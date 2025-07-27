@@ -1,0 +1,13 @@
+package org.example.chessunion;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class ChessUnionApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(ChessUnionApplication.class, args);
+    }
+
+}
