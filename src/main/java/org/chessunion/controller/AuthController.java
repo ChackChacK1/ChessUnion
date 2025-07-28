@@ -1,6 +1,7 @@
 package org.chessunion.controller;
 
 
+import jakarta.annotation.security.PermitAll;
 import lombok.RequiredArgsConstructor;
 import org.chessunion.dto.AuthRequest;
 import org.chessunion.security.AuthService;
@@ -20,11 +21,13 @@ public class AuthController {
     private final UserService userService;
 
 
+    @PermitAll
     @PostMapping("/registration")
     public ResponseEntity<?> registration(@RequestBody AuthRequest authRequest) {
         return userService.registerUser(authRequest);
     }
 
+    @PermitAll
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest authRequest) {
         return authService.createToken(authRequest);
