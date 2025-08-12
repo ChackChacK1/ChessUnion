@@ -15,8 +15,8 @@ public class SimpleRatingCalculator implements RatingCalculator {
         if (match.getResult() == null) {
             throw new IllegalArgumentException("match result is null");
         }
-        Player playerWhite = match.getPlayerWhite();
-        Player playerBlack = match.getPlayerBlack();
+        Player playerWhite = match.getWhitePlayer();
+        Player playerBlack = match.getBlackPlayer();
         Double ratingOfFirstPlayer = playerWhite.getRating();
         Double ratingOfSecondPlayer = playerWhite.getRating();
 
@@ -29,8 +29,8 @@ public class SimpleRatingCalculator implements RatingCalculator {
         matchResult -= Math.abs(matchResult-1);
         playerBlack.setRating(ratingOfSecondPlayer + 30 * (matchResult - expectedRatingDifferenceOfSecondPlayer));
 
-        match.setPlayerWhite(playerWhite);
-        match.setPlayerBlack(playerBlack);
+        match.setWhitePlayer(playerWhite);
+        match.setBlackPlayer(playerBlack);
 
         return match;
     }

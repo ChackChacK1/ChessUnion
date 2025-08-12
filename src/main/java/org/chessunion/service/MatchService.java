@@ -23,21 +23,21 @@ public class MatchService {
     private final SimpleRatingCalculator simpleRatingCalculator;
     private final PlayerRepository playerRepository;
 
-    public ResponseEntity<?> createMatch(Player firstPlayer, Player secondPlayer ) {
+    public ResponseEntity<?> createMatch(Player firstPlayer, Player secondPlayer) {
         Match match = new Match();
 
         if (firstPlayer.getColorBalance() > secondPlayer.getColorBalance()) {
             firstPlayer.setColorBalance(firstPlayer.getColorBalance() - 1);
             secondPlayer.setColorBalance(secondPlayer.getColorBalance() + 1);
 
-            match.setPlayerBlack(firstPlayer);
-            match.setPlayerWhite(secondPlayer);
+            match.setBlackPlayer(firstPlayer);
+            match.setWhitePlayer(secondPlayer);
         } else {
             firstPlayer.setColorBalance(firstPlayer.getColorBalance() + 1);
             secondPlayer.setColorBalance(secondPlayer.getColorBalance() - 1);
 
-            match.setPlayerWhite(firstPlayer);
-            match.setPlayerBlack(secondPlayer);
+            match.setWhitePlayer(firstPlayer);
+            match.setBlackPlayer(secondPlayer);
         }
 
         playerRepository.save(firstPlayer);
@@ -61,8 +61,8 @@ public class MatchService {
 
         match = simpleRatingCalculator.calculate(match);
 
-        playerRepository.save(match.getPlayerWhite());
-        playerRepository.save(match.getPlayerBlack());
+        playerRepository.save(match.getWhitePlayer());
+        playerRepository.save(match.getBlackPlayer());
         matchRepository.save(match);
 
         return new ResponseEntity<>(match, HttpStatus.OK);
