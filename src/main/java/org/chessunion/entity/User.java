@@ -22,8 +22,7 @@ public class User {
 
     private String password;
 
-    //TODO необходимые поля
-
+    private Double rating;
 
     @ManyToMany
     @JoinTable(
