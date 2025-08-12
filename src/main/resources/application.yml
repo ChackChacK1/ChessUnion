@@ -3,14 +3,14 @@ spring:
     driverClassName: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/chess-union-db
     username: postgres
-    password: 23111
+    password: 104423315
   application:
     name: ChessUnion
   flyway:
     baseline-on-migrate: true
     enabled: true
     user: postgres
-    password: 23111
+    password: 104423315
 jwt:
   lifetime: 30m
   secret: 90384fj304jf09j09fj3409fj3094fj9sjfP3dj8DDikSDJ39dJD39d3jdd

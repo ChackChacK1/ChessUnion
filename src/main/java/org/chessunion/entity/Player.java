@@ -31,12 +31,15 @@ public class Player {
     @OneToMany
     private Set<Match> matchesPlayed;
 
+    @Column(name = "had_bye")
+    private boolean hadBye; // Получал ли техническое очко
+
     public Double getSecondRating(){
         Double secondRating = 0.0;
 
         for (Match match : matchesPlayed){
-            Player whitePlayer = match.getPlayerWhite();
-            Player blackPlayer = match.getPlayerBlack();
+            Player whitePlayer = match.getWhitePlayer();
+            Player blackPlayer = match.getBlackPlayer();
             if (whitePlayer.equals(this)){
                 secondRating += blackPlayer.getScore();
             } else{

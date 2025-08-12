@@ -6,7 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -22,8 +24,16 @@ public class Tournament {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
+    @OneToMany(mappedBy = "tournament")
+    private List<Player> players = new ArrayList<>();
+
+    @OneToMany(mappedBy = "tournament")
+    private Set<Match> games = new HashSet<>();
+
+    @Column(name = "current_round")
+    private int currentRound = 0;
 
     private Integer maxAmountOfPlayers;
     private Integer minAmountOfPlayers;
@@ -31,9 +41,4 @@ public class Tournament {
     @Enumerated(EnumType.STRING)
     private Stage stage;
 
-    @OneToMany
-    private Set<Player> players = new HashSet<>();
-
-    @OneToMany
-    private Set<Match> matches = new HashSet<>();
 }

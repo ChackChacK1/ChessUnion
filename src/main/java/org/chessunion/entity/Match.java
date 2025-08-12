@@ -15,13 +15,23 @@ public class Match {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Integer id;
 
     @ManyToOne
-    private Player playerWhite;
+    @JoinColumn(name = "white_player", referencedColumnName = "id")
+    private Player whitePlayer;
 
     @ManyToOne
-    private Player playerBlack;
+    @JoinColumn(name = "black_player", referencedColumnName = "id")
+    private Player blackPlayer;
+
+    @ManyToOne
+    @JoinColumn(name = "tournament", referencedColumnName = "id")
+    private Tournament tournament;
+
+    @Column(name = "round_number")
+    private int roundNumber;
 
     private Double result;
 
