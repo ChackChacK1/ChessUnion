@@ -20,11 +20,11 @@ public class Match {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "white_player_id")
+    @JoinColumn(name = "white_player_id", nullable = false)
     private Player whitePlayer;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "black_player_id")
+    @JoinColumn(name = "black_player_id", nullable = false)
     private Player blackPlayer;
 
     @ManyToOne(fetch = FetchType.LAZY)
