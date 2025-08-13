@@ -2,12 +2,13 @@ package org.chessunion.service;
 
 
 import lombok.RequiredArgsConstructor;
-import org.chessunion.dto.AuthRequest;
+import org.chessunion.dto.RegistrationRequest;
 import org.chessunion.entity.User;
 import org.chessunion.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,17 +22,13 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public ResponseEntity<?> registerUser(AuthRequest authRequest) {
-        User user = new User();
+    public ResponseEntity<?> registerUser(RegistrationRequest registrationRequest) {
+        User user = modelMapper.map(registrationRequest, User.class);
 
-        //  Имя и пароль
-        user.setUsername(authRequest.getUsername());
-        user.setPassword(passwordEncoder.encode(authRequest.getPassword()));
+        // шифрование пароля
+        user.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));
 
-        //TODO Логика создания базового пользователя ...
-
-
-
+        user.setRating(1500.00);
 
         userRepository.save(user);
 
@@ -40,7 +37,17 @@ public class UserService {
 
     @Transactional
     public ResponseEntity<?> deleteUser(String username) {
-        userRepository.deleteByUsername(username);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException(username));
+        userRepository.delete(user);
         return new ResponseEntity<>("User deleted successfully", HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> updateEmail(String username, String email) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException(username));
+        user.setEmail(email);
+        userRepository.save(user);
+        return new ResponseEntity<>(String.format("Email %s successfully been set to your account", email), HttpStatus.OK);
     }
 }

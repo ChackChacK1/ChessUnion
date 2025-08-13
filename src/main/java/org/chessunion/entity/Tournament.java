@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -24,13 +25,13 @@ public class Tournament {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
-    @OneToMany(mappedBy = "tournament")
+    @OneToMany(mappedBy = "tournament", fetch = FetchType.LAZY)
     private List<Player> players = new ArrayList<>();
 
-    @OneToMany(mappedBy = "tournament")
-    private Set<Match> games = new HashSet<>();
+    @OneToMany(mappedBy = "tournament", fetch = FetchType.LAZY)
+    private Set<Match> matches = new HashSet<>();
 
     @Column(name = "current_round")
     private int currentRound = 0;
@@ -41,4 +42,6 @@ public class Tournament {
     @Enumerated(EnumType.STRING)
     private Stage stage;
 
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 }

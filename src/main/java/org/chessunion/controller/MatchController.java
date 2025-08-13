@@ -3,6 +3,8 @@ package org.chessunion.controller;
 
 import com.fasterxml.jackson.databind.deser.DataFormatReaders;
 import lombok.RequiredArgsConstructor;
+import org.chessunion.repository.MatchRepository;
+import org.chessunion.service.MatchService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -14,20 +16,22 @@ import org.springframework.web.bind.annotation.*;
 @PreAuthorize("permitAll()")
 @RequiredArgsConstructor
 public class MatchController {
+    private final MatchService matchService;
+
 
     @GetMapping("/all")
     public ResponseEntity<?> getAllMatches(@PageableDefault Pageable pageable) {
-        return ResponseEntity.ok("pageble");
+        return matchService.findAllMatches(pageable);
     }
 
     @GetMapping("/byTournament/{tournamentId}")
     public ResponseEntity<?> getTournamentMatches(@PathVariable int tournamentId) {
-        return ResponseEntity.ok("matches");
+        return matchService.findMatchesByTournament(tournamentId);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getMatchById(@PathVariable int id) {
-        return ResponseEntity.ok("matches");
+        return matchService.findMatchById(id);
     }
 
 

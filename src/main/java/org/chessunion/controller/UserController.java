@@ -2,13 +2,14 @@ package org.chessunion.controller;
 
 
 import lombok.RequiredArgsConstructor;
+import org.chessunion.dto.DeleteUserRequest;
 import org.chessunion.repository.UserRepository;
 import org.chessunion.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 
 @RestController
 @RequestMapping("/api/user")
@@ -17,8 +18,14 @@ public class UserController {
     private final UserService userService;
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/delete")
-    public ResponseEntity<?> deleteUser(String username) {
-        return userService.deleteUser(username);
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteUser(@RequestBody DeleteUserRequest deleteUserRequest) {
+        return userService.deleteUser(deleteUserRequest.getUsername());
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PatchMapping("/email")
+    public ResponseEntity<?> updateUserEmail(Principal principal, @RequestBody String email) {
+        return userService.updateEmail(principal.getName(), email);
     }
 }

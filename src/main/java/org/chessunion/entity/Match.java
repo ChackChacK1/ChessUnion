@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "matches")
 @Data
@@ -15,24 +17,26 @@ public class Match {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Integer id;
 
-    @ManyToOne
-    @JoinColumn(name = "white_player", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "white_player_id")
     private Player whitePlayer;
 
-    @ManyToOne
-    @JoinColumn(name = "black_player", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "black_player_id")
     private Player blackPlayer;
 
-    @ManyToOne
-    @JoinColumn(name = "tournament", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tournament_id")
     private Tournament tournament;
 
     @Column(name = "round_number")
     private int roundNumber;
 
     private Double result;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
 }

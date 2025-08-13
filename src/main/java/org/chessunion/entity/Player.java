@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
@@ -23,19 +24,34 @@ public class Player {
     @Column(name = "color_balance")
     private int colorBalance;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     private User user;
 
     private Double rating;
 
-    @OneToMany
-    private Set<Match> matchesPlayed;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Tournament tournament;
+
+    @OneToMany(mappedBy = "whitePlayer", fetch = FetchType.LAZY)
+    private Set<Match> matchesPlayedWhite;
+
+    @OneToMany(mappedBy = "blackPlayer", fetch = FetchType.LAZY)
+    private Set<Match> matchesPlayedBlack;
 
     @Column(name = "had_bye")
     private boolean hadBye; // Получал ли техническое очко
 
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+
+
     public Double getSecondRating(){
         Double secondRating = 0.0;
+        Set<Match> matchesPlayed = matchesPlayedWhite;
+        matchesPlayed.addAll(matchesPlayedBlack);
+
 
         for (Match match : matchesPlayed){
             Player whitePlayer = match.getWhitePlayer();
@@ -47,5 +63,9 @@ public class Player {
             }
         }
         return secondRating;
+    }
+
+    public String getFullName(){
+        return user.getFirstName() + " " + user.getLastName();
     }
 }

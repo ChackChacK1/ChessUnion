@@ -2,6 +2,7 @@ package org.chessunion.controller;
 
 
 import lombok.RequiredArgsConstructor;
+import org.chessunion.service.TournamentService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class TournamentAdminController {
 
+    private final TournamentService tournamentService;
 
     @PostMapping("/create")
     public ResponseEntity<?> createNewTournament() {

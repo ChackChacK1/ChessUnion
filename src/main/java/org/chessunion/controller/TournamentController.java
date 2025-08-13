@@ -2,7 +2,7 @@ package org.chessunion.controller;
 
 
 import lombok.RequiredArgsConstructor;
-import org.chessunion.entity.User;
+import org.chessunion.service.TournamentService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +16,7 @@ import java.security.Principal;
 @RequiredArgsConstructor
 public class TournamentController {
 
+    private final TournamentService tournamentService;
 
     @GetMapping("/all")
     @PreAuthorize("permitAll()")

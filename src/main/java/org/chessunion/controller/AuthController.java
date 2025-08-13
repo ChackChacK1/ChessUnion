@@ -4,6 +4,7 @@ package org.chessunion.controller;
 import jakarta.annotation.security.PermitAll;
 import lombok.RequiredArgsConstructor;
 import org.chessunion.dto.AuthRequest;
+import org.chessunion.dto.RegistrationRequest;
 import org.chessunion.security.AuthService;
 import org.chessunion.service.UserService;
 import org.springframework.http.HttpEntity;
@@ -23,8 +24,8 @@ public class AuthController {
 
     @PermitAll
     @PostMapping("/registration")
-    public ResponseEntity<?> registration(@RequestBody AuthRequest authRequest) {
-        return userService.registerUser(authRequest);
+    public ResponseEntity<?> registration(@RequestBody RegistrationRequest registrationRequest) {
+        return userService.registerUser(registrationRequest);
     }
 
     @PermitAll

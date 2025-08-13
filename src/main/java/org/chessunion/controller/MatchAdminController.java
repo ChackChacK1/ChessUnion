@@ -20,16 +20,4 @@ public class MatchAdminController {
     public ResponseEntity<?> setMatchResult(@PathVariable int id, @RequestBody MatchResultSetRequest matchResult) {
         return matchService.setMatchResult(id, matchResult.getResult());
     }
-
-    @PostMapping("/create")
-    public ResponseEntity<?> createMatch(/*todo match*/) {
-        return ResponseEntity.ok("matches");
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteMatch(@PathVariable int id) {
-        return ResponseEntity.ok("matches");
-    }
-
-
 }
