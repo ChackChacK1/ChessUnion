@@ -16,7 +16,7 @@ public class MatchAdminController {
 
     private final MatchService matchService;
 
-    @PatchMapping("/{id}/setResult}")
+    @PatchMapping("/{id}/setResult")
     public ResponseEntity<?> setMatchResult(@PathVariable int id, @RequestBody MatchResultSetRequest matchResult) {
         return matchService.setMatchResult(id, matchResult.getResult());
     }
