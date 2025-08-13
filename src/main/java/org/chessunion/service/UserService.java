@@ -43,6 +43,7 @@ public class UserService {
         return new ResponseEntity<>("User deleted successfully", HttpStatus.OK);
     }
 
+    @Transactional
     public ResponseEntity<?> updateEmail(String username, String email) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(username));
