@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 public class AuthRequest {
-    private String username;  //используется для входа в аккаунт и security
+    private String login;  //либо username, либо email
     private String password;  //пароль для входа в аккаунт
 }

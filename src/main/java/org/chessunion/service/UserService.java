@@ -4,6 +4,7 @@ package org.chessunion.service;
 import lombok.RequiredArgsConstructor;
 import org.chessunion.dto.RegistrationRequest;
 import org.chessunion.entity.User;
+import org.chessunion.repository.RoleRepository;
 import org.chessunion.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -13,11 +14,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Set;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserService {
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
 
@@ -29,10 +33,11 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));
 
         user.setRating(1500.00);
+        user.setRoles(Set.of(roleRepository.findById(1).orElseThrow()));
 
         userRepository.save(user);
 
-        return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
+        return new ResponseEntity<>("User registered successfully", HttpStatus.CREATED);
     }
 
     @Transactional

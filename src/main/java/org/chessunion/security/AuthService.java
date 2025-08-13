@@ -3,11 +3,14 @@ package org.chessunion.security;
 import lombok.RequiredArgsConstructor;
 import org.chessunion.dto.AuthRequest;
 import org.chessunion.dto.AuthResponse;
+import org.chessunion.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,13 +22,24 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
     private final UserUserDetailsService userUserDetailsService;
+    private final UserRepository userRepository;
 
     public ResponseEntity<?> createToken(AuthRequest authRequest) {
+        String login;
+
+        if (authRequest.getLogin().contains("@")){
+            login = userRepository.findByEmail(authRequest.getLogin())
+                    .orElseThrow(() -> new BadCredentialsException("Invalid email")).getUsername();
+        } else {
+            login = authRequest.getLogin();
+        }
+
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        authRequest.getUsername(),
+                        login,
                         authRequest.getPassword()));
-        UserDetails userDetails = userUserDetailsService.loadUserByUsername(authRequest.getUsername());
+        UserDetails userDetails = userUserDetailsService.loadUserByUsername(login);
         AuthResponse authResponse = new AuthResponse(jwtUtil.generateToken(userDetails));
         return new ResponseEntity<>(authResponse, HttpStatus.OK);
     }

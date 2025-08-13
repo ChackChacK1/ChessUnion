@@ -22,7 +22,6 @@ public class User {
     private Integer id;
 
     @Column(unique = true, nullable = false, length = 128)
-    @UniqueUserValidation(message = "User with username %s already exists")
     private String username;
 
     @Column(name = "first_name", nullable = false, length = 50)
@@ -31,8 +30,7 @@ public class User {
     @Column(name = "last_name", nullable = false, length = 50)
     private String lastName;
 
-    @Column(length = 50, nullable = true, unique = true)
-    @UniqueUserValidation(message = "User with email %s already exists")
+    @Column(length = 50, unique = true)
     @Email
     private String email;
 
