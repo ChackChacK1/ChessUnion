@@ -97,7 +97,11 @@ public class MatchService {
 
 
     public ResponseEntity<?> findAllMatches(Pageable pageable) {
-        return new ResponseEntity<>(matchRepository.findAll(pageable), HttpStatus.OK);
+        List<MatchDto> matchDtoS = matchRepository.findAll(pageable).stream()
+                .map(this::matchToMatchDto)
+                .toList();
+
+        return new ResponseEntity<>(matchDtoS, HttpStatus.OK);
     }
 
 
@@ -105,7 +109,9 @@ public class MatchService {
 
     public ResponseEntity<?> findMatchesByTournament(int tournamentId) {
         return new ResponseEntity<>(matchRepository.findMatchesByTournamentId(tournamentId)
-                .orElseThrow(() -> new TournamentNotFoundException(tournamentId)),
+                .orElseThrow(() -> new TournamentNotFoundException(tournamentId)).stream()
+                .map(this::matchToMatchDto)
+                .toList(),
                 HttpStatus.OK);
     }
 
