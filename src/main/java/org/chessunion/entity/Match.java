@@ -34,7 +34,7 @@ public class Match {
     @Column(name = "round_number")
     private int roundNumber;
 
-    private Double result;
+    private Double result; // 1.0 - победили белые; 0.5 - ничья; 0.0 - победили черные
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

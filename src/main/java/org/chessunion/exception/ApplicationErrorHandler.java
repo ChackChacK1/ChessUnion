@@ -33,6 +33,14 @@ public class ApplicationErrorHandler {
         ), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(MatchHasNotResultException.class)
+    public ResponseEntity<AppErrorResponse> handleMatchHasNotResultException(MatchHasNotResultException e) {
+        return new ResponseEntity<>(new AppErrorResponse(
+                "Match has not result.",
+                e.getMessage()
+        ), HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(TournamentNotFoundException.class)
     public ResponseEntity<AppErrorResponse> handleTournamentNotFoundException(TournamentNotFoundException e) {
         return new ResponseEntity<>(new AppErrorResponse(

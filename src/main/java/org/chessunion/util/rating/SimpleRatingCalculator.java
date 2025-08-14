@@ -3,6 +3,7 @@ package org.chessunion.util.rating;
 import lombok.RequiredArgsConstructor;
 import org.chessunion.entity.Match;
 import org.chessunion.entity.Player;
+import org.chessunion.exception.MatchHasNotResultException;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -13,7 +14,7 @@ public class SimpleRatingCalculator implements RatingCalculator {
 
     public Match calculate(Match match) {
         if (match.getResult() == null) {
-            throw new IllegalArgumentException("match result is null");
+            throw new MatchHasNotResultException("SimpleRatingCalculator.calculate");
         }
         Player playerWhite = match.getWhitePlayer();
         Player playerBlack = match.getBlackPlayer();
@@ -26,7 +27,7 @@ public class SimpleRatingCalculator implements RatingCalculator {
         double matchResult = match.getResult();
 
         playerWhite.setRating(ratingOfFirstPlayer + 30 * (matchResult - expectedRatingDifferenceOfFirstPlayer));
-        matchResult -= Math.abs(matchResult-1);
+        matchResult = Math.abs(matchResult-1);
         playerBlack.setRating(ratingOfSecondPlayer + 30 * (matchResult - expectedRatingDifferenceOfSecondPlayer));
 
         match.setWhitePlayer(playerWhite);
