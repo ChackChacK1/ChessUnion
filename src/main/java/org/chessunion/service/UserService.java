@@ -32,7 +32,7 @@ public class UserService {
         // шифрование пароля
         user.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));
 
-        user.setRating(1500.00);
+        user.setRating(1000.00);
         user.setRoles(Set.of(roleRepository.findById(1).orElseThrow()));
 
         userRepository.save(user);
