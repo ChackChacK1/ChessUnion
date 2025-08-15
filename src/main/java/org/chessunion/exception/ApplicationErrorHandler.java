@@ -16,6 +16,13 @@ import java.util.List;
 @RestControllerAdvice
 public class ApplicationErrorHandler {
 
+    @ExceptionHandler(PlayersTournamentConflictException.class)
+    public ResponseEntity<AppErrorResponse> handlePlayersTournamentConflictException(PlayersTournamentConflictException e) {
+        return new ResponseEntity<>(new AppErrorResponse(
+                "Player are from different tournaments! Player ids are below:",
+                e.getMessage()
+        ), HttpStatus.BAD_REQUEST);
+    }
 
     @ExceptionHandler(MatchAlreadyHasResultException.class)
     public ResponseEntity<AppErrorResponse> handleMatchAlreadyHasResultException(MatchAlreadyHasResultException e) {

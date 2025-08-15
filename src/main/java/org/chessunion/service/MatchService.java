@@ -7,6 +7,7 @@ import org.chessunion.entity.Match;
 import org.chessunion.entity.Player;
 import org.chessunion.exception.MatchAlreadyHasResultException;
 import org.chessunion.exception.MatchNotFoundException;
+import org.chessunion.exception.PlayersTournamentConflictException;
 import org.chessunion.exception.TournamentNotFoundException;
 import org.chessunion.repository.MatchRepository;
 import org.chessunion.repository.PlayerRepository;
@@ -33,6 +34,12 @@ public class MatchService {
     @Transactional
     public ResponseEntity<?> createMatch(Player firstPlayer, Player secondPlayer) {
         Match match = new Match();
+
+        if (firstPlayer.getTournament().equals(secondPlayer.getTournament())) {
+            match.setTournament(firstPlayer.getTournament());
+        } else {
+            throw new PlayersTournamentConflictException(firstPlayer.getId(), secondPlayer.getId());
+        }
 
 
         /*Проверка на баланс цветов
