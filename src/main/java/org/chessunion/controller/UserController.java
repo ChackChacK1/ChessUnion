@@ -1,6 +1,7 @@
 package org.chessunion.controller;
 
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.chessunion.dto.DeleteUserRequest;
 import org.chessunion.repository.UserRepository;
@@ -14,6 +15,7 @@ import java.security.Principal;
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "BearerAuth")
 public class UserController {
     private final UserService userService;
 

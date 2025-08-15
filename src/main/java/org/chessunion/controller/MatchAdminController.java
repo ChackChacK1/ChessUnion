@@ -1,6 +1,7 @@
 package org.chessunion.controller;
 
 import com.fasterxml.jackson.databind.deser.DataFormatReaders;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.chessunion.dto.MatchResultSetRequest;
 import org.chessunion.service.MatchService;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/admin/match")
 @PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "BearerAuth")
 public class MatchAdminController {
 
     private final MatchService matchService;

@@ -1,6 +1,7 @@
 package org.chessunion.controller;
 
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.chessunion.service.TournamentService;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +33,7 @@ public class TournamentController {
 
     @PutMapping("/{id}/registration")
     @PreAuthorize("hasRole('USER')")
+    @SecurityRequirement(name = "BearerAuth")
     public ResponseEntity<?> registrationToTournament(Principal principal, @PathVariable int id) {
         return ResponseEntity.ok("");
     }

@@ -1,6 +1,7 @@
 package org.chessunion.controller;
 
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.chessunion.service.TournamentService;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/admin/tournament")
 @PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "BearerAuth")
 public class TournamentAdminController {
 
     private final TournamentService tournamentService;
