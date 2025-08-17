@@ -30,4 +30,10 @@ public class UserController {
     public ResponseEntity<?> updateUserEmail(Principal principal, @RequestBody String email) {
         return userService.updateEmail(principal.getName(), email);
     }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/profile")
+    public ResponseEntity<?> getUserProfile(Principal principal) {
+        return userService.getProfile(principal);
+    }
 }

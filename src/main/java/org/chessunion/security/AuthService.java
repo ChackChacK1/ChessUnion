@@ -40,7 +40,13 @@ public class AuthService {
                         login,
                         authRequest.getPassword()));
         UserDetails userDetails = userUserDetailsService.loadUserByUsername(login);
-        AuthResponse authResponse = new AuthResponse(jwtUtil.generateToken(userDetails));
+        String role = userDetails.getAuthorities().toString();
+        if (role.contains("ADMIN_ROLE")) {
+            role = "ADMIN";
+        } else {
+            role = "USER";
+        }
+        AuthResponse authResponse = new AuthResponse(jwtUtil.generateToken(userDetails), role);
         return new ResponseEntity<>(authResponse, HttpStatus.OK);
     }
 }

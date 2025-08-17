@@ -2,8 +2,10 @@ package org.chessunion.service;
 
 
 import lombok.RequiredArgsConstructor;
+import org.chessunion.dto.ProfileDto;
 import org.chessunion.dto.RegistrationRequest;
 import org.chessunion.entity.User;
+import org.chessunion.repository.MatchRepository;
 import org.chessunion.repository.RoleRepository;
 import org.chessunion.repository.UserRepository;
 import org.modelmapper.ModelMapper;
@@ -14,6 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Service
@@ -24,6 +28,17 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
+    private final MatchService matchService;
+
+    public ResponseEntity<?> getProfile(Principal principal) {
+        User user = userRepository.findByUsername(principal.getName()).orElseThrow(() -> new UsernameNotFoundException(principal.getName()));
+
+        ProfileDto profileDto = modelMapper.map(user, ProfileDto.class);
+
+        profileDto.setMatches(matchService.findAllMatchesByUserId(user.getId()));
+
+        return new ResponseEntity<>(profileDto, HttpStatus.OK);
+    }
 
     @Transactional
     public ResponseEntity<?> registerUser(RegistrationRequest registrationRequest) {
@@ -34,6 +49,7 @@ public class UserService {
 
         user.setRating(1000.00);
         user.setRoles(Set.of(roleRepository.findById(1).orElseThrow()));
+        user.setCreatedAt(LocalDateTime.now());
 
         userRepository.save(user);
 
@@ -56,4 +72,6 @@ public class UserService {
         userRepository.save(user);
         return new ResponseEntity<>(String.format("Email %s successfully been set to your account", email), HttpStatus.OK);
     }
+
+
 }

@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.LinkedList;
 import java.util.List;
 
 @Service
@@ -90,7 +91,11 @@ public class MatchService {
     }
 
 
-
+    public List<MatchDto> findAllMatchesByUserId(Integer userId) {
+        return matchRepository.findAllMatchesByUserId(userId).stream()
+                .map(this::matchToMatchDto)
+                .toList();
+    }
 
 
     public MatchDto matchToMatchDto(Match match) {
@@ -99,7 +104,6 @@ public class MatchService {
         matchDto.setBlackPlayerName(match.getBlackPlayer().getFullName());
         return matchDto;
     }
-
 
 
 
@@ -128,4 +132,6 @@ public class MatchService {
     public ResponseEntity<?> findMatchById(int id) {
         return new ResponseEntity<>(matchRepository.findById(id).orElseThrow(() -> new MatchNotFoundException(id)), HttpStatus.OK);
     }
+
+
 }
