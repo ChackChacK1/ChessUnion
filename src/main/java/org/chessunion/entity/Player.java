@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -68,4 +69,22 @@ public class Player {
     public String getFullName(){
         return user.getFirstName() + " " + user.getLastName();
     }
+
+    public Set<Player> getAllPlayers(){
+        Set<Player> result = new HashSet<>();
+        for (Match match : matchesPlayedWhite ){
+            result.add(match.getBlackPlayer());
+        }
+
+        for (Match match : matchesPlayedBlack ){
+            result.add(match.getWhitePlayer());
+        }
+
+        return result;
+    }
+
+    public boolean hasPlayedBefore(Player player){
+        return this.getAllPlayers().contains(player);
+    }
+
 }

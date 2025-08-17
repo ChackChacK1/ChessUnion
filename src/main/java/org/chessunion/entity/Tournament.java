@@ -40,7 +40,7 @@ public class Tournament {
     private Integer minAmountOfPlayers;
 
     @Enumerated(EnumType.STRING)
-    private Stage stage;
+    private Stage stage = Stage.REGISTRATION;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
