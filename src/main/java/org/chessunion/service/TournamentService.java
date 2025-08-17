@@ -7,8 +7,10 @@ import org.chessunion.dto.TournamentDto;
 import org.chessunion.entity.Player;
 import org.chessunion.entity.Tournament;
 import org.chessunion.entity.User;
+import org.chessunion.exception.TournamentNotFoundException;
 import org.chessunion.repository.PlayerRepository;
 import org.chessunion.repository.TournamentRepository;
+import org.hibernate.query.Page;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,8 +31,7 @@ public class TournamentService {
 
     public ResponseEntity<List<TournamentDto>> getAllTournaments(Pageable pageable) {
         return new ResponseEntity<>(tournamentRepository.findAll(pageable).stream()
-                .map(
-                this::tournamentToDto).toList(), HttpStatus.OK);
+                .map(this::tournamentToDto).toList(), HttpStatus.OK);
     }
 
     public ResponseEntity<?> createTournament(TournamentCreateRequest tournamentCreateRequest) {
@@ -44,7 +45,8 @@ public class TournamentService {
         return new ResponseEntity<>(tournamentRepository.save(tournament), HttpStatus.OK);
     }
 
-    public ResponseEntity<?> generateNextRound(Tournament tournament){
+    public ResponseEntity<?> generateNextRound(int id){
+        Tournament tournament = tournamentRepository.findById(id).orElseThrow(()-> new TournamentNotFoundException(id));
         if (tournament.getCurrentRound() == 0) {
             generateFirstRound(tournament);
         } else {
@@ -55,9 +57,15 @@ public class TournamentService {
     }
 
     public ResponseEntity<?> registrationTournament(User user){
-        Player player = modelMapper.map(user, Player.class);
+        Player player = new Player();
 
+        player.setRating(player.getRating());
         return new ResponseEntity<>(playerRepository.save(player), HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> findById(int id){
+        Optional<Tournament> tournament = tournamentRepository.findById(id);
+        return new ResponseEntity<>(tournament.orElse(null), HttpStatus.OK);
     }
 
     private void generateFirstRound(Tournament tournament){
@@ -106,10 +114,6 @@ public class TournamentService {
 
     public TournamentDto tournamentToDto(Tournament tournament){
         TournamentDto dto = modelMapper.map(tournament, TournamentDto.class);
-
-        dto.setStart(LocalDateTime.of(2025,9,1,17,0));
-        dto.setName("Turnir pizdec");
-        dto.setDescription("Turnir pizdec description");
 
         return dto;
     }

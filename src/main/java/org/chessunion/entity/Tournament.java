@@ -31,8 +31,8 @@ public class Tournament {
 
     private String description;
 
-    @Column(name = "start_time")
-    private LocalDateTime startTime;
+    @Column(name = "start_date_time")
+    private LocalDateTime startDateTime;
 
     @OneToMany(mappedBy = "tournament", fetch = FetchType.LAZY)
     private List<Player> players = new ArrayList<>();

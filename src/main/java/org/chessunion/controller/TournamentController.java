@@ -3,6 +3,7 @@ package org.chessunion.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import org.chessunion.dto.TournamentCreateRequest;
 import org.chessunion.service.TournamentService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -22,13 +23,13 @@ public class TournamentController {
     @GetMapping("/all")
     @PreAuthorize("permitAll()")
     public ResponseEntity<?> getAllTournaments(@PageableDefault Pageable pageable) {
-        return ResponseEntity.ok("todo");
+        return ResponseEntity.ok(tournamentService.getAllTournaments(pageable));
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("permitAll()")
     public ResponseEntity<?> getTournamentById(@PathVariable int id) {
-        return ResponseEntity.ok("todo");
+        return ResponseEntity.ok(tournamentService.findById(id));
     }
 
     @PutMapping("/{id}/registration")
@@ -37,6 +38,7 @@ public class TournamentController {
     public ResponseEntity<?> registrationToTournament(Principal principal, @PathVariable int id) {
         return ResponseEntity.ok("");
     }
+
 
 
 }

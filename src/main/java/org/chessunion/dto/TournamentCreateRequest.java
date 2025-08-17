@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 public class TournamentCreateRequest {
     private String name;
     private String description;
-    private LocalDateTime startDate;
-    private Integer minPlayers;
-    private Integer maxPlayers;
+    private LocalDateTime startDateTime;
+    private Integer maxAmountOfPlayers;
+    private Integer minAmountOfPlayers;
 }
