@@ -2,12 +2,15 @@ package org.chessunion.service;
 
 
 import lombok.RequiredArgsConstructor;
+import org.chessunion.dto.TournamentCreateRequest;
+import org.chessunion.dto.TournamentDto;
 import org.chessunion.entity.Player;
 import org.chessunion.entity.Tournament;
 import org.chessunion.entity.User;
 import org.chessunion.repository.PlayerRepository;
 import org.chessunion.repository.TournamentRepository;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -24,7 +27,13 @@ public class TournamentService {
     private final PlayerRepository playerRepository;
     private final ModelMapper modelMapper;
 
-    public ResponseEntity<?> createTournament(){
+    public ResponseEntity<List<TournamentDto>> getAllTournaments(Pageable pageable) {
+        return new ResponseEntity<>(tournamentRepository.findAll(pageable).stream()
+                .map(
+                this::tournamentToDto).toList(), HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> createTournament(TournamentCreateRequest tournamentCreateRequest) {
         Tournament tournament = new Tournament();
 
         tournament.setCreatedAt(LocalDateTime.now());
@@ -93,6 +102,16 @@ public class TournamentService {
                 firstPlayer.setScore(firstPlayer.getScore() + 1);
             }
         }
+    }
+
+    public TournamentDto tournamentToDto(Tournament tournament){
+        TournamentDto dto = modelMapper.map(tournament, TournamentDto.class);
+
+        dto.setStart(LocalDateTime.of(2025,9,1,17,0));
+        dto.setName("Turnir pizdec");
+        dto.setDescription("Turnir pizdec description");
+
+        return dto;
     }
 
 }

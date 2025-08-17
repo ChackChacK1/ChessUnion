@@ -18,4 +18,6 @@ public interface MatchRepository extends JpaRepository<Match, Integer> {
             "WHERE black_player_id IN(SELECT id FROM players WHERE user_id = ?1) " +
             "or white_player_id IN(SELECT id FROM players WHERE user_id = ?1)", nativeQuery = true)
     List<Match> findAllMatchesByUserId(Integer userId);
+
+
 }

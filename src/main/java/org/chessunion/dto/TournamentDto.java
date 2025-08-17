@@ -1,0 +1,33 @@
+package org.chessunion.dto;
+
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.chessunion.entity.Match;
+import org.chessunion.entity.Player;
+import org.chessunion.entity.Tournament;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class TournamentDto {
+    private Integer id;
+    private List<String> players;
+    private String name;
+    private String description;
+    private LocalDateTime start;
+    private Set<MatchDto> matches;
+    private int currentRound;
+    private Integer maxAmountOfPlayers;
+    private Integer minAmountOfPlayers;
+    private Tournament.Stage stage;
+    private LocalDateTime createdAt;
+}

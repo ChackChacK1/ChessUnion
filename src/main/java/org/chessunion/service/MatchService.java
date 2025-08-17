@@ -32,6 +32,7 @@ public class MatchService {
     private final PlayerRepository playerRepository;
     private final ModelMapper modelMapper;
 
+
     @Transactional
     public ResponseEntity<?> createMatch(Player firstPlayer, Player secondPlayer) {
         Match match = new Match();

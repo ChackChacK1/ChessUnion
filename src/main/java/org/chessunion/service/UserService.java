@@ -9,6 +9,7 @@ import org.chessunion.repository.MatchRepository;
 import org.chessunion.repository.RoleRepository;
 import org.chessunion.repository.UserRepository;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Set;
+import org.springframework.cache.annotation.Cacheable;
 
 @Service
 @RequiredArgsConstructor
@@ -30,14 +32,16 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final MatchService matchService;
 
-    public ResponseEntity<?> getProfile(Principal principal) {
+
+    @Cacheable(cacheNames = "profiles", key = "#principal.getName()", unless = "#result == null")
+    public ProfileDto getProfile(Principal principal) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow(() -> new UsernameNotFoundException(principal.getName()));
 
         ProfileDto profileDto = modelMapper.map(user, ProfileDto.class);
 
         profileDto.setMatches(matchService.findAllMatchesByUserId(user.getId()));
 
-        return new ResponseEntity<>(profileDto, HttpStatus.OK);
+        return profileDto;
     }
 
     @Transactional
@@ -65,6 +69,7 @@ public class UserService {
     }
 
     @Transactional
+    @CachePut(cacheNames = "profiles", key = "#username")
     public ResponseEntity<?> updateEmail(String username, String email) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(username));

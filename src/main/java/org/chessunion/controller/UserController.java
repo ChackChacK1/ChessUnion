@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.chessunion.dto.DeleteUserRequest;
 import org.chessunion.repository.UserRepository;
 import org.chessunion.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +35,6 @@ public class UserController {
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/profile")
     public ResponseEntity<?> getUserProfile(Principal principal) {
-        return userService.getProfile(principal);
+        return new ResponseEntity<>(userService.getProfile(principal), HttpStatus.OK);
     }
 }

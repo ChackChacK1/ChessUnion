@@ -27,6 +27,13 @@ public class Tournament {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    private String name;
+
+    private String description;
+
+    @Column(name = "start_time")
+    private LocalDateTime startTime;
+
     @OneToMany(mappedBy = "tournament", fetch = FetchType.LAZY)
     private List<Player> players = new ArrayList<>();
 
