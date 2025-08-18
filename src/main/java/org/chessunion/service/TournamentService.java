@@ -37,14 +37,13 @@ public class TournamentService {
     }
 
     public ResponseEntity<?> createTournament(TournamentCreateRequest tournamentCreateRequest) {
-        Tournament tournament = new Tournament();
-
+        Tournament tournament = modelMapper.map(tournamentCreateRequest, Tournament.class);
         tournament.setCreatedAt(LocalDateTime.now());
-        tournament.setMaxAmountOfPlayers(20);
-        tournament.setMinAmountOfPlayers(8);
 
 
-        return new ResponseEntity<>(tournamentRepository.save(tournament), HttpStatus.OK);
+        tournamentRepository.save(tournament);
+
+        return new ResponseEntity<>("Tournament created!", HttpStatus.OK);
     }
 
     public ResponseEntity<?> generateNextRound(int id){
@@ -75,13 +74,15 @@ public class TournamentService {
         players.add(player);
 
         tournament.setPlayers(players);
+        tournamentRepository.save(tournament);
+
 
         return new ResponseEntity<>(tournament.getPlayers(), HttpStatus.OK);
     }
 
     public ResponseEntity<?> findById(int id){
-        Optional<Tournament> tournament = tournamentRepository.findById(id);
-        return new ResponseEntity<>(tournament.map(this::tournamentToDto).orElse(null), HttpStatus.OK);
+        Tournament tournament = tournamentRepository.findById(id).orElseThrow(() -> new TournamentNotFoundException(id));
+        return new ResponseEntity<>(tournamentToDto(tournament), HttpStatus.OK);
     }
 
     private void generateFirstRound(Tournament tournament){

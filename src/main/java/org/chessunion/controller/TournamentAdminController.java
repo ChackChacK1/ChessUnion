@@ -28,7 +28,7 @@ public class TournamentAdminController {
 
     @PostMapping("/{id}/round")
     public ResponseEntity<?> generateNextTournamentRound(@PathVariable("id") int id) {
-        return ResponseEntity.ok(generateNextTournamentRound(id));
+        return ResponseEntity.ok(tournamentService.generateNextRound(id));
     }
 
     @PostMapping("/{id}/results")
