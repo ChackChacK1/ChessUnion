@@ -20,10 +20,10 @@ public class Player {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private Double score;
+    private Double score = 0.0;
 
     @Column(name = "color_balance")
-    private int colorBalance;
+    private int colorBalance = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -41,7 +41,7 @@ public class Player {
     private Set<Match> matchesPlayedBlack;
 
     @Column(name = "had_bye")
-    private boolean hadBye; // Получал ли техническое очко
+    private boolean hadBye = false; // Получал ли техническое очко
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

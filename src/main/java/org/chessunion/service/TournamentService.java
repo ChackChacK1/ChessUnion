@@ -10,11 +10,12 @@ import org.chessunion.entity.User;
 import org.chessunion.exception.TournamentNotFoundException;
 import org.chessunion.repository.PlayerRepository;
 import org.chessunion.repository.TournamentRepository;
-import org.hibernate.query.Page;
+import org.chessunion.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -28,6 +29,7 @@ public class TournamentService {
     private final TournamentRepository tournamentRepository;
     private final PlayerRepository playerRepository;
     private final ModelMapper modelMapper;
+    private final UserRepository userRepository;
 
     public ResponseEntity<List<TournamentDto>> getAllTournaments(Pageable pageable) {
         return new ResponseEntity<>(tournamentRepository.findAll(pageable).stream()
@@ -56,16 +58,30 @@ public class TournamentService {
         return new ResponseEntity<>(tournament.getCurrentRound(), HttpStatus.OK);
     }
 
-    public ResponseEntity<?> registrationTournament(User user){
+    public ResponseEntity<?> registrationTournament(String username, int id){
+        Tournament tournament = tournamentRepository.findById(id).orElseThrow(()-> new TournamentNotFoundException(id));
+
+        User user = userRepository.findByUsername(username).orElseThrow(()-> new UsernameNotFoundException(username));
+
         Player player = new Player();
 
-        player.setRating(player.getRating());
-        return new ResponseEntity<>(playerRepository.save(player), HttpStatus.OK);
+        player.setUser(user);
+        player.setRating(user.getRating());
+        player.setTournament(tournament);
+        player.setCreatedAt(LocalDateTime.now());
+
+        playerRepository.save(player);
+        List<Player> players = new ArrayList<>();
+        players.add(player);
+
+        tournament.setPlayers(players);
+
+        return new ResponseEntity<>(tournament.getPlayers(), HttpStatus.OK);
     }
 
     public ResponseEntity<?> findById(int id){
         Optional<Tournament> tournament = tournamentRepository.findById(id);
-        return new ResponseEntity<>(tournament.orElse(null), HttpStatus.OK);
+        return new ResponseEntity<>(tournament.map(this::tournamentToDto).orElse(null), HttpStatus.OK);
     }
 
     private void generateFirstRound(Tournament tournament){
@@ -86,7 +102,6 @@ public class TournamentService {
             matchService.createMatch(topGroup.get(i), bottomGroup.get(i));
         }
     }
-
 
     private void generateNonFirstRound(Tournament tournament) {
         LinkedList<Player> players = new LinkedList<>(tournament.getPlayers());

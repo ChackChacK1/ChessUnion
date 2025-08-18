@@ -36,7 +36,7 @@ public class TournamentController {
     @PreAuthorize("hasRole('USER')")
     @SecurityRequirement(name = "BearerAuth")
     public ResponseEntity<?> registrationToTournament(Principal principal, @PathVariable int id) {
-        return ResponseEntity.ok("");
+        return ResponseEntity.ok(tournamentService.registrationTournament(principal.getName(), id));
     }
 
 
