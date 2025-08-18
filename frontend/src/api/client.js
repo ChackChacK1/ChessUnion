@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8080'; // Ваш backend URL
+const API_BASE_URL = 'http://localhost:8080';
 
 const client = axios.create({
     baseURL: API_BASE_URL,
@@ -9,7 +9,6 @@ const client = axios.create({
     },
 });
 
-// Добавляем интерцептор для JWT-токена
 client.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
     if (token) {

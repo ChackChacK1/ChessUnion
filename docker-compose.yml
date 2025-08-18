@@ -1,28 +1,52 @@
 version: '3.8'
 
 services:
+  frontend:
+    build:
+      context: ./frontend
+    container_name: my-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - my-network
+
+  backend:
+    build:
+      context: .
+    container_name: my-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    restart: unless-stopped
+    networks:
+      - my-network
+
   redis:
     image: redis:latest
     container_name: my-redis
     ports:
       - "6379:6379"
     networks:
-      - my-redis-network
+      - my-network
 
   redis-insight:
     image: redis/redisinsight:latest
-    container_name: redis-insight
+    container_name: my-redis-insight
     restart: always
     depends_on:
       - redis
     ports:
       - "5540:5540"
     networks:
-      - my-redis-network
+      - my-network
 
 volumes:
   redis_insight:
 
 networks:
-  my-redis-network:
+  my-network:
     driver: bridge

@@ -1,18 +1,22 @@
 spring:
   datasource:
-    driverClassName: org.postgresql.Driver
-    url:
-    username:
-    password:
-  application:
-    name: ChessUnion
+    driver-class-name: org.postgresql.Driver
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
   flyway:
     baseline-on-migrate: true
     enabled: true
-    user:
-    password:
+    user: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST}
+      port: 6379
+  application:
+    name: ChessUnion
 jwt:
-  lifetime: 30m
-  secret:
+  secret: ${JWT_SECRET}
+  lifetime: ${JWT_LIFETIME}
 server:
-  port: 8080
+  port: ${SERVER_PORT}
