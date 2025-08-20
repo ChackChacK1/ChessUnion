@@ -1,12 +1,8 @@
 package org.chessunion.dto;
 
-
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.chessunion.entity.Match;
-import org.chessunion.entity.Player;
 import org.chessunion.entity.Tournament;
 
 import java.time.LocalDateTime;
@@ -20,7 +16,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class TournamentDto {
     private Integer id;
-    private List<String> players;
+    private List<PlayerDto> players;
     private String name;
     private String description;
     private LocalDateTime startDateTime;

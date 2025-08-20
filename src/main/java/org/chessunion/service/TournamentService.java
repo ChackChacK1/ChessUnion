@@ -46,17 +46,6 @@ public class TournamentService {
         return new ResponseEntity<>("Tournament created!", HttpStatus.OK);
     }
 
-    public ResponseEntity<?> generateNextRound(int id){
-        Tournament tournament = tournamentRepository.findById(id).orElseThrow(()-> new TournamentNotFoundException(id));
-        if (tournament.getCurrentRound() == 0) {
-            generateFirstRound(tournament);
-        } else {
-            generateNonFirstRound(tournament);
-        }
-        tournament.setCurrentRound(tournament.getCurrentRound() + 1);
-        return new ResponseEntity<>(tournament.getCurrentRound(), HttpStatus.OK);
-    }
-
     public ResponseEntity<?> registrationTournament(String username, int id){
         Tournament tournament = tournamentRepository.findById(id).orElseThrow(()-> new TournamentNotFoundException(id));
 
@@ -85,6 +74,17 @@ public class TournamentService {
         return new ResponseEntity<>(tournamentToDto(tournament), HttpStatus.OK);
     }
 
+    public ResponseEntity<?> generateNextRound(int id){
+        Tournament tournament = tournamentRepository.findById(id).orElseThrow(()-> new TournamentNotFoundException(id));
+        if (tournament.getCurrentRound() == 0) {
+            generateFirstRound(tournament);
+        } else {
+            generateNonFirstRound(tournament);
+        }
+        tournament.setCurrentRound(tournament.getCurrentRound() + 1);
+        return new ResponseEntity<>(tournament.getCurrentRound(), HttpStatus.OK);
+    }
+
     private void generateFirstRound(Tournament tournament){
         List<Player> players = new ArrayList<>(tournament.getPlayers());
         players.sort(Comparator.comparingDouble(Player::getRating).reversed());
@@ -105,6 +105,7 @@ public class TournamentService {
     }
 
     private void generateNonFirstRound(Tournament tournament) {
+
         LinkedList<Player> players = new LinkedList<>(tournament.getPlayers());
         players.sort((p1, p2) -> {
             int scoreCompare = Double.compare(p2.getScore(), p1.getScore());
@@ -112,17 +113,51 @@ public class TournamentService {
                     Double.compare(p2.getRating(), p1.getRating());
         });
 
-        while (players.size() > 0){
-            Player firstPlayer = players.poll();
-            boolean playerFound = false;
-            for (Player p : players){
-                if (!firstPlayer.hasPlayedBefore(p)){
-                    matchService.createMatch(firstPlayer, p);
-                    players.remove(p);
-                    playerFound = true;
+        if (players.size() % 2 != 0) {
+            Player byePlayer = players.getLast(); // последний в списке
+            if (!byePlayer.isHadBye()) {
+                byePlayer.setScore(byePlayer.getScore() + 1);
+                byePlayer.setHadBye(true);
+                players.removeLast();
+            } else {
+                // если уже получал bye — ищем следующего кандидата
+                for (int i = players.size() - 1; i >= 0; i--) {
+                    Player candidate = players.get(i);
+                    if (!candidate.isHadBye()) {
+                        candidate.setScore(candidate.getScore() + 1);
+                        candidate.setHadBye(true);
+                        players.remove(i);
+                        break;
+                    }
                 }
             }
-            if (!playerFound){
+        }
+
+        while (!players.isEmpty()) {
+            Player firstPlayer = players.poll();
+            Player bestMatch = null;
+            int bestColorDiff = Integer.MAX_VALUE;
+
+            for (Player p : players) {
+                if (!firstPlayer.hasPlayedBefore(p)) {
+                    // считаем, насколько хорошо совпадают балансы
+                    int colorDiff = Math.abs(firstPlayer.getColorBalance() - p.getColorBalance());
+                    if (colorDiff < bestColorDiff) {
+                        bestColorDiff = colorDiff;
+                        bestMatch = p;
+                    }
+                }
+            }
+
+            if (bestMatch != null) {
+                if (firstPlayer.getColorBalance() > bestMatch.getColorBalance()) {
+                    matchService.createMatch(firstPlayer, bestMatch);
+
+                } else {
+                    matchService.createMatch(bestMatch, firstPlayer);
+                }
+                players.remove(bestMatch);
+            } else {
                 firstPlayer.setScore(firstPlayer.getScore() + 1);
             }
         }

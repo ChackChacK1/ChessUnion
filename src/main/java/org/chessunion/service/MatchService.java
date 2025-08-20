@@ -43,22 +43,11 @@ public class MatchService {
             throw new PlayersTournamentConflictException(firstPlayer.getId(), secondPlayer.getId());
         }
 
+        firstPlayer.setColorBalance(firstPlayer.getColorBalance() - 1);
+        secondPlayer.setColorBalance(secondPlayer.getColorBalance() + 1);
 
-        /*Проверка на баланс цветов
-          Если коэффициенты равны, то белыми играет первый игрок(firstPlayer) */
-        if (firstPlayer.getColorBalance() > secondPlayer.getColorBalance()) {
-            firstPlayer.setColorBalance(firstPlayer.getColorBalance() - 1);
-            secondPlayer.setColorBalance(secondPlayer.getColorBalance() + 1);
-
-            match.setBlackPlayer(firstPlayer);
-            match.setWhitePlayer(secondPlayer);
-        } else {
-            firstPlayer.setColorBalance(firstPlayer.getColorBalance() + 1);
-            secondPlayer.setColorBalance(secondPlayer.getColorBalance() - 1);
-
-            match.setWhitePlayer(firstPlayer);
-            match.setBlackPlayer(secondPlayer);
-        }
+        match.setWhitePlayer(firstPlayer);
+        match.setBlackPlayer(secondPlayer);
 
         //сохранение в бд
         playerRepository.save(firstPlayer);
