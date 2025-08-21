@@ -31,18 +31,8 @@ public class TournamentAdminController {
         return ResponseEntity.ok(tournamentService.generateNextRound(id));
     }
 
-<<<<<<< Updated upstream
-    @PostMapping("/{id}/results")
-    public ResponseEntity<?> getResultsTournament(@PathVariable("id") int id) {
-        return ResponseEntity.ok(id);
-    }
-
     @GetMapping("/running")
     public ResponseEntity<?> getRunningTournaments(Pageable pageable){
         return ResponseEntity.ok(tournamentService.getRunningTournaments(pageable));
     }
-
-
-=======
->>>>>>> Stashed changes
 }
