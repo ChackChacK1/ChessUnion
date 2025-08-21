@@ -2,6 +2,7 @@ package org.chessunion.service;
 
 
 import lombok.RequiredArgsConstructor;
+import org.chessunion.dto.PlayerDto;
 import org.chessunion.dto.TournamentCreateRequest;
 import org.chessunion.dto.TournamentDto;
 import org.chessunion.entity.Player;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -184,7 +186,10 @@ public class TournamentService {
 
     public TournamentDto tournamentToDto(Tournament tournament){
         TournamentDto dto = modelMapper.map(tournament, TournamentDto.class);
-
+        List<PlayerDto> playerDtoList = tournament.getPlayers().stream()
+                .map(player -> modelMapper.map(player, PlayerDto.class))
+                .toList();
+        dto.setPlayers(playerDtoList);
         return dto;
     }
 
