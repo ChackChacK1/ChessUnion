@@ -74,6 +74,25 @@ public class TournamentService {
         return new ResponseEntity<>(tournamentToDto(tournament), HttpStatus.OK);
     }
 
+    public ResponseEntity<?> checkTournamentRegistered(String name, int id){
+        Tournament tournament = tournamentRepository.findById(id).orElseThrow(() -> new TournamentNotFoundException(id));
+        User user = userRepository.findByUsername(name)
+                .orElseThrow(() -> new UsernameNotFoundException(name));
+
+        boolean registered = playerRepository.existsByUserAndTournament(user, tournament);
+        return new ResponseEntity<>(registered, HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> getRunningTournaments(Pageable pageable){
+        List<Tournament> tournaments = tournamentRepository.findByStageNot(Tournament.Stage.FINISHED);
+
+        List<TournamentDto> result = tournaments.stream()
+                .map(this::tournamentToDto)
+                .toList();
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
     public ResponseEntity<?> generateNextRound(int id){
         Tournament tournament = tournamentRepository.findById(id).orElseThrow(()-> new TournamentNotFoundException(id));
         if (tournament.getCurrentRound() == 0) {

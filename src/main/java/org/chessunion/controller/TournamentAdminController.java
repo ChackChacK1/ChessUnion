@@ -36,5 +36,10 @@ public class TournamentAdminController {
         return ResponseEntity.ok(id);
     }
 
+    @GetMapping("/running")
+    public ResponseEntity<?> getRunningTournaments(Pageable pageable){
+        return ResponseEntity.ok(tournamentService.getRunningTournaments(pageable));
+    }
+
 
 }

@@ -39,6 +39,12 @@ public class TournamentController {
         return ResponseEntity.ok(tournamentService.registrationTournament(principal.getName(), id));
     }
 
+    @GetMapping("/id/if_registered")
+    public ResponseEntity<?> tournamentIfRegistered(Principal principal, @PathVariable int id){
+        return ResponseEntity.ok(tournamentService.checkTournamentRegistered(principal.getName(), id));
+    }
+
+
 
 
 }
