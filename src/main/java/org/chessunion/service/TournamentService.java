@@ -109,6 +109,7 @@ public class TournamentService {
             generateNonFirstRound(tournament);
         }
         tournament.setCurrentRound(tournament.getCurrentRound() + 1);
+        tournamentRepository.save(tournament);
         return new ResponseEntity<>(tournament.getCurrentRound(), HttpStatus.OK);
     }
 
