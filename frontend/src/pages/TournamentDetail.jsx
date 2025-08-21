@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Card, Typography, Tag, Spin, message, Button, Row, Col, Space, Alert } from 'antd';
 import { CalendarOutlined, TrophyOutlined, TeamOutlined, UserAddOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import client from '../api/client';
@@ -9,6 +9,7 @@ const { Title, Text, Paragraph } = Typography;
 
 const TournamentDetail = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [tournament, setTournament] = useState(null);
     const [loading, setLoading] = useState(true);
     const [registering, setRegistering] = useState(false);
@@ -223,7 +224,7 @@ const TournamentDetail = () => {
                             <Button
                                 type="primary"
                                 block
-                                onClick={() => window.location.href = `/matches/${tournament.id}`}
+                                onClick={() => navigate(`/matches/${tournament.id}`)} // ← Используйте navigate
                             >
                                 Посмотреть матчи
                             </Button>

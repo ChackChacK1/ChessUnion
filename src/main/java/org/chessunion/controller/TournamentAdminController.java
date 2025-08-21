@@ -23,16 +23,16 @@ public class TournamentAdminController {
 
     @PostMapping("/create")
     public ResponseEntity<?> createNewTournament(@RequestBody TournamentCreateRequest tournamentCreateRequest) {
-        return ResponseEntity.ok(tournamentService.createTournament(tournamentCreateRequest));
+        return tournamentService.createTournament(tournamentCreateRequest);
     }
 
     @PostMapping("/{id}/round")
     public ResponseEntity<?> generateNextTournamentRound(@PathVariable("id") int id) {
-        return ResponseEntity.ok(tournamentService.generateNextRound(id));
+        return tournamentService.generateNextRound(id);
     }
 
     @GetMapping("/running")
     public ResponseEntity<?> getRunningTournaments(Pageable pageable){
-        return ResponseEntity.ok(tournamentService.getRunningTournaments(pageable));
+        return tournamentService.getRunningTournaments(pageable);
     }
 }

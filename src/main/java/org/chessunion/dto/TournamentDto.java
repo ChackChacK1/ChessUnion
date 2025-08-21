@@ -20,7 +20,6 @@ public class TournamentDto {
     private String name;
     private String description;
     private LocalDateTime startDateTime;
-    private Set<MatchDto> matches;
     private int currentRound;
     private Integer maxAmountOfPlayers;
     private Integer minAmountOfPlayers;

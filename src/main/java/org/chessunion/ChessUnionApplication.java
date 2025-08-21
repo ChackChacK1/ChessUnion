@@ -15,9 +15,4 @@ public class ChessUnionApplication {
         SpringApplication.run(ChessUnionApplication.class, args);
     }
 
-
-    @Bean
-    public ModelMapper modelMapper() {
-        return new ModelMapper();
-    }
 }

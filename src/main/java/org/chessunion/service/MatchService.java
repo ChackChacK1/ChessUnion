@@ -3,6 +3,7 @@ package org.chessunion.service;
 
 import lombok.RequiredArgsConstructor;
 import org.chessunion.dto.MatchDto;
+import org.chessunion.dto.PlayerDto;
 import org.chessunion.entity.Match;
 import org.chessunion.entity.Player;
 import org.chessunion.exception.MatchAlreadyHasResultException;
@@ -19,7 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.LinkedList;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -31,14 +32,17 @@ public class MatchService {
     private final SimpleRatingCalculator simpleRatingCalculator;
     private final PlayerRepository playerRepository;
     private final ModelMapper modelMapper;
+    private final PlayerService playerService;
 
 
     @Transactional
-    public ResponseEntity<?> createMatch(Player firstPlayer, Player secondPlayer) {
+    public void createMatch(Player firstPlayer, Player secondPlayer) {
         Match match = new Match();
 
         if (firstPlayer.getTournament().equals(secondPlayer.getTournament())) {
             match.setTournament(firstPlayer.getTournament());
+            match.setRoundNumber(firstPlayer.getTournament().getCurrentRound());
+            match.setCreatedAt(LocalDateTime.now());
         } else {
             throw new PlayersTournamentConflictException(firstPlayer.getId(), secondPlayer.getId());
         }
@@ -54,7 +58,6 @@ public class MatchService {
         playerRepository.save(secondPlayer);
         matchRepository.save(match);
 
-        return new ResponseEntity<>(matchToMatchDto(match), HttpStatus.CREATED);
     }
 
 
@@ -90,8 +93,15 @@ public class MatchService {
 
     public MatchDto matchToMatchDto(Match match) {
         MatchDto matchDto = modelMapper.map(match, MatchDto.class);
-        matchDto.setWhitePlayerName(match.getWhitePlayer().getFullName());
-        matchDto.setBlackPlayerName(match.getBlackPlayer().getFullName());
+
+        PlayerDto whitePlayer = modelMapper.map(match.getWhitePlayer(), PlayerDto.class);
+        whitePlayer.setFullName(playerService.getFullName(match.getWhitePlayer()));
+
+        PlayerDto blackPlayer = modelMapper.map(match.getBlackPlayer(), PlayerDto.class);
+        blackPlayer.setFullName(playerService.getFullName(match.getBlackPlayer()));
+
+        matchDto.setWhitePlayer(whitePlayer);
+        matchDto.setBlackPlayer(blackPlayer);
         return matchDto;
     }
 
@@ -108,8 +118,8 @@ public class MatchService {
 
 
 
-    public ResponseEntity<?> findMatchesByTournament(int tournamentId) {
-        return new ResponseEntity<>(matchRepository.findMatchesByTournamentId(tournamentId)
+    public ResponseEntity<?> findMatchesByTournament(int tournamentId, Pageable pageable) {
+        return new ResponseEntity<>(matchRepository.findMatchesByTournamentId(tournamentId, pageable)
                 .orElseThrow(() -> new TournamentNotFoundException(tournamentId)).stream()
                 .map(this::matchToMatchDto)
                 .toList(),

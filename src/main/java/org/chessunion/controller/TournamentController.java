@@ -23,7 +23,7 @@ public class TournamentController {
     @GetMapping("/all")
     @PreAuthorize("permitAll()")
     public ResponseEntity<?> getAllTournaments(@PageableDefault Pageable pageable) {
-        return ResponseEntity.ok(tournamentService.getAllTournaments(pageable));
+        return tournamentService.getAllTournaments(pageable);
     }
 
     @GetMapping("/{id}")

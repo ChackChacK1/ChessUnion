@@ -18,6 +18,6 @@ public class PlayerDto {
     private String fullName;
     private Double rating;
     private Double score;
-    private Double secondScore;
     private String place;
+    private Double secondScore;
 }
