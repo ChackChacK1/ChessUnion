@@ -41,7 +41,7 @@ const Navbar = () => {
             key: 'admin',
             label: <Link to="/admin">Администрирование</Link>,
             icon: <LockOutlined />,
-            disabled: !isAdmin, // Кнопка активна только для админа
+            disabled: !isAdmin,
         },
     ];
 

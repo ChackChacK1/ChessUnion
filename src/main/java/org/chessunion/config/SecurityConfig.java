@@ -55,6 +55,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**",
                                 "/v3/**",
                                 "/swagger-ui.html",
+                                "/api/tournament/all",
+                                "/api/tournament/*",
                                 "/swagger-ui/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session

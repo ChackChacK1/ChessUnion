@@ -41,7 +41,7 @@ public class AuthService {
                         authRequest.getPassword()));
         UserDetails userDetails = userUserDetailsService.loadUserByUsername(login);
         String role = userDetails.getAuthorities().toString();
-        if (role.contains("ADMIN_ROLE")) {
+        if (role.contains("ROLE_ADMIN")) {
             role = "ADMIN";
         } else {
             role = "USER";
