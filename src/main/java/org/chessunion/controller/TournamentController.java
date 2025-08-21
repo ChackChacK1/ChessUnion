@@ -23,7 +23,7 @@ public class TournamentController {
     @GetMapping("/all")
     @PreAuthorize("permitAll()")
     public ResponseEntity<?> getAllTournaments(@PageableDefault Pageable pageable) {
-        return ResponseEntity.ok(tournamentService.getAllTournaments(pageable));
+        return tournamentService.getAllTournaments(pageable);
     }
 
     @GetMapping("/{id}")
@@ -33,13 +33,13 @@ public class TournamentController {
     }
 
     @PutMapping("/{id}/registration")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("isAuthenticated()")
     @SecurityRequirement(name = "BearerAuth")
     public ResponseEntity<?> registrationToTournament(Principal principal, @PathVariable int id) {
         return ResponseEntity.ok(tournamentService.registrationTournament(principal.getName(), id));
     }
 
-    @GetMapping("/id/if_registered")
+    @GetMapping("/{id}/if_registered")
     public ResponseEntity<?> tournamentIfRegistered(Principal principal, @PathVariable int id){
         return ResponseEntity.ok(tournamentService.checkTournamentRegistered(principal.getName(), id));
     }

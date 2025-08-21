@@ -25,6 +25,26 @@ const Profile = () => {
         fetchProfile();
     }, []);
 
+    // Функция для отображения результата матча
+    const getResultText = (result) => {
+        switch (result) {
+            case 1: return 'Победа белых';
+            case 0: return 'Победа чёрных';
+            case 0.5: return 'Ничья';
+            default: return 'Не завершён';
+        }
+    };
+
+    // Функция для цвета тега результата
+    const getResultColor = (result) => {
+        switch (result) {
+            case 1: return 'green';
+            case 0: return 'red';
+            case 0.5: return 'blue';
+            default: return 'gray';
+        }
+    };
+
     if (loading) {
         return <Spin size="large" style={{ display: 'flex', justifyContent: 'center', marginTop: 50 }} />;
     }
@@ -67,15 +87,33 @@ const Profile = () => {
                         renderItem={(match) => (
                             <List.Item>
                                 <div style={{ width: '100%' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <Text strong>{match.whitePlayerName}</Text>
-                                        <Text strong>vs</Text>
-                                        <Text strong>{match.blackPlayerName}</Text>
+                                    {/* Заголовки столбцов */}
+                                    <div style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: '1fr auto 1fr',
+                                        textAlign: 'center',
+                                        marginBottom: 8,
+                                        fontWeight: 'bold'
+                                    }}>
+                                        <span>Белые</span>
+                                        <span>Результат</span>
+                                        <span>Чёрные</span>
                                     </div>
-                                    <div style={{ textAlign: 'center', marginTop: 8 }}>
-                                        <Tag color={match.result === 1 ? 'green' : match.result === 0 ? 'red' : 'blue'}>
-                                            Результат: {match.result === 1 ? 'Победа белых' : match.result === 0 ? 'Победа чёрных' : 'Ничья'}
+
+                                    {/* Данные матча */}
+                                    <div style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: '1fr auto 1fr',
+                                        alignItems: 'center',
+                                        textAlign: 'center'
+                                    }}>
+                                        <Text strong>{match.whitePlayer?.fullName || 'Неизвестный игрок'}</Text>
+
+                                        <Tag color={getResultColor(match.result)} style={{ margin: '0 10px' }}>
+                                            {getResultText(match.result)}
                                         </Tag>
+
+                                        <Text strong>{match.blackPlayer?.fullName || 'Неизвестный игрок'}</Text>
                                     </div>
                                 </div>
                             </List.Item>
@@ -89,4 +127,4 @@ const Profile = () => {
     );
 };
 
-export default Profile;
+export default Profile;;

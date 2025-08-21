@@ -1,6 +1,9 @@
 package org.chessunion.dto;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.chessunion.entity.Match;
 import org.chessunion.entity.Tournament;
 import org.chessunion.entity.User;
@@ -8,10 +11,13 @@ import org.chessunion.entity.User;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class PlayerDto {
-    private Double score = 0.0;
-    private String name;
+    private String fullName;
     private Double rating;
-    private Tournament tournament;
-    private LocalDateTime createdAt;
+    private Double score;
+    private String place;
+    private Double secondScore;
 }

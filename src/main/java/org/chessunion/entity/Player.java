@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Entity
 @Table(name = "players")
@@ -27,7 +29,7 @@ public class Player {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private User user;
+    private User user = new User();
 
     private Double rating;
 
@@ -35,56 +37,15 @@ public class Player {
     private Tournament tournament;
 
     @OneToMany(mappedBy = "whitePlayer", fetch = FetchType.LAZY)
-    private Set<Match> matchesPlayedWhite;
+    private Set<Match> matchesPlayedWhite = new HashSet<>();
 
     @OneToMany(mappedBy = "blackPlayer", fetch = FetchType.LAZY)
-    private Set<Match> matchesPlayedBlack;
+    private Set<Match> matchesPlayedBlack = new HashSet<>();
 
     @Column(name = "had_bye")
     private boolean hadBye = false; // Получал ли техническое очко
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
-
-
-
-    public Double getSecondRating(){
-        Double secondRating = 0.0;
-        Set<Match> matchesPlayed = matchesPlayedWhite;
-        matchesPlayed.addAll(matchesPlayedBlack);
-
-
-        for (Match match : matchesPlayed){
-            Player whitePlayer = match.getWhitePlayer();
-            Player blackPlayer = match.getBlackPlayer();
-            if (whitePlayer.equals(this)){
-                secondRating += blackPlayer.getScore();
-            } else{
-                secondRating += whitePlayer.getScore();
-            }
-        }
-        return secondRating;
-    }
-
-    public String getFullName(){
-        return user.getFirstName() + " " + user.getLastName();
-    }
-
-    public Set<Player> getAllPlayers(){
-        Set<Player> result = new HashSet<>();
-        for (Match match : matchesPlayedWhite ){
-            result.add(match.getBlackPlayer());
-        }
-
-        for (Match match : matchesPlayedBlack ){
-            result.add(match.getWhitePlayer());
-        }
-
-        return result;
-    }
-
-    public boolean hasPlayedBefore(Player player){
-        return this.getAllPlayers().contains(player);
-    }
 
 }

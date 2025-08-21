@@ -7,7 +7,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 
 
-@EnableCaching
+//@EnableCaching
 @SpringBootApplication
 public class ChessUnionApplication {
 
@@ -15,9 +15,4 @@ public class ChessUnionApplication {
         SpringApplication.run(ChessUnionApplication.class, args);
     }
 
-
-    @Bean
-    public ModelMapper modelMapper() {
-        return new ModelMapper();
-    }
 }

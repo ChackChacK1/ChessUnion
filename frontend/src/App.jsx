@@ -9,7 +9,7 @@ import Navbar from './components/Navbar';
 import Profile from './pages/Profile';
 import PrivateRoute from "./components/PrivateRoute.jsx";
 import TournamentDetail from './pages/TournamentDetail';
-
+import TournamentMatches from './pages/TournamentMatches';
 
 const AdminRoute = ({ children }) => {
     const role = localStorage.getItem('role');
@@ -26,7 +26,7 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/registration" element={<Registration />} />
             <Route path="/tournament/:id" element={<TournamentDetail />} />
-            <Route path="/matches/:tournamentId" element={<div>Страница матчей (скоро будет)</div>} />
+            <Route path="/matches/:tournamentId" element={<TournamentMatches />} />
             <Route
                 path="/profile"
                 element={

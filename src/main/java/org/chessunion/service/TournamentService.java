@@ -18,17 +18,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class TournamentService {
 
     private final MatchService matchService;
     private final TournamentRepository tournamentRepository;
     private final PlayerRepository playerRepository;
+    private final PlayerService playerService;
     private final ModelMapper modelMapper;
     private final UserRepository userRepository;
 
@@ -37,16 +40,19 @@ public class TournamentService {
                 .map(this::tournamentToDto).toList(), HttpStatus.OK);
     }
 
+    @Transactional
     public ResponseEntity<?> createTournament(TournamentCreateRequest tournamentCreateRequest) {
         Tournament tournament = modelMapper.map(tournamentCreateRequest, Tournament.class);
         tournament.setCreatedAt(LocalDateTime.now());
-
+        tournament.setCurrentRound(0);
+        tournament.setStage(Tournament.Stage.REGISTRATION);
 
         tournamentRepository.save(tournament);
 
         return new ResponseEntity<>("Tournament created!", HttpStatus.OK);
     }
 
+    @Transactional
     public ResponseEntity<?> registrationTournament(String username, int id){
         Tournament tournament = tournamentRepository.findById(id).orElseThrow(()-> new TournamentNotFoundException(id));
 
@@ -67,7 +73,7 @@ public class TournamentService {
         tournamentRepository.save(tournament);
 
 
-        return new ResponseEntity<>(tournament.getPlayers(), HttpStatus.OK);
+        return new ResponseEntity<>("Registration successful!", HttpStatus.OK);
     }
 
     public ResponseEntity<?> findById(int id){
@@ -94,6 +100,7 @@ public class TournamentService {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
+    @Transactional
     public ResponseEntity<?> generateNextRound(int id){
         Tournament tournament = tournamentRepository.findById(id).orElseThrow(()-> new TournamentNotFoundException(id));
         if (tournament.getCurrentRound() == 0) {
@@ -105,12 +112,13 @@ public class TournamentService {
         return new ResponseEntity<>(tournament.getCurrentRound(), HttpStatus.OK);
     }
 
-    private void generateFirstRound(Tournament tournament){
+    @Transactional
+    protected void generateFirstRound(Tournament tournament){
         List<Player> players = new ArrayList<>(tournament.getPlayers());
         players.sort(Comparator.comparingDouble(Player::getRating).reversed());
 
         if (players.size() % 2 != 0) {
-            Player byePlayer = players.remove(players.size() - 1);
+            Player byePlayer = players.removeLast();
             byePlayer.setScore(byePlayer.getScore() + 1);
             byePlayer.setHadBye(true);
         }
@@ -124,7 +132,8 @@ public class TournamentService {
         }
     }
 
-    private void generateNonFirstRound(Tournament tournament) {
+    @Transactional
+    protected void generateNonFirstRound(Tournament tournament) {
 
         LinkedList<Player> players = new LinkedList<>(tournament.getPlayers());
         players.sort((p1, p2) -> {
@@ -159,7 +168,7 @@ public class TournamentService {
             int bestColorDiff = Integer.MAX_VALUE;
 
             for (Player p : players) {
-                if (!firstPlayer.hasPlayedBefore(p)) {
+                if (!playerService.getAllOpponents(firstPlayer).contains(p)) {
                     // считаем, насколько хорошо совпадают балансы
                     int colorDiff = Math.abs(firstPlayer.getColorBalance() - p.getColorBalance());
                     if (colorDiff < bestColorDiff) {
@@ -183,13 +192,22 @@ public class TournamentService {
         }
     }
 
-    public TournamentDto tournamentToDto(Tournament tournament){
+    public TournamentDto tournamentToDto(Tournament tournament) {
         TournamentDto dto = modelMapper.map(tournament, TournamentDto.class);
+
         List<PlayerDto> playerDtoList = tournament.getPlayers().stream()
-                .map(player -> modelMapper.map(player, PlayerDto.class))
+                .map(player -> {
+                    PlayerDto playerDto = modelMapper.map(player, PlayerDto.class);
+                    playerDto.setSecondScore(playerService.calculateSecondScore(player));
+                    playerDto.setFullName(playerService.getFullName(player));
+                    return playerDto;
+                })
+                .sorted(Comparator.comparingDouble(PlayerDto::getScore)
+                        .thenComparingDouble(PlayerDto::getSecondScore)
+                        .reversed())
                 .toList();
+
         dto.setPlayers(playerDtoList);
         return dto;
     }
-
 }

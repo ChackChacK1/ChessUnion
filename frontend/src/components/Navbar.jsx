@@ -1,24 +1,41 @@
-import { Menu, Button, Space, Dropdown, Modal, Form, Input } from 'antd';
+import { Menu, Button, Space, Modal, Form, Input, message } from 'antd';
 import { HomeOutlined, TrophyOutlined, UserOutlined, LockOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import client from '../api/client';
 
 const Navbar = () => {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+    const [loginLoading, setLoginLoading] = useState(false);
     const navigate = useNavigate();
-    const role = localStorage.getItem('role'); // Получаем роль
-
-    const isAdmin = role === 'ADMIN'; // Проверяем, админ ли
 
     const showAuthModal = () => setIsAuthModalOpen(true);
     const handleAuthCancel = () => setIsAuthModalOpen(false);
 
-    const onLogin = (values) => {
-        console.log('Вход:', values);
-        // TODO: Добавить запрос к API
-        setIsAuthModalOpen(false);
-        navigate('/');
+    const onLogin = async (values) => {
+        try {
+            setLoginLoading(true);
+            const response = await client.post('/api/auth/login', values);
+
+            localStorage.setItem('token', response.data.token);
+            localStorage.setItem('role', response.data.role || 'USER');
+
+            message.success('Успешный вход!');
+            setIsAuthModalOpen(false); // Закрываем модальное окно
+            window.location.reload(); // Перезагружаем страницу для обновления состояния
+        } catch (error) {
+            message.error('Ошибка входа: ' + (error.response?.data?.message || error.message));
+        } finally {
+            setLoginLoading(false);
+        }
     };
+
+    const handleRegisterClick = () => {
+        setIsAuthModalOpen(false); // Закрываем модальное окно
+        navigate('/registration'); // Переходим на страницу регистрации
+    };
+    const isAuthenticated = !!localStorage.getItem('token');
+    const isAdmin = localStorage.getItem('role') === 'ADMIN';
 
     const menuItems = [
         {
@@ -35,14 +52,13 @@ const Navbar = () => {
             key: 'profile',
             label: <Link to="/profile">Профиль</Link>,
             icon: <UserOutlined />,
-            disabled: !localStorage.getItem('token'), // Только для авторизованных
+            disabled: !isAuthenticated,
         },
-        {
+        ...(isAdmin ? [{
             key: 'admin',
             label: <Link to="/admin">Администрирование</Link>,
             icon: <LockOutlined />,
-            disabled: !isAdmin,
-        },
+        }] : [])
     ];
 
     return (
@@ -60,15 +76,16 @@ const Navbar = () => {
                             localStorage.removeItem('token');
                             localStorage.removeItem('role');
                             navigate('/');
+                            window.location.reload();
                         }}
                     >
                         Выйти
                     </Button>
                 ) : (
-                <Button type="text" onClick={showAuthModal}>
-                    Войти
-                </Button>
-                    )}
+                    <Button type="text" onClick={showAuthModal}>
+                        Войти
+                    </Button>
+                )}
             </Space>
 
             <Modal
@@ -76,21 +93,43 @@ const Navbar = () => {
                 open={isAuthModalOpen}
                 onCancel={handleAuthCancel}
                 footer={null}
+                style={{ top: 20, right: 20, position: 'absolute' }}
+                bodyStyle={{ padding: '20px' }}
+                width={400}
             >
-                <Form onFinish={onLogin}>
-                    <Form.Item name="login" label="Логин" rules={[{ required: true }]}>
-                        <Input />
+                <Form onFinish={onLogin} layout="vertical">
+                    <Form.Item
+                        name="login"
+                        label="Логин или Email"
+                        rules={[{ required: true, message: 'Введите логин или email' }]}
+                    >
+                        <Input placeholder="Введите логин или email" />
                     </Form.Item>
-                    <Form.Item name="password" label="Пароль" rules={[{ required: true }]}>
-                        <Input.Password />
+                    <Form.Item
+                        name="password"
+                        label="Пароль"
+                        rules={[{ required: true, message: 'Введите пароль' }]}
+                    >
+                        <Input.Password placeholder="Введите пароль" />
                     </Form.Item>
                     <Form.Item>
-                        <Button type="primary" htmlType="submit">
+                        <Button
+                            type="primary"
+                            htmlType="submit"
+                            loading={loginLoading}
+                            style={{ width: '100%', marginBottom: '10px' }}
+                        >
                             Войти
+                        </Button>
+                        <Button
+                            type="link"
+                            style={{ width: '100%', textAlign: 'center' }}
+                            onClick={handleRegisterClick}
+                        >
+                            Нет аккаунта? Зарегистрироваться
                         </Button>
                     </Form.Item>
                 </Form>
-                <Link to="/registration">Нет аккаунта? Зарегистрируйтесь</Link>
             </Modal>
         </>
     );
