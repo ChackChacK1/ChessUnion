@@ -40,7 +40,8 @@ public class TournamentService {
     public ResponseEntity<?> createTournament(TournamentCreateRequest tournamentCreateRequest) {
         Tournament tournament = modelMapper.map(tournamentCreateRequest, Tournament.class);
         tournament.setCreatedAt(LocalDateTime.now());
-
+        tournament.setCurrentRound(0);
+        tournament.setStage(Tournament.Stage.REGISTRATION);
 
         tournamentRepository.save(tournament);
 
@@ -67,7 +68,7 @@ public class TournamentService {
         tournamentRepository.save(tournament);
 
 
-        return new ResponseEntity<>(tournament.getPlayers(), HttpStatus.OK);
+        return new ResponseEntity<>("Registration successful!", HttpStatus.OK);
     }
 
     public ResponseEntity<?> findById(int id){
@@ -187,9 +188,11 @@ public class TournamentService {
         TournamentDto dto = modelMapper.map(tournament, TournamentDto.class);
         List<PlayerDto> playerDtoList = tournament.getPlayers().stream()
                 .map(player -> modelMapper.map(player, PlayerDto.class))
+                .sorted(Comparator.comparingDouble(PlayerDto::getScore)
+                        .thenComparingDouble(PlayerDto::getSecondScore)
+                        .reversed())
                 .toList();
         dto.setPlayers(playerDtoList);
         return dto;
     }
-
 }

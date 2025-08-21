@@ -47,8 +47,7 @@ public class Player {
     private LocalDateTime createdAt;
 
 
-
-    public Double getSecondRating(){
+    public Double getSecondScore(){
         Double secondRating = 0.0;
         Set<Match> matchesPlayed = matchesPlayedWhite;
         matchesPlayed.addAll(matchesPlayedBlack);

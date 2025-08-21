@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Card, Typography, Tag, Spin, message, Button, Row, Col, Space } from 'antd';
-import { CalendarOutlined, TrophyOutlined, TeamOutlined, UserAddOutlined } from '@ant-design/icons';
+import { Card, Typography, Tag, Spin, message, Button, Row, Col, Space, Alert } from 'antd';
+import { CalendarOutlined, TrophyOutlined, TeamOutlined, UserAddOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import client from '../api/client';
 import dayjs from 'dayjs';
 
@@ -13,11 +13,19 @@ const TournamentDetail = () => {
     const [loading, setLoading] = useState(true);
     const [registering, setRegistering] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isRegistered, setIsRegistered] = useState(false);
+    const [checkingRegistration, setCheckingRegistration] = useState(false);
 
     useEffect(() => {
         fetchTournament();
         checkAuth();
     }, [id]);
+
+    useEffect(() => {
+        if (isAuthenticated && tournament) {
+            checkRegistration();
+        }
+    }, [isAuthenticated, tournament]);
 
     const checkAuth = () => {
         const token = localStorage.getItem('token');
@@ -28,23 +36,59 @@ const TournamentDetail = () => {
         try {
             setLoading(true);
             const response = await client.get(`/api/tournament/${id}`);
-            setTournament(response.data);
+            // Получаем данные из response.data.body
+            setTournament(response.data.body || response.data);
         } catch (error) {
-            message.error('Ошибка загрузки турнира: ' + error.response?.data?.message || error.message);
+            message.error('Ошибка загрузки турнира: ' + (error.response?.data?.message || error.message));
         } finally {
             setLoading(false);
+        }
+    };
+
+    const checkRegistration = async () => {
+        try {
+            setCheckingRegistration(true);
+            const response = await client.get(`/api/tournament/${id}/if_registered`);
+
+            console.log('Raw registration response:', response.data);
+
+            // Обрабатываем разные форматы ответа
+            let registrationStatus = false;
+
+            if (typeof response.data === 'boolean') {
+                registrationStatus = response.data;
+            } else if (response.data && typeof response.data.body === 'boolean') {
+                registrationStatus = response.data.body;
+            } else if (response.data && response.data.body !== undefined) {
+                registrationStatus = Boolean(response.data.body);
+            }
+
+            console.log('Parsed registration status:', registrationStatus);
+            setIsRegistered(registrationStatus);
+
+        } catch (error) {
+            console.error('Ошибка проверки регистрации:', error);
+            message.error('Ошибка проверки регистрации');
+        } finally {
+            setCheckingRegistration(false);
         }
     };
 
     const handleRegistration = async () => {
         try {
             setRegistering(true);
-            await client.put(`/api/tournament/${id}/registration`);
-            message.success('Вы успешно зарегистрировались на турнир!');
-            // Обновляем данные турнира после регистрации
-            fetchTournament();
+            const response = await client.put(`/api/tournament/${id}/registration`);
+            console.log('Registration response:', response); // Добавьте лог
+
+            if (response.status === 200) {
+                message.success('Вы успешно зарегистрировались на турнир!');
+                // Полная перезагрузка страницы
+                window.location.reload();
+            }
+
         } catch (error) {
-            message.error('Ошибка регистрации: ' + error.response?.data?.message || error.message);
+            console.error('Registration error:', error); // Лог ошибки
+            message.error('Ошибка регистрации: ' + (error.response?.data?.message || error.message));
         } finally {
             setRegistering(false);
         }
@@ -61,17 +105,23 @@ const TournamentDetail = () => {
         return colors[stage] || 'default';
     };
 
+    const translateStage = (stage) => {
+        const translations = {
+            'ANNOUNCED': 'Анонсирован',
+            'REGISTRATION': 'Регистрация',
+            'IN_PROGRESS': 'В процессе',
+            'FINISHED': 'Завершен',
+            'CANCELLED': 'Отменен'
+        };
+        return translations[stage] || stage;
+    };
+
     const canRegister = () => {
         if (!isAuthenticated) return false;
         if (tournament.stage !== 'REGISTRATION') return false;
         if (tournament.maxAmountOfPlayers && tournament.players?.length >= tournament.maxAmountOfPlayers) return false;
+        if (isRegistered) return false;
         return true;
-    };
-
-    const isUserRegistered = () => {
-        // Здесь можно добавить проверку, зарегистрирован ли уже пользователь
-        // Пока просто возвращаем false, можно доработать когда будет endpoint для проверки
-        return false;
     };
 
     if (loading) {
@@ -82,9 +132,13 @@ const TournamentDetail = () => {
         return <Text>Турнир не найден</Text>;
     }
 
+    // Добавим отладочную информацию
+    console.log('Tournament data:', tournament);
+    console.log('Registration status:', isRegistered);
+
     return (
         <div style={{ padding: '20px', maxWidth: '1000px', margin: '0 auto' }}>
-            <Title level={2}>{tournament.name}</Title>
+            <Title level={2}>{tournament.name || 'Без названия'}</Title>
 
             <Row gutter={16}>
                 <Col span={16}>
@@ -99,15 +153,22 @@ const TournamentDetail = () => {
                         <div style={{ marginBottom: 10 }}>
                             <CalendarOutlined style={{ marginRight: 8 }} />
                             <Text strong>Дата начала: </Text>
-                            {dayjs(tournament.startDateTime).format('DD.MM.YYYY HH:mm')}
+                            {tournament.startDateTime ?
+                                dayjs(tournament.startDateTime).format('DD.MM.YYYY HH:mm') :
+                                'Дата не указана'}
                         </div>
 
                         <div style={{ marginBottom: 10 }}>
                             <TrophyOutlined style={{ marginRight: 8 }} />
                             <Text strong>Стадия: </Text>
                             <Tag color={getStageColor(tournament.stage)}>
-                                {tournament.stage}
+                                {translateStage(tournament.stage)}
                             </Tag>
+                        </div>
+
+                        <div style={{ marginBottom: 10 }}>
+                            <Text strong>Текущий раунд: </Text>
+                            {tournament.currentRound || 0}
                         </div>
 
                         <div style={{ marginBottom: 10 }}>
@@ -118,13 +179,10 @@ const TournamentDetail = () => {
                         </div>
 
                         <div style={{ marginBottom: 10 }}>
-                            <Text strong>Текущий раунд: </Text>
-                            {tournament.currentRound}
-                        </div>
-
-                        <div style={{ marginBottom: 10 }}>
                             <Text strong>Создан: </Text>
-                            {dayjs(tournament.createdAt).format('DD.MM.YYYY HH:mm')}
+                            {tournament.createdAt ?
+                                dayjs(tournament.createdAt).format('DD.MM.YYYY HH:mm') :
+                                'Не указано'}
                         </div>
 
                         {tournament.minAmountOfPlayers && (
@@ -133,7 +191,30 @@ const TournamentDetail = () => {
                                 {tournament.minAmountOfPlayers}
                             </div>
                         )}
+
+                        {tournament.maxAmountOfPlayers && (
+                            <div style={{ marginBottom: 10 }}>
+                                <Text strong>Максимальное количество игроков: </Text>
+                                {tournament.maxAmountOfPlayers}
+                            </div>
+                        )}
                     </Card>
+
+                    {/* Список зарегистрированных игроков */}
+                    {tournament.players && tournament.players.length > 0 && (
+                        <Card title="Зарегистрированные игроки">
+                            {tournament.players.map((player, index) => (
+                                <div key={index} style={{ marginBottom: 8 }}>
+                                    <Text>{player.fullName || 'Неизвестный игрок'}</Text>
+                                    {player.rating && (
+                                        <Tag color="blue" style={{ marginLeft: 8 }}>
+                                            Рейтинг: {player.rating}
+                                        </Tag>
+                                    )}
+                                </div>
+                            ))}
+                        </Card>
+                    )}
                 </Col>
 
                 <Col span={8}>
@@ -147,7 +228,16 @@ const TournamentDetail = () => {
                                 Посмотреть матчи
                             </Button>
 
-                            {canRegister() && !isUserRegistered() && (
+                            {checkingRegistration ? (
+                                <Spin size="small" />
+                            ) : isRegistered ? (
+                                <Alert
+                                    message="Вы уже зарегистрированы"
+                                    type="success"
+                                    icon={<CheckCircleOutlined />}
+                                    showIcon
+                                />
+                            ) : canRegister() ? (
                                 <Button
                                     type="primary"
                                     block
@@ -158,19 +248,7 @@ const TournamentDetail = () => {
                                 >
                                     Зарегистрироваться
                                 </Button>
-                            )}
-
-                            {isUserRegistered() && (
-                                <Button
-                                    type="default"
-                                    block
-                                    disabled
-                                >
-                                    Вы уже зарегистрированы
-                                </Button>
-                            )}
-
-                            {!isAuthenticated && tournament.stage === 'REGISTRATION' && (
+                            ) : !isAuthenticated && tournament.stage === 'REGISTRATION' ? (
                                 <Button
                                     type="dashed"
                                     block
@@ -178,17 +256,13 @@ const TournamentDetail = () => {
                                 >
                                     Войдите, чтобы зарегистрироваться
                                 </Button>
-                            )}
-
-                            {tournament.stage !== 'REGISTRATION' && (
-                                <Button
-                                    type="default"
-                                    block
-                                    disabled
-                                >
-                                    Регистрация закрыта
-                                </Button>
-                            )}
+                            ) : tournament.stage !== 'REGISTRATION' ? (
+                                <Alert
+                                    message="Регистрация закрыта"
+                                    type="warning"
+                                    showIcon
+                                />
+                            ) : null}
 
                             <Button
                                 type="default"
