@@ -17,4 +17,5 @@ public class TournamentCreateRequest {
     private LocalDateTime startDateTime;
     private Integer maxAmountOfPlayers;
     private Integer minAmountOfPlayers;
+    private Integer amountOfRounds;
 }

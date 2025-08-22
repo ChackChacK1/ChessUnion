@@ -23,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static java.util.stream.Collectors.toList;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -57,6 +59,11 @@ public class TournamentService {
         Tournament tournament = tournamentRepository.findById(id).orElseThrow(()-> new TournamentNotFoundException(id));
 
         User user = userRepository.findByUsername(username).orElseThrow(()-> new UsernameNotFoundException(username));
+
+        boolean alreadyRegistered = playerRepository.existsByUserAndTournament(user, tournament);
+        if (alreadyRegistered) {
+            return new ResponseEntity<>("User already registered in this tournament!", HttpStatus.BAD_REQUEST);
+        }
 
         Player player = new Player();
 
@@ -103,6 +110,11 @@ public class TournamentService {
     @Transactional
     public ResponseEntity<?> generateNextRound(int id){
         Tournament tournament = tournamentRepository.findById(id).orElseThrow(()-> new TournamentNotFoundException(id));
+        if (tournament.getCurrentRound() == tournament.getAmountOfRounds() ) {
+            tournament.setStage(Tournament.Stage.FINISHED);
+            tournamentRepository.save(tournament);
+            return new ResponseEntity<>(tournament.getCurrentRound(), HttpStatus.OK);
+        }
         if (tournament.getCurrentRound() == 0) {
             generateFirstRound(tournament);
         } else {

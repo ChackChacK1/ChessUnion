@@ -46,6 +46,9 @@ public class Tournament {
     private Integer maxAmountOfPlayers;
     private Integer minAmountOfPlayers;
 
+    @Column(name = "amount_of_rounds")
+    private Integer amountOfRounds;
+
     @Enumerated(EnumType.STRING)
     private Stage stage = Stage.REGISTRATION;
 
