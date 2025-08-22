@@ -126,6 +126,13 @@ public class MatchService {
                 HttpStatus.OK);
     }
 
+    public ResponseEntity<?> findMatchesByTournamentRound(int tournamentId, int roundNumber, Pageable pageable) {
+        return new ResponseEntity<>(matchRepository.findAllByTournamentIdAndRoundNumber(tournamentId, roundNumber, pageable).stream()
+                .map(this::matchToMatchDto)
+                .toList(),
+                HttpStatus.OK);
+    }
+
 
 
 

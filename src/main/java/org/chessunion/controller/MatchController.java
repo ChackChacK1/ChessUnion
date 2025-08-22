@@ -29,6 +29,13 @@ public class MatchController {
         return matchService.findMatchesByTournament(tournamentId, pageable);
     }
 
+    @GetMapping("/byTournament/{tournamentId}/{roundId}")
+    public ResponseEntity<?> getTournamentMatchesRound(@PathVariable int tournamentId,
+                                                  @PathVariable int roundId,
+                                                  @PageableDefault Pageable pageable) {
+        return matchService.findMatchesByTournamentRound(tournamentId, roundId, pageable);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getMatchById(@PathVariable int id) {
         return matchService.findMatchById(id);

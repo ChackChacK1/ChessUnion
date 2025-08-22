@@ -10,6 +10,7 @@ import Profile from './pages/Profile';
 import PrivateRoute from "./components/PrivateRoute.jsx";
 import TournamentDetail from './pages/TournamentDetail';
 import TournamentMatches from './pages/TournamentMatches';
+import TournamentManagement from "./pages/TournamentManagement.jsx";
 
 const AdminRoute = ({ children }) => {
     const role = localStorage.getItem('role');
@@ -27,6 +28,7 @@ function App() {
             <Route path="/registration" element={<Registration />} />
             <Route path="/tournament/:id" element={<TournamentDetail />} />
             <Route path="/matches/:tournamentId" element={<TournamentMatches />} />
+            <Route path="/admin/tournament/:tournamentId/:roundId" element={<TournamentManagement />} />
             <Route
                 path="/profile"
                 element={

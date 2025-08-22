@@ -23,4 +23,6 @@ public interface MatchRepository extends JpaRepository<Match, Integer> {
 
     @Query("SELECT m FROM Match m WHERE m.whitePlayer.id = ?1 OR m.blackPlayer.id = ?1")
     List<Match> findAllMatchesByPlayerId(Integer playerId);
+
+    List<Match> findAllByTournamentIdAndRoundNumber(Integer tournamentId, int roundNumber, Pageable pageable);
 }
