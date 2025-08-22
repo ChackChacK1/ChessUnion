@@ -42,17 +42,21 @@ public class PlayerService {
         return secondRating;
     }
 
-    public Set<Player> getAllOpponents(Player player){
-        Set<Player> result = new HashSet<>();
-        List<Match> playerMatches = matchRepository.findAllMatchesByPlayerId(player.getId());
+    public Set<Integer> getAllOpponentIds(Player player) {
+        // Получаем только ID противников - это быстрее и безопаснее
+        Set<Integer> opponentIds = new HashSet<>();
+        List<Object[]> results = matchRepository.findOpponentIdsByPlayerId(player.getId());
 
-        for (Match match : playerMatches) {
-            if (match.getWhitePlayer().equals(player)) {
-                result.add(match.getBlackPlayer());
+        for (Object[] result : results) {
+            Integer whiteId = (Integer) result[0];
+            Integer blackId = (Integer) result[1];
+
+            if (player.getId().equals(whiteId)) {
+                opponentIds.add(blackId);
             } else {
-                result.add(match.getWhitePlayer());
+                opponentIds.add(whiteId);
             }
         }
-        return result;
+        return opponentIds;
     }
 }

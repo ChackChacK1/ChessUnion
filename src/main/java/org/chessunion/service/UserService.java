@@ -4,8 +4,10 @@ package org.chessunion.service;
 import lombok.RequiredArgsConstructor;
 import org.chessunion.dto.ProfileDto;
 import org.chessunion.dto.RegistrationRequest;
+import org.chessunion.entity.Player;
 import org.chessunion.entity.User;
 import org.chessunion.repository.MatchRepository;
+import org.chessunion.repository.PlayerRepository;
 import org.chessunion.repository.RoleRepository;
 import org.chessunion.repository.UserRepository;
 import org.modelmapper.ModelMapper;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import org.springframework.cache.annotation.Cacheable;
 
@@ -31,6 +34,7 @@ public class UserService {
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
     private final MatchService matchService;
+    private final PlayerRepository playerRepository;
 
 
     @Cacheable(cacheNames = "profiles", key = "#principal.getName()", unless = "#result == null")
@@ -76,6 +80,15 @@ public class UserService {
         user.setEmail(email);
         userRepository.save(user);
         return new ResponseEntity<>(String.format("Email %s successfully been set to your account", email), HttpStatus.OK);
+    }
+
+    @Transactional
+    public void saveRatings(Integer tournamentId) {
+        List<Player> players = playerRepository.findAllByTournament_Id(tournamentId);
+        for (Player player : players) {
+            User user = player.getUser();
+            user.setRating(player.getRating());
+        }
     }
 
 

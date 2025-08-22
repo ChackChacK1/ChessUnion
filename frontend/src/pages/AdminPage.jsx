@@ -21,7 +21,6 @@ const AdminPage = () => {
         try {
             setTournamentsLoading(true);
             const response = await client.get('/api/admin/tournament/running');
-            // API возвращает просто массив, а не объект с пагинацией
             setRunningTournaments(response.data || []);
         } catch (error) {
             message.error('Ошибка загрузки турниров: ' + error.response?.data?.message || error.message);
@@ -42,13 +41,14 @@ const AdminPage = () => {
                 description: values.description,
                 startDateTime: values.startDateTime.format('YYYY-MM-DDTHH:mm:ss'),
                 maxAmountOfPlayers: values.maxAmountOfPlayers,
-                minAmountOfPlayers: values.minAmountOfPlayers
+                minAmountOfPlayers: values.minAmountOfPlayers,
+                amountOfRounds: values.amountOfRounds // Добавляем количество раундов
             };
 
             await client.post('/api/admin/tournament/create', tournamentData);
             message.success('Турнир успешно создан!');
             form.resetFields();
-            fetchRunningTournaments(); // Обновляем список после создания
+            fetchRunningTournaments();
 
         } catch (error) {
             message.error('Ошибка создания турнира: ' + error.response?.data?.message || error.message);
@@ -67,8 +67,8 @@ const AdminPage = () => {
         return <Tag color={config.color}>{config.text}</Tag>;
     };
 
-    const handleTournamentClick = (tournamentId) => {
-        navigate(`/admin/tournament/${tournamentId}/0`); // меняем на /0 для текущего раунда
+    const handleTournamentClick = (tournament) => {
+        navigate(`/admin/tournament/${tournament.id}/${tournament.currentRound}`);
     };
 
     return (
@@ -101,7 +101,7 @@ const AdminPage = () => {
                                             marginBottom: '8px',
                                             transition: 'all 0.3s'
                                         }}
-                                        onClick={() => handleTournamentClick(tournament.id)}
+                                        onClick={() => handleTournamentClick(tournament)}
                                         onMouseEnter={(e) => {
                                             e.currentTarget.style.backgroundColor = '#f5f5f5';
                                             e.currentTarget.style.borderColor = '#1890ff';
@@ -117,6 +117,7 @@ const AdminPage = () => {
                                                     <Text strong>{tournament.name}</Text>
                                                     {getStageTag(tournament.stage)}
                                                     <Tag color="cyan">{tournament.players?.length || 0} игроков</Tag>
+                                                    <Tag color="orange">Раунд: {tournament.currentRound + 1}/{tournament.amountOfRounds}</Tag>
                                                 </div>
                                             }
                                             description={
@@ -131,7 +132,7 @@ const AdminPage = () => {
                                                     )}
                                                     <div style={{ marginTop: '4px' }}>
                                                         <Text type="secondary">
-                                                            ID: {tournament.id} • Раунд: {tournament.currentRound}
+                                                            ID: {tournament.id}
                                                         </Text>
                                                     </div>
                                                 </div>
@@ -201,7 +202,7 @@ const AdminPage = () => {
                             </Form.Item>
 
                             <Row gutter={16}>
-                                <Col span={12}>
+                                <Col span={8}>
                                     <Form.Item
                                         name="minAmountOfPlayers"
                                         label="Минимальное количество игроков"
@@ -216,7 +217,7 @@ const AdminPage = () => {
                                     </Form.Item>
                                 </Col>
 
-                                <Col span={12}>
+                                <Col span={8}>
                                     <Form.Item
                                         name="maxAmountOfPlayers"
                                         label="Максимальное количество игроков"
@@ -227,6 +228,21 @@ const AdminPage = () => {
                                             max={100}
                                             style={{ width: '100%' }}
                                             placeholder="Максимум игроков"
+                                        />
+                                    </Form.Item>
+                                </Col>
+
+                                <Col span={8}>
+                                    <Form.Item
+                                        name="amountOfRounds"
+                                        label="Количество раундов"
+                                        rules={[{ required: true, message: 'Введите количество раундов' }]}
+                                    >
+                                        <InputNumber
+                                            min={1}
+                                            max={20}
+                                            style={{ width: '100%' }}
+                                            placeholder="Количество раундов"
                                         />
                                     </Form.Item>
                                 </Col>

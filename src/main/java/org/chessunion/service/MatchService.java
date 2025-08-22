@@ -6,6 +6,7 @@ import org.chessunion.dto.MatchDto;
 import org.chessunion.dto.PlayerDto;
 import org.chessunion.entity.Match;
 import org.chessunion.entity.Player;
+import org.chessunion.entity.Tournament;
 import org.chessunion.exception.MatchAlreadyHasResultException;
 import org.chessunion.exception.MatchNotFoundException;
 import org.chessunion.exception.PlayersTournamentConflictException;
@@ -36,16 +37,13 @@ public class MatchService {
 
 
     @Transactional
-    public void createMatch(Player firstPlayer, Player secondPlayer) {
+    public void createMatch(Player firstPlayer, Player secondPlayer, Tournament tournament) {
         Match match = new Match();
 
-        if (firstPlayer.getTournament().equals(secondPlayer.getTournament())) {
-            match.setTournament(firstPlayer.getTournament());
-            match.setRoundNumber(firstPlayer.getTournament().getCurrentRound());
-            match.setCreatedAt(LocalDateTime.now());
-        } else {
-            throw new PlayersTournamentConflictException(firstPlayer.getId(), secondPlayer.getId());
-        }
+        match.setTournament(tournament);
+        match.setRoundNumber(tournament.getCurrentRound());
+        match.setCreatedAt(LocalDateTime.now());
+
 
         firstPlayer.setColorBalance(firstPlayer.getColorBalance() - 1);
         secondPlayer.setColorBalance(secondPlayer.getColorBalance() + 1);
@@ -73,8 +71,10 @@ public class MatchService {
         }
 
         match.setResult(result);
-
         match = simpleRatingCalculator.calculate(match);
+
+        match.getWhitePlayer().addScore(result);
+        match.getBlackPlayer().addScore(Math.abs(result - 1));
 
         playerRepository.save(match.getWhitePlayer());
         playerRepository.save(match.getBlackPlayer());

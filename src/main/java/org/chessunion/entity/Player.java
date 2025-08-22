@@ -48,4 +48,7 @@ public class Player {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    public void addScore(double score) {
+        this.score += score;
+    }
 }
