@@ -42,6 +42,8 @@ public class UserService {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow(() -> new UsernameNotFoundException(principal.getName()));
 
         ProfileDto profileDto = modelMapper.map(user, ProfileDto.class);
+        profileDto.setRating(Math.round(profileDto.getRating() * 100) / 100.00);
+
 
         profileDto.setMatches(matchService.findAllMatchesByUserId(user.getId()));
 
@@ -88,6 +90,7 @@ public class UserService {
         for (Player player : players) {
             User user = player.getUser();
             user.setRating(player.getRating());
+            userRepository.save(user);
         }
     }
 

@@ -19,7 +19,7 @@ public class SimpleRatingCalculator implements RatingCalculator {
         Player playerWhite = match.getWhitePlayer();
         Player playerBlack = match.getBlackPlayer();
         Double ratingOfFirstPlayer = playerWhite.getRating();
-        Double ratingOfSecondPlayer = playerWhite.getRating();
+        Double ratingOfSecondPlayer = playerBlack.getRating();
 
         double expectedRatingDifferenceOfFirstPlayer = 1 / (1 + Math.pow(10, (ratingOfSecondPlayer - ratingOfFirstPlayer) / 400));
         double expectedRatingDifferenceOfSecondPlayer = 1 / (1 + Math.pow(10, (ratingOfFirstPlayer - ratingOfSecondPlayer) / 400));

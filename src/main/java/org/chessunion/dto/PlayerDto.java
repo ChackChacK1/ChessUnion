@@ -16,7 +16,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class PlayerDto {
     private String fullName;
-    private Double rating;
+    private Integer rating;
     private Double score;
     private String place;
     private Double secondScore;
