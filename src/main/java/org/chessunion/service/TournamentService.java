@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.chessunion.dto.PlayerDto;
 import org.chessunion.dto.TournamentCreateRequest;
 import org.chessunion.dto.TournamentDto;
+import org.chessunion.dto.UpdateTournamentDto;
 import org.chessunion.entity.Player;
 import org.chessunion.entity.Tournament;
 import org.chessunion.entity.User;
@@ -53,6 +54,14 @@ public class TournamentService {
         tournamentRepository.save(tournament);
 
         return new ResponseEntity<>("Tournament created!", HttpStatus.OK);
+    }
+
+    public void updateTournament(int id, UpdateTournamentDto updateTournamentDto){
+        Tournament tournament = tournamentRepository.findById(id).orElseThrow(()-> new TournamentNotFoundException(id));
+
+        modelMapper.map(updateTournamentDto, tournament);
+
+        tournamentRepository.save(tournament);
     }
 
     @Transactional
