@@ -4,6 +4,7 @@ package org.chessunion.controller;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.chessunion.dto.DeleteUserRequest;
+import org.chessunion.dto.UpdateProfileDto;
 import org.chessunion.repository.UserRepository;
 import org.chessunion.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -36,5 +37,12 @@ public class UserController {
     @GetMapping("/profile")
     public ResponseEntity<?> getUserProfile(Principal principal) {
         return new ResponseEntity<>(userService.getProfile(principal), HttpStatus.OK);
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PatchMapping("/update")
+    public ResponseEntity<?> updateProfile(Principal principal, UpdateProfileDto updateProfileDto){
+        userService.updateProfile(principal, updateProfileDto);
+        return new ResponseEntity<>("Profile update successfully", HttpStatus.OK);
     }
 }

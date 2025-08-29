@@ -4,6 +4,7 @@ package org.chessunion.service;
 import lombok.RequiredArgsConstructor;
 import org.chessunion.dto.ProfileDto;
 import org.chessunion.dto.RegistrationRequest;
+import org.chessunion.dto.UpdateProfileDto;
 import org.chessunion.entity.Player;
 import org.chessunion.entity.User;
 import org.chessunion.repository.MatchRepository;
@@ -94,5 +95,15 @@ public class UserService {
         }
     }
 
+    @Transactional
+    public void updateProfile(Principal principal, UpdateProfileDto updateProfile){
+        User user = userRepository.findByUsername(principal.getName()).orElseThrow(() -> new UsernameNotFoundException(principal.getName()));
 
+        user.setUsername(updateProfile.getUsername());
+        user.setFirstName(updateProfile.getFirstName());
+        user.setLastName(updateProfile.getLastName());
+        user.setEmail(updateProfile.getEmail());
+
+        userRepository.save(user);
+    }
 }
