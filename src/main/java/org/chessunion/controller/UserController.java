@@ -41,7 +41,7 @@ public class UserController {
 
     @PreAuthorize("isAuthenticated()")
     @PatchMapping("/update")
-    public ResponseEntity<?> updateProfile(Principal principal, UpdateProfileDto updateProfileDto){
+    public ResponseEntity<?> updateProfile(Principal principal, @RequestBody UpdateProfileDto updateProfileDto){
         userService.updateProfile(principal, updateProfileDto);
         return new ResponseEntity<>("Profile update successfully", HttpStatus.OK);
     }

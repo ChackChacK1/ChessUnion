@@ -81,7 +81,7 @@ public class SecurityConfig {
                 "http://192.168.0.103:5173",
                 url
         ));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true); // Важно для работы с куки/токенами
 
