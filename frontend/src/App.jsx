@@ -11,6 +11,7 @@ import PrivateRoute from "./components/PrivateRoute.jsx";
 import TournamentDetail from './pages/TournamentDetail';
 import TournamentMatches from './pages/TournamentMatches';
 import TournamentManagement from "./pages/TournamentManagement.jsx";
+import EditProfile from './pages/EditProfile';
 
 const AdminRoute = ({ children }) => {
     const role = localStorage.getItem('role');
@@ -37,6 +38,7 @@ function App() {
                     </PrivateRoute>
                 }
             />
+            <Route path="/profile/edit" element={<EditProfile />} />
             <Route
                 path="/admin"
                 element={

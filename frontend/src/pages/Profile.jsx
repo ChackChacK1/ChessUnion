@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Card, List, Typography, Divider, Tag, Spin, message } from 'antd';
-import { UserOutlined, MailOutlined, TrophyOutlined, CalendarOutlined } from '@ant-design/icons';
+import { Card, List, Typography, Divider, Tag, Spin, message, Button } from 'antd';
+import { UserOutlined, MailOutlined, TrophyOutlined, CalendarOutlined, EditOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import client from '../api/client';
 import dayjs from 'dayjs';
 
@@ -9,6 +10,7 @@ const { Title, Text } = Typography;
 const Profile = () => {
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -24,6 +26,10 @@ const Profile = () => {
 
         fetchProfile();
     }, []);
+
+    const handleEdit = () => {
+        navigate('/profile/edit');
+    };
 
     // Функция для отображения результата матча
     const getResultText = (result) => {
@@ -55,7 +61,19 @@ const Profile = () => {
 
     return (
         <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
-            <Card title="Профиль пользователя" bordered={false}>
+            <Card
+                title="Профиль пользователя"
+                bordered={false}
+                extra={
+                    <Button
+                        icon={<EditOutlined />}
+                        onClick={handleEdit}
+                        type="primary"
+                    >
+                        Редактировать
+                    </Button>
+                }
+            >
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
                     <UserOutlined style={{ fontSize: 24, marginRight: 10 }} />
                     <Title level={4} style={{ margin: 0 }}>
@@ -127,4 +145,4 @@ const Profile = () => {
     );
 };
 
-export default Profile;;
+export default Profile;
