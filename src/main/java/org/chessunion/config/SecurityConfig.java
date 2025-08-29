@@ -4,6 +4,7 @@ import org.chessunion.repository.UserRepository;
 import org.chessunion.security.JwtFilter;
 import org.chessunion.security.UserUserDetailsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -35,6 +36,9 @@ public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
     private final UserRepository userRepository;
+
+    @Value("${cors.url}")
+    private String url;
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -74,10 +78,10 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:5173",
                 "http://127.0.0.1:5173",
-                "http://frontend:5173",
-                "http://192.168.0.103:5173"
+                "http://192.168.0.103:5173",
+                url
         ));
-        configuration.setAllowedMethods(List.of("*"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true); // Важно для работы с куки/токенами
 

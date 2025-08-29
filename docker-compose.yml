@@ -3,6 +3,9 @@ services:
     build:
       context: ./frontend
     container_name: my-frontend
+    image: wq1a/chess-union-frontend:latest
+    environment:
+      - VITE_API_BASE_URL=http://83.166.247.15:8080
     ports:
       - "5173:5173"
     depends_on:
@@ -10,21 +13,17 @@ services:
     restart: unless-stopped
     networks:
       - my-network
+    command: ["npm", "run", "dev", "--", "--host"]
 
   backend:
     build:
       context: .
+    image: wq1a/chess-union-backend:latest
     container_name: my-backend
     ports:
       - "8080:8080"
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
-      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
-      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
-      - SPRING_DATA_REDIS_HOST=${SPRING_DATA_REDIS_HOST}
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_LIFETIME=${JWT_LIFETIME}
+    env_file:
+      - .env
     depends_on:
       - db
       - redis
@@ -36,9 +35,9 @@ services:
     image: postgres:15
     container_name: my-postgres
     environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=chess-union-db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=23111
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
