@@ -1,6 +1,22 @@
 import { useState, useEffect } from 'react';
-import { Card, Form, Input, Button, DatePicker, InputNumber, message, Typography, Row, Col, List, Tabs, Tag, Spin } from 'antd';
-import { PlusOutlined, SettingOutlined } from '@ant-design/icons';
+import {
+    Card,
+    Form,
+    Input,
+    Button,
+    DatePicker,
+    InputNumber,
+    message,
+    Typography,
+    Row,
+    Col,
+    List,
+    Tabs,
+    Tag,
+    Spin,
+    Space
+} from 'antd';
+import { PlusOutlined, SettingOutlined, EditOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import client from '../api/client';
 import dayjs from 'dayjs';
@@ -23,7 +39,7 @@ const AdminPage = () => {
             const response = await client.get('/api/admin/tournament/running');
             setRunningTournaments(response.data || []);
         } catch (error) {
-            message.error('Ошибка загрузки турниров: ' + error.response?.data?.message || error.message);
+            message.error('Ошибка загрузки турниров: ' + (error.response?.data?.message || error.message));
         } finally {
             setTournamentsLoading(false);
         }
@@ -42,7 +58,7 @@ const AdminPage = () => {
                 startDateTime: values.startDateTime.format('YYYY-MM-DDTHH:mm:ss'),
                 maxAmountOfPlayers: values.maxAmountOfPlayers,
                 minAmountOfPlayers: values.minAmountOfPlayers,
-                amountOfRounds: values.amountOfRounds // Добавляем количество раундов
+                amountOfRounds: values.amountOfRounds
             };
 
             await client.post('/api/admin/tournament/create', tournamentData);
@@ -51,7 +67,7 @@ const AdminPage = () => {
             fetchRunningTournaments();
 
         } catch (error) {
-            message.error('Ошибка создания турнира: ' + error.response?.data?.message || error.message);
+            message.error('Ошибка создания турнира: ' + (error.response?.data?.message || error.message));
         } finally {
             setLoading(false);
         }
@@ -71,6 +87,11 @@ const AdminPage = () => {
         navigate(`/admin/tournament/${tournament.id}/${tournament.currentRound}`);
     };
 
+    const handleEditTournament = (tournament, e) => {
+        e.stopPropagation(); // Предотвращаем всплытие события
+        navigate(`/admin/tournament/${tournament.id}/edit`);
+    };
+
     return (
         <div style={{ padding: '20px', maxWidth: '1000px', margin: '0 auto' }}>
             <Title level={2}>Панель администратора</Title>
@@ -79,9 +100,9 @@ const AdminPage = () => {
                 <TabPane
                     tab={
                         <span>
-                            <SettingOutlined />
-                            Управление турнирами
-                        </span>
+              <SettingOutlined />
+              Управление турнирами
+            </span>
                     }
                     key="management"
                 >
@@ -99,7 +120,8 @@ const AdminPage = () => {
                                             border: '1px solid #d9d9d9',
                                             borderRadius: '6px',
                                             marginBottom: '8px',
-                                            transition: 'all 0.3s'
+                                            transition: 'all 0.3s',
+                                            position: 'relative'
                                         }}
                                         onClick={() => handleTournamentClick(tournament)}
                                         onMouseEnter={(e) => {
@@ -111,6 +133,21 @@ const AdminPage = () => {
                                             e.currentTarget.style.borderColor = '#d9d9d9';
                                         }}
                                     >
+                                        {/* Кнопка редактирования */}
+                                        <Button
+                                            icon={<EditOutlined />}
+                                            type="text"
+                                            size="small"
+                                            style={{
+                                                position: 'absolute',
+                                                top: '8px',
+                                                right: '8px',
+                                                zIndex: 10
+                                            }}
+                                            onClick={(e) => handleEditTournament(tournament, e)}
+                                            onMouseEnter={(e) => e.stopPropagation()}
+                                        />
+
                                         <List.Item.Meta
                                             title={
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -150,9 +187,9 @@ const AdminPage = () => {
                 <TabPane
                     tab={
                         <span>
-                            <PlusOutlined />
-                            Создание турнира
-                        </span>
+              <PlusOutlined />
+              Создание турнира
+            </span>
                     }
                     key="creation"
                 >

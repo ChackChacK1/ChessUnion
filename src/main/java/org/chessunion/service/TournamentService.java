@@ -56,6 +56,7 @@ public class TournamentService {
         return new ResponseEntity<>("Tournament created!", HttpStatus.OK);
     }
 
+    @Transactional
     public void updateTournament(int id, UpdateTournamentDto updateTournamentDto){
         Tournament tournament = tournamentRepository.findById(id).orElseThrow(()-> new TournamentNotFoundException(id));
 
