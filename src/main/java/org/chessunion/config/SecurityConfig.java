@@ -83,6 +83,7 @@ public class SecurityConfig {
                 "http://www.wq1a.ru",
                 "https://wq1a.ru",
                 "https://www.wq1a.ru",
+                "http://192.168.0.100:5173",
                 url
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));

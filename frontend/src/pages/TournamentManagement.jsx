@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, List, Typography, Button, message, Spin, Dropdown, Space, Tag } from 'antd';
-import { DownOutlined, ArrowRightOutlined } from '@ant-design/icons';
+import { DownOutlined, ArrowRightOutlined, PlayCircleOutlined } from '@ant-design/icons';
 import client from '../api/client';
 
 const { Title, Text } = Typography;
@@ -64,6 +64,31 @@ const TournamentManagement = () => {
         }
     };
 
+    // Начать жеребьевку (первый раунд)
+    const startTournamentDraw = async () => {
+        try {
+            setUpdating(true);
+            const response = await client.post(`/api/admin/tournament/${tournamentId}/round`);
+            const newRound = response.data;
+            message.success('Жеребьевка проведена! Турнир начат.');
+            navigate(`/admin/tournament/${tournamentId}/${newRound}`);
+        } catch (error) {
+            message.error('Ошибка жеребьевки: ' + error.response?.data?.message || error.message);
+        } finally {
+            setUpdating(false);
+        }
+    };
+
+    // Проверяем, является ли это первым раундом и турнир еще не начат
+    const isFirstRoundAndNotStarted = () => {
+        return parseInt(roundId) === 0 && matches.length === 0;
+    };
+
+    // Проверяем, можно ли создавать следующий раунд
+    const canCreateNextRound = () => {
+        return !matches.some(match => match.result === null);
+    };
+
     // Меню для выбора результата
     const getResultMenu = (match) => [
         {
@@ -115,14 +140,26 @@ const TournamentManagement = () => {
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                 <Text strong>Раунд: {parseInt(roundId) + 1}</Text>
-                <Button
-                    type="primary"
-                    onClick={createNextRound}
-                    loading={updating}
-                    disabled={matches.some(match => match.result === null)}
-                >
-                    Следующий раунд
-                </Button>
+
+                {isFirstRoundAndNotStarted() ? (
+                    <Button
+                        type="primary"
+                        icon={<PlayCircleOutlined />}
+                        onClick={startTournamentDraw}
+                        loading={updating}
+                    >
+                        Начать жеребьевку
+                    </Button>
+                ) : (
+                    <Button
+                        type="primary"
+                        onClick={createNextRound}
+                        loading={updating}
+                        disabled={!canCreateNextRound()}
+                    >
+                        Следующий раунд
+                    </Button>
+                )}
             </div>
 
             <Card title="Матчи раунда" bordered={false}>

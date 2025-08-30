@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class UpdateTournamentDto {
     private String name;
+    private String address;
     private String description;
     private LocalDateTime startDateTime;
     private Integer maxAmountOfPlayers;

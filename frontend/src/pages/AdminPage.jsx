@@ -16,7 +16,7 @@ import {
     Spin,
     Space
 } from 'antd';
-import { PlusOutlined, SettingOutlined, EditOutlined } from '@ant-design/icons';
+import { PlusOutlined, SettingOutlined, EditOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import client from '../api/client';
 import dayjs from 'dayjs';
@@ -54,6 +54,7 @@ const AdminPage = () => {
             setLoading(true);
             const tournamentData = {
                 name: values.name,
+                address: values.address, // Добавляем адрес
                 description: values.description,
                 startDateTime: values.startDateTime.format('YYYY-MM-DDTHH:mm:ss'),
                 maxAmountOfPlayers: values.maxAmountOfPlayers,
@@ -100,9 +101,9 @@ const AdminPage = () => {
                 <TabPane
                     tab={
                         <span>
-              <SettingOutlined />
-              Управление турнирами
-            </span>
+                            <SettingOutlined />
+                            Управление турнирами
+                        </span>
                     }
                     key="management"
                 >
@@ -162,6 +163,14 @@ const AdminPage = () => {
                                                     <Text type="secondary">
                                                         Дата проведения: {dayjs(tournament.startDateTime).format('DD.MM.YYYY HH:mm')}
                                                     </Text>
+                                                    {tournament.address && (
+                                                        <div style={{ marginTop: '4px' }}>
+                                                            <Space size="small">
+                                                                <EnvironmentOutlined style={{ color: '#ff4d4f' }} />
+                                                                <Text type="secondary">{tournament.address}</Text>
+                                                            </Space>
+                                                        </div>
+                                                    )}
                                                     {tournament.description && (
                                                         <div style={{ marginTop: '4px' }}>
                                                             <Text type="secondary">{tournament.description}</Text>
@@ -187,9 +196,9 @@ const AdminPage = () => {
                 <TabPane
                     tab={
                         <span>
-              <PlusOutlined />
-              Создание турнира
-            </span>
+                            <PlusOutlined />
+                            Создание турнира
+                        </span>
                     }
                     key="creation"
                 >
@@ -227,6 +236,18 @@ const AdminPage = () => {
                                     </Form.Item>
                                 </Col>
                             </Row>
+
+                            {/* Новое поле: Адрес проведения */}
+                            <Form.Item
+                                name="address"
+                                label="Адрес проведения"
+                                rules={[{ required: true, message: 'Введите адрес проведения турнира' }]}
+                            >
+                                <Input
+                                    placeholder="Введите адрес проведения турнира"
+                                    prefix={<EnvironmentOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
+                                />
+                            </Form.Item>
 
                             <Form.Item
                                 name="description"

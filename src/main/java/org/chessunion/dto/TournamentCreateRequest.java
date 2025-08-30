@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class TournamentCreateRequest {
     private String name;
+    private String address;
     private String description;
     private LocalDateTime startDateTime;
     private Integer maxAmountOfPlayers;

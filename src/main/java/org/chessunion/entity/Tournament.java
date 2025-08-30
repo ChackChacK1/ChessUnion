@@ -29,6 +29,8 @@ public class Tournament {
 
     private String name;
 
+    private String address;
+
     private String description;
 
     @Column(name = "start_date_time")

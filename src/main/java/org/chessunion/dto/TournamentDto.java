@@ -18,6 +18,7 @@ public class TournamentDto {
     private Integer id;
     private List<PlayerDto> players;
     private String name;
+    private String address;
     private String description;
     private LocalDateTime startDateTime;
     private int currentRound;
