@@ -9,8 +9,8 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     allowedHosts: [
-      'wq1a.ru',
-      'www.wq1a.ru',
+      'chess-union.ru',
+      'www.chess-union.ru',
       'localhost',
       '127.0.0.1'
     ],

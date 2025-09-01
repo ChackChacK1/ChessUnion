@@ -52,7 +52,7 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseEntity<?> registerUser(RegistrationRequest registrationRequest) {
+    public void registerUser(RegistrationRequest registrationRequest) {
         User user = modelMapper.map(registrationRequest, User.class);
 
         // шифрование пароля
@@ -63,26 +63,23 @@ public class UserService {
         user.setCreatedAt(LocalDateTime.now());
 
         userRepository.save(user);
-
-        return new ResponseEntity<>("User registered successfully", HttpStatus.CREATED);
     }
 
     @Transactional
-    public ResponseEntity<?> deleteUser(String username) {
+    public void deleteUser(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(username));
         userRepository.delete(user);
-        return new ResponseEntity<>("User deleted successfully", HttpStatus.OK);
     }
 
     @Transactional
     @CachePut(cacheNames = "profiles", key = "#username")
-    public ResponseEntity<?> updateEmail(String username, String email) {
+    public String updateEmail(String username, String email) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(username));
         user.setEmail(email);
         userRepository.save(user);
-        return new ResponseEntity<>(String.format("Email %s successfully been set to your account", email), HttpStatus.OK);
+        return email;
     }
 
     @Transactional

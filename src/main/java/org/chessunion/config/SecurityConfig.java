@@ -79,10 +79,10 @@ public class SecurityConfig {
                 "http://localhost:5173",
                 "http://127.0.0.1:5173",
                 "http://192.168.0.103:5173",
-                "http://wq1a.ru",
-                "http://www.wq1a.ru",
-                "https://wq1a.ru",
-                "https://www.wq1a.ru",
+                "http://chess-union.ru",
+                "http://www.chess-union.ru",
+                "https://chess-union.ru",
+                "https://www.chess-union.ru",
                 "http://192.168.0.100:5173",
                 url
         ));

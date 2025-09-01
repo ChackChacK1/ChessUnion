@@ -61,7 +61,7 @@ public class MatchService {
 
 
     @Transactional
-    public ResponseEntity<?> setMatchResult(int id, double result) {
+    public MatchDto setMatchResult(int id, double result) {
         Match match = matchRepository.findById(id).orElseThrow(() -> new MatchNotFoundException(id));
         if (match.getResult() != null) {
             throw new MatchAlreadyHasResultException(String.format("Match id: %s, has result: %s, tried to set: %s", id, match.getResult(), result));
@@ -80,7 +80,7 @@ public class MatchService {
         playerRepository.save(match.getBlackPlayer());
         matchRepository.save(match);
 
-        return new ResponseEntity<>(matchToMatchDto(match), HttpStatus.OK);
+        return matchToMatchDto(match);
     }
 
 
@@ -107,37 +107,35 @@ public class MatchService {
 
 
 
-    public ResponseEntity<?> findAllMatches(Pageable pageable) {
+    public List<MatchDto> findAllMatches(Pageable pageable) {
         List<MatchDto> matchDtoS = matchRepository.findAll(pageable).stream()
                 .map(this::matchToMatchDto)
                 .toList();
 
-        return new ResponseEntity<>(matchDtoS, HttpStatus.OK);
+        return matchDtoS;
     }
 
 
 
 
-    public ResponseEntity<?> findMatchesByTournament(int tournamentId, Pageable pageable) {
-        return new ResponseEntity<>(matchRepository.findMatchesByTournamentId(tournamentId, pageable)
+    public List<MatchDto> findMatchesByTournament(int tournamentId, Pageable pageable) {
+        return matchRepository.findMatchesByTournamentId(tournamentId, pageable)
                 .orElseThrow(() -> new TournamentNotFoundException(tournamentId)).stream()
                 .map(this::matchToMatchDto)
-                .toList(),
-                HttpStatus.OK);
+                .toList();
     }
 
-    public ResponseEntity<?> findMatchesByTournamentRound(int tournamentId, int roundNumber, Pageable pageable) {
-        return new ResponseEntity<>(matchRepository.findAllByTournamentIdAndRoundNumber(tournamentId, roundNumber, pageable).stream()
+    public List<MatchDto> findMatchesByTournamentRound(int tournamentId, int roundNumber, Pageable pageable) {
+        return matchRepository.findAllByTournamentIdAndRoundNumber(tournamentId, roundNumber, pageable).stream()
                 .map(this::matchToMatchDto)
-                .toList(),
-                HttpStatus.OK);
+                .toList();
     }
 
 
 
 
-    public ResponseEntity<?> findMatchById(int id) {
-        return new ResponseEntity<>(matchRepository.findById(id).orElseThrow(() -> new MatchNotFoundException(id)), HttpStatus.OK);
+    public Match findMatchById(int id) {
+        return matchRepository.findById(id).orElseThrow(() -> new MatchNotFoundException(id));
     }
 
 

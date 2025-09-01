@@ -10,6 +10,7 @@ import org.chessunion.entity.Player;
 import org.chessunion.entity.Tournament;
 import org.chessunion.entity.User;
 import org.chessunion.exception.TournamentNotFoundException;
+import org.chessunion.exception.UserAlreadyRegisteredTournamentException;
 import org.chessunion.repository.PlayerRepository;
 import org.chessunion.repository.TournamentRepository;
 import org.chessunion.repository.UserRepository;
@@ -39,21 +40,19 @@ public class TournamentService {
     private final UserRepository userRepository;
     private final UserService userService;
 
-    public ResponseEntity<List<TournamentDto>> getAllTournaments(Pageable pageable) {
-        return new ResponseEntity<>(tournamentRepository.findAll(pageable).stream()
-                .map(this::tournamentToDto).toList(), HttpStatus.OK);
+    public List<TournamentDto> getAllTournaments(Pageable pageable) {
+        return tournamentRepository.findAll(pageable).stream()
+                .map(this::tournamentToDto).toList();
     }
 
     @Transactional
-    public ResponseEntity<?> createTournament(TournamentCreateRequest tournamentCreateRequest) {
+    public void createTournament(TournamentCreateRequest tournamentCreateRequest) {
         Tournament tournament = modelMapper.map(tournamentCreateRequest, Tournament.class);
         tournament.setCreatedAt(LocalDateTime.now());
         tournament.setCurrentRound(0);
         tournament.setStage(Tournament.Stage.REGISTRATION);
 
         tournamentRepository.save(tournament);
-
-        return new ResponseEntity<>("Tournament created!", HttpStatus.OK);
     }
 
     @Transactional
@@ -66,14 +65,14 @@ public class TournamentService {
     }
 
     @Transactional
-    public ResponseEntity<?> registrationTournament(String username, int id){
+    public void registrationTournament(String username, int id){
         Tournament tournament = tournamentRepository.findById(id).orElseThrow(()-> new TournamentNotFoundException(id));
 
         User user = userRepository.findByUsername(username).orElseThrow(()-> new UsernameNotFoundException(username));
 
         boolean alreadyRegistered = playerRepository.existsByUserAndTournament(user, tournament);
         if (alreadyRegistered) {
-            return new ResponseEntity<>("User already registered in this tournament!", HttpStatus.BAD_REQUEST);
+            throw new UserAlreadyRegisteredTournamentException("User id: " + user.getId());
         }
 
         Player player = new Player();
@@ -89,43 +88,37 @@ public class TournamentService {
 
         tournament.setPlayers(players);
         tournamentRepository.save(tournament);
-
-
-        return new ResponseEntity<>("Registration successful!", HttpStatus.OK);
     }
 
-    public ResponseEntity<?> findById(int id){
+    public TournamentDto findById(int id){
         Tournament tournament = tournamentRepository.findById(id).orElseThrow(() -> new TournamentNotFoundException(id));
-        return new ResponseEntity<>(tournamentToDto(tournament), HttpStatus.OK);
+        return tournamentToDto(tournament);
     }
 
-    public ResponseEntity<?> checkTournamentRegistered(String name, int id){
+    public boolean checkTournamentRegistered(String name, int id){
         Tournament tournament = tournamentRepository.findById(id).orElseThrow(() -> new TournamentNotFoundException(id));
         User user = userRepository.findByUsername(name)
                 .orElseThrow(() -> new UsernameNotFoundException(name));
 
-        boolean registered = playerRepository.existsByUserAndTournament(user, tournament);
-        return new ResponseEntity<>(registered, HttpStatus.OK);
+        return playerRepository.existsByUserAndTournament(user, tournament);
     }
 
-    public ResponseEntity<?> getRunningTournaments(Pageable pageable){
+    public List<TournamentDto> getRunningTournaments(Pageable pageable){
         List<Tournament> tournaments = tournamentRepository.findByStageNot(Tournament.Stage.FINISHED);
 
-        List<TournamentDto> result = tournaments.stream()
+        return tournaments.stream()
                 .map(this::tournamentToDto)
                 .toList();
-
-        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @Transactional
-    public ResponseEntity<?> generateNextRound(int id){
+    public int generateNextRound(int id){
         Tournament tournament = tournamentRepository.findById(id).orElseThrow(()-> new TournamentNotFoundException(id));
         if (tournament.getCurrentRound() == tournament.getAmountOfRounds() ) {
             tournament.setStage(Tournament.Stage.FINISHED);
             userService.saveRatings(tournament.getId());
             tournamentRepository.save(tournament);
-            return new ResponseEntity<>(tournament.getCurrentRound(), HttpStatus.OK);
+            return tournament.getCurrentRound();
         }
         tournament.setCurrentRound(tournament.getCurrentRound() + 1);
         if (tournament.getCurrentRound() == 0) {
@@ -134,7 +127,7 @@ public class TournamentService {
             generateNonFirstRound(tournament);
         }
         tournamentRepository.save(tournament);
-        return new ResponseEntity<>(tournament.getCurrentRound(), HttpStatus.OK);
+        return tournament.getCurrentRound();
     }
 
     @Transactional

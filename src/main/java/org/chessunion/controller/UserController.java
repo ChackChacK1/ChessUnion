@@ -4,6 +4,7 @@ package org.chessunion.controller;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.chessunion.dto.DeleteUserRequest;
+import org.chessunion.dto.ProfileDto;
 import org.chessunion.dto.UpdateProfileDto;
 import org.chessunion.repository.UserRepository;
 import org.chessunion.service.UserService;
@@ -23,26 +24,28 @@ public class UserController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteUser(@RequestBody DeleteUserRequest deleteUserRequest) {
-        return userService.deleteUser(deleteUserRequest.getUsername());
+    public ResponseEntity<String> deleteUser(@RequestBody DeleteUserRequest deleteUserRequest) {
+        userService.deleteUser(deleteUserRequest.getUsername());
+        return ResponseEntity.ok("User deleted successfully");
     }
 
     @PreAuthorize("isAuthenticated()")
     @PatchMapping("/email")
-    public ResponseEntity<?> updateUserEmail(Principal principal, @RequestBody String email) {
-        return userService.updateEmail(principal.getName(), email);
+    public ResponseEntity<String> updateUserEmail(Principal principal, @RequestBody String email) {
+        userService.updateEmail(principal.getName(), email);
+        return ResponseEntity.ok(String.format("Email %s successfully been set to your account", email));
     }
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/profile")
-    public ResponseEntity<?> getUserProfile(Principal principal) {
-        return new ResponseEntity<>(userService.getProfile(principal), HttpStatus.OK);
+    public ResponseEntity<ProfileDto> getUserProfile(Principal principal) {
+        return ResponseEntity.ok(userService.getProfile(principal));
     }
 
     @PreAuthorize("isAuthenticated()")
     @PatchMapping("/update")
-    public ResponseEntity<?> updateProfile(Principal principal, @RequestBody UpdateProfileDto updateProfileDto){
+    public ResponseEntity<String> updateProfile(Principal principal, @RequestBody UpdateProfileDto updateProfileDto){
         userService.updateProfile(principal, updateProfileDto);
-        return new ResponseEntity<>("Profile update successfully", HttpStatus.OK);
+        return ResponseEntity.ok("Profile update successfully");
     }
 }

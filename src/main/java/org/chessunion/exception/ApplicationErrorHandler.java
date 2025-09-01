@@ -24,6 +24,14 @@ public class ApplicationErrorHandler {
         ), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(UserAlreadyRegisteredTournamentException.class)
+    public ResponseEntity<AppErrorResponse> handleMatchAlreadyHasResultException(UserAlreadyRegisteredTournamentException e) {
+        return new ResponseEntity<>(new AppErrorResponse(
+                "User already registered in this tournament!",
+                e.getMessage()
+        ), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(MatchAlreadyHasResultException.class)
     public ResponseEntity<AppErrorResponse> handleMatchAlreadyHasResultException(MatchAlreadyHasResultException e) {
         return new ResponseEntity<>(new AppErrorResponse(

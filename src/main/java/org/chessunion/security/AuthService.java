@@ -24,7 +24,7 @@ public class AuthService {
     private final UserUserDetailsService userUserDetailsService;
     private final UserRepository userRepository;
 
-    public ResponseEntity<?> createToken(AuthRequest authRequest) {
+    public AuthResponse createToken(AuthRequest authRequest) {
         String login;
 
         if (authRequest.getLogin().contains("@")){
@@ -46,7 +46,6 @@ public class AuthService {
         } else {
             role = "USER";
         }
-        AuthResponse authResponse = new AuthResponse(jwtUtil.generateToken(userDetails), role);
-        return new ResponseEntity<>(authResponse, HttpStatus.OK);
+        return new AuthResponse(jwtUtil.generateToken(userDetails), role);
     }
 }

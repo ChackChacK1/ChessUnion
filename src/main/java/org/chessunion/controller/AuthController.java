@@ -4,10 +4,12 @@ package org.chessunion.controller;
 import jakarta.annotation.security.PermitAll;
 import lombok.RequiredArgsConstructor;
 import org.chessunion.dto.AuthRequest;
+import org.chessunion.dto.AuthResponse;
 import org.chessunion.dto.RegistrationRequest;
 import org.chessunion.security.AuthService;
 import org.chessunion.service.UserService;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,13 +26,14 @@ public class AuthController {
 
     @PermitAll
     @PostMapping("/registration")
-    public ResponseEntity<?> registration(@RequestBody RegistrationRequest registrationRequest) {
-        return userService.registerUser(registrationRequest);
+    public ResponseEntity<String> registration(@RequestBody RegistrationRequest registrationRequest) {
+        userService.registerUser(registrationRequest);
+        return new ResponseEntity<>("User registered successfully", HttpStatus.CREATED);
     }
 
     @PermitAll
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthRequest authRequest) {
-        return authService.createToken(authRequest);
+    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest authRequest) {
+        return ResponseEntity.ok(authService.createToken(authRequest));
     }
 }
