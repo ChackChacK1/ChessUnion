@@ -13,7 +13,6 @@ import java.util.List;
 @Repository
 public interface PlayerRepository extends JpaRepository<Player, Integer> {
     boolean existsByUserAndTournament(User user, Tournament tournament);
-    List<Player> findAllByTournament_Id(int tournamentId);
 
     @EntityGraph(attributePaths = {"user"})
     List<Player> findAllByTournament_Id(Integer tournamentId);

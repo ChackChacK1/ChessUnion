@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.chessunion.entity.Match;
 import org.chessunion.entity.Player;
 import org.chessunion.repository.MatchRepository;
-import org.chessunion.repository.PlayerRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,7 +16,6 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PlayerService {
-    private final PlayerRepository playerRepository;
     private final MatchRepository matchRepository;
 
     public String getFullName(Player player) {

@@ -16,16 +16,12 @@ import org.chessunion.repository.TournamentRepository;
 import org.chessunion.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
-
-import static java.util.stream.Collectors.toList;
 
 @Service
 @RequiredArgsConstructor
@@ -104,7 +100,7 @@ public class TournamentService {
     }
 
     public List<TournamentDto> getRunningTournaments(Pageable pageable){
-        List<Tournament> tournaments = tournamentRepository.findByStageNot(Tournament.Stage.FINISHED);
+        List<Tournament> tournaments = tournamentRepository.findByStageNot(Tournament.Stage.FINISHED, pageable);
 
         return tournaments.stream()
                 .map(this::tournamentToDto)
@@ -159,7 +155,7 @@ public class TournamentService {
                     Double.compare(p2.getRating(), p1.getRating());
         });
 
-        // Предзагружаем всех противников для всех игроков
+        // Загружаем всех противников для всех игроков
         Map<Integer, Set<Integer>> opponentsMap = new HashMap<>();
         for (Player player : players) {
             opponentsMap.put(player.getId(), playerService.getAllOpponentIds(player));
@@ -192,19 +188,7 @@ public class TournamentService {
             Player firstPlayer = remainingPlayers.removeFirst();
             Set<Integer> firstPlayerOpponents = opponentsMap.get(firstPlayer.getId());
 
-            Player bestMatch = null;
-            int bestColorDiff = Integer.MAX_VALUE;
-
-            for (Player candidate : remainingPlayers) {
-                // Проверяем по ID, а не по объектам
-                if (!firstPlayerOpponents.contains(candidate.getId())) {
-                    int colorDiff = Math.abs(firstPlayer.getColorBalance() - candidate.getColorBalance());
-                    if (colorDiff < bestColorDiff) {
-                        bestColorDiff = colorDiff;
-                        bestMatch = candidate;
-                    }
-                }
-            }
+            Player bestMatch = getBestMatchPlayer(remainingPlayers, firstPlayerOpponents, firstPlayer);
 
             if (bestMatch != null) {
                 if (firstPlayer.getColorBalance() > bestMatch.getColorBalance()) {
@@ -218,6 +202,23 @@ public class TournamentService {
                 playerRepository.save(firstPlayer);
             }
         }
+    }
+
+    private static Player getBestMatchPlayer(List<Player> remainingPlayers, Set<Integer> firstPlayerOpponents, Player firstPlayer) {
+        Player bestMatch = null;
+        int bestColorDiff = Integer.MAX_VALUE;
+
+        for (Player candidate : remainingPlayers) {
+            // Проверяем по ID, а не по объектам
+            if (!firstPlayerOpponents.contains(candidate.getId())) {
+                int colorDiff = Math.abs(firstPlayer.getColorBalance() - candidate.getColorBalance());
+                if (colorDiff < bestColorDiff) {
+                    bestColorDiff = colorDiff;
+                    bestMatch = candidate;
+                }
+            }
+        }
+        return bestMatch;
     }
 
     public TournamentDto tournamentToDto(Tournament tournament) {

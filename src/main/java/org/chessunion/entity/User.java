@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.chessunion.validation.UniqueUserValidation;
 
 import java.time.LocalDateTime;
 import java.util.Set;

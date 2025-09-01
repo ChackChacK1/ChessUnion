@@ -9,15 +9,12 @@ import org.chessunion.entity.Player;
 import org.chessunion.entity.Tournament;
 import org.chessunion.exception.MatchAlreadyHasResultException;
 import org.chessunion.exception.MatchNotFoundException;
-import org.chessunion.exception.PlayersTournamentConflictException;
 import org.chessunion.exception.TournamentNotFoundException;
 import org.chessunion.repository.MatchRepository;
 import org.chessunion.repository.PlayerRepository;
 import org.chessunion.util.rating.SimpleRatingCalculator;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -108,11 +105,9 @@ public class MatchService {
 
 
     public List<MatchDto> findAllMatches(Pageable pageable) {
-        List<MatchDto> matchDtoS = matchRepository.findAll(pageable).stream()
+        return matchRepository.findAll(pageable).stream()
                 .map(this::matchToMatchDto)
                 .toList();
-
-        return matchDtoS;
     }
 
 

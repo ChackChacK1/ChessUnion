@@ -1,12 +1,10 @@
 package org.chessunion.controller;
 
-import com.fasterxml.jackson.databind.deser.DataFormatReaders;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.chessunion.dto.MatchDto;
 import org.chessunion.dto.MatchResultSetRequest;
 import org.chessunion.service.MatchService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;

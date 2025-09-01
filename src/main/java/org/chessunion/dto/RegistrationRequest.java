@@ -1,6 +1,5 @@
 package org.chessunion.dto;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Data;

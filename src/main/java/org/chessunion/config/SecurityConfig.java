@@ -63,6 +63,7 @@ public class SecurityConfig {
                                 "/api/tournament/*",
                                 "/api/match/**",
                                 "/swagger-ui/**").permitAll()
+                        .requestMatchers("/actuator/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -79,8 +80,6 @@ public class SecurityConfig {
                 "http://localhost:5173",
                 "http://127.0.0.1:5173",
                 "http://192.168.0.103:5173",
-                "http://chess-union.ru",
-                "http://www.chess-union.ru",
                 "https://chess-union.ru",
                 "https://www.chess-union.ru",
                 "http://192.168.0.100:5173",
@@ -97,8 +96,7 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationProvider authenticationProvider(){
-        DaoAuthenticationProvider authenticationProvider=new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(userDetailsService());
+        DaoAuthenticationProvider authenticationProvider=new DaoAuthenticationProvider(userDetailsService());
         authenticationProvider.setPasswordEncoder(passwordEncoder());
         return authenticationProvider;
     }

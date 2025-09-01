@@ -7,14 +7,12 @@ import org.chessunion.dto.RegistrationRequest;
 import org.chessunion.dto.UpdateProfileDto;
 import org.chessunion.entity.Player;
 import org.chessunion.entity.User;
-import org.chessunion.repository.MatchRepository;
 import org.chessunion.repository.PlayerRepository;
 import org.chessunion.repository.RoleRepository;
 import org.chessunion.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.cache.annotation.CachePut;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,7 +22,6 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
-import org.springframework.cache.annotation.Cacheable;
 
 @Service
 @RequiredArgsConstructor

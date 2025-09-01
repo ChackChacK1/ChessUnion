@@ -5,14 +5,15 @@ import org.chessunion.entity.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
 import java.util.Collection;
 import java.util.List;
 
 public class UserUserDetails implements UserDetails {
 
-    private String name;
-    private String password;
-    private List<SimpleGrantedAuthority> authorities;
+    private final String name;
+    private final String password;
+    private final List<SimpleGrantedAuthority> authorities;
 
     public UserUserDetails(User user) {
         name = user.getUsername();

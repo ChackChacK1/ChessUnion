@@ -6,8 +6,6 @@ import org.chessunion.entity.Player;
 import org.chessunion.exception.MatchHasNotResultException;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @Component
 @RequiredArgsConstructor
 public class SimpleRatingCalculator implements RatingCalculator {
