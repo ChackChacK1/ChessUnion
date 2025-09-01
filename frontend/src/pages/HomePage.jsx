@@ -9,7 +9,7 @@ const HomePage = () => {
             <Paragraph>Платформа для организации шахматных турниров</Paragraph>
             <Card style={{ maxWidth: 800, margin: '0 auto' }}>
                 <Image
-                    src="https://via.placeholder.com/800x400?text=Chess+Background"
+                    src="src/images/sorryyourenotasigma..webp"
                     preview={false}
                     alt="Chess Background"
                 />
