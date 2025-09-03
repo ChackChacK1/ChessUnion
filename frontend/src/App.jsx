@@ -13,6 +13,7 @@ import TournamentMatches from './pages/TournamentMatches';
 import TournamentManagement from "./pages/TournamentManagement.jsx";
 import EditProfile from './pages/EditProfile';
 import EditTournament from "./pages/EditTournament.jsx";
+import TournamentPlayersManagement from "./pages/TournamentPlayersManagement.jsx";
 
 const AdminRoute = ({ children }) => {
     const role = localStorage.getItem('role');
@@ -32,6 +33,7 @@ function App() {
             <Route path="/matches/:tournamentId" element={<TournamentMatches />} />
             <Route path="/admin/tournament/:tournamentId/:roundId" element={<TournamentManagement />} />
             <Route path="/admin/tournament/:tournamentId/edit" element={<EditTournament />} />
+            <Route path="/admin/players/:tournamentId" element={<TournamentPlayersManagement />} />
             <Route
                 path="/profile"
                 element={

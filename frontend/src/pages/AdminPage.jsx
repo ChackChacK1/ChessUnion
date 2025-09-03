@@ -16,7 +16,7 @@ import {
     Spin,
     Space
 } from 'antd';
-import { PlusOutlined, SettingOutlined, EditOutlined, EnvironmentOutlined } from '@ant-design/icons';
+import { PlusOutlined, SettingOutlined, EditOutlined, EnvironmentOutlined, UserOutlined, TeamOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import client from '../api/client';
 import dayjs from 'dayjs';
@@ -87,6 +87,11 @@ const AdminPage = () => {
         navigate(`/admin/tournament/${tournament.id}/${tournament.currentRound}`);
     };
 
+    const handleManagePlayers = (tournament, e) => {
+        e.stopPropagation();
+        navigate(`/admin/players/${tournament.id}`);
+    };
+
     const handleEditTournament = (tournament, e) => {
         e.stopPropagation();
         navigate(`/admin/tournament/${tournament.id}/edit`);
@@ -145,6 +150,20 @@ const AdminPage = () => {
                                             e.currentTarget.style.borderColor = 'var(--border-color)';
                                         }}
                                     >
+                                        <Button
+                                            icon={<TeamOutlined />}
+                                            type="text"
+                                            size="large"
+                                            style={{
+                                                position: 'absolute',
+                                                top: '8px',
+                                                right: '48px', // Смещаем правее, чтобы не перекрывать кнопку редактирования
+                                                zIndex: 30,
+                                                color: 'var(--text-color)'
+                                            }}
+                                            onClick={(e) => handleManagePlayers(tournament, e)}
+                                            onMouseEnter={(e) => e.stopPropagation()}
+                                        />
                                         {/* Кнопка редактирования */}
                                         <Button
                                             icon={<EditOutlined />}

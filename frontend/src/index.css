@@ -1283,3 +1283,55 @@ h1, h2, h3, h4, h5, h6,
 .ant-btn-link:hover {
   color: var(--hover-color) !important;
 }
+
+.ant-btn-danger {
+  background-color: #ff4d4f !important;
+  border-color: #ff4d4f !important;
+}
+
+.ant-btn-danger:hover {
+  background-color: #ff7875 !important;
+  border-color: #ff7875 !important;
+}
+
+/* Стили для Table */
+.ant-table {
+  background-color: var(--card-bg) !important;
+  color: var(--text-color) !important;
+}
+
+.ant-table-thead > tr > th {
+  background-color: var(--card-bg) !important;
+  color: var(--text-color) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.ant-table-tbody > tr > td {
+  border-bottom: 1px solid var(--border-color) !important;
+  color: var(--text-color) !important;
+  background-color: var(--card-bg) !important;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background-color: var(--hover-color) !important;
+}
+
+.ant-table-placeholder {
+  background-color: var(--card-bg) !important;
+  color: var(--text-secondary) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.ant-empty-description {
+  color: var(--text-secondary) !important;
+}
+
+/* Стили для заголовков колонок */
+.ant-table-thead > tr > th .ant-table-cell {
+  color: var(--text-color) !important;
+}
+
+/* Стили для ячеек с текстом */
+.ant-table-tbody > tr > td .ant-typography {
+  color: var(--text-color) !important;
+}
