@@ -106,7 +106,7 @@ const Tournaments = () => {
 
     return (
         <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-            <Title level={2}>Турниры</Title>
+            <Title level={2} style={{ color: 'var(--text-color)' }}>Турниры</Title>
 
             <List
                 grid={{
@@ -124,12 +124,26 @@ const Tournaments = () => {
                         <Link to={`/tournament/${tournament.id}`}>
                             <Card
                                 hoverable
-                                style={{ minHeight: '180px' }}
+                                style={{
+                                    minHeight: '180px',
+                                    backgroundColor: 'var(--card-bg)',
+                                    borderColor: 'var(--border-color)'
+                                }}
+                                bodyStyle={{
+                                    color: 'var(--text-color)'
+                                }}
                             >
                                 <Card.Meta
-                                    title={tournament.name || 'Без названия'}
+                                    title={
+                                        <span style={{ color: 'var(--text-color)' }}>
+                                            {tournament.name || 'Без названия'}
+                                        </span>
+                                    }
                                     description={
-                                        <Text ellipsis={{ tooltip: tournament.description }}>
+                                        <Text
+                                            ellipsis={{ tooltip: tournament.description }}
+                                            style={{ color: 'var(--text-secondary)' }}
+                                        >
                                             {tournament.description || 'Описание отсутствует'}
                                         </Text>
                                     }
@@ -137,8 +151,8 @@ const Tournaments = () => {
 
                                 <div style={{ marginTop: '16px' }}>
                                     <div style={{ marginBottom: '8px' }}>
-                                        <CalendarOutlined style={{ marginRight: '8px' }} />
-                                        <Text type="secondary">
+                                        <CalendarOutlined style={{ marginRight: '8px', color: 'var(--text-secondary)' }} />
+                                        <Text style={{ color: 'var(--text-secondary)' }}>
                                             {tournament.startDateTime ?
                                                 dayjs(tournament.startDateTime).format('DD.MM.YYYY HH:mm') :
                                                 'Дата не указана'}
@@ -146,15 +160,21 @@ const Tournaments = () => {
                                     </div>
 
                                     <div>
-                                        <TrophyOutlined style={{ marginRight: '8px' }} />
-                                        <Tag color={getStageColor(tournament.stage)}>
+                                        <TrophyOutlined style={{ marginRight: '8px', color: 'var(--text-secondary)' }} />
+                                        <Tag
+                                            color={getStageColor(tournament.stage)}
+                                            style={{
+                                                color: 'var(--text-color)',
+                                                borderColor: 'var(--border-color)'
+                                            }}
+                                        >
                                             {translateStage(tournament.stage) || 'Неизвестно'}
                                         </Tag>
                                     </div>
 
                                     {tournament.players && (
                                         <div style={{ marginTop: '8px' }}>
-                                            <Text type="secondary" small>
+                                            <Text style={{ color: 'var(--text-secondary)' }}>
                                                 Участников: {tournament.players.length}
                                                 {tournament.maxAmountOfPlayers && ` / ${tournament.maxAmountOfPlayers}`}
                                             </Text>
@@ -176,6 +196,7 @@ const Tournaments = () => {
                         onChange={handlePageChange}
                         showSizeChanger={false}
                         showQuickJumper
+                        style={{ color: 'var(--text-color)' }}
                     />
                 </div>
             )}

@@ -4,7 +4,9 @@ package org.chessunion.service;
 import lombok.RequiredArgsConstructor;
 import org.chessunion.entity.Match;
 import org.chessunion.entity.Player;
+import org.chessunion.exception.PlayerNotFoundException;
 import org.chessunion.repository.MatchRepository;
+import org.chessunion.repository.PlayerRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,7 @@ import java.util.Set;
 @Transactional(readOnly = true)
 public class PlayerService {
     private final MatchRepository matchRepository;
+    private final PlayerRepository playerRepository;
 
     public String getFullName(Player player) {
         return player.getUser().getFirstName() + " " + player.getUser().getLastName();
@@ -56,5 +59,11 @@ public class PlayerService {
             }
         }
         return opponentIds;
+    }
+
+    public void deletePlayerByFullName(Integer playerId) {
+        Player player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new PlayerNotFoundException(playerId));
+        playerRepository.delete(player);
     }
 }

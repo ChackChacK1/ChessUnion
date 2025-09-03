@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import {
     Menu, Button, Space, Modal, Form, Input, message,
-    Drawer, Grid
+    Drawer, Grid, Switch
 } from 'antd';
 import {
     HomeOutlined, TrophyOutlined, UserOutlined,
     LockOutlined, MenuOutlined, LoginOutlined,
-    LogoutOutlined, ExclamationCircleOutlined
+    LogoutOutlined, ExclamationCircleOutlined,
+    MoonOutlined, SunOutlined
 } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import client from '../api/client';
@@ -19,8 +20,27 @@ const Navbar = () => {
     const [loginLoading, setLoginLoading] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
+    const [isDarkTheme, setIsDarkTheme] = useState(false);
     const navigate = useNavigate();
     const screens = useBreakpoint();
+
+    // Инициализация темы при загрузке
+    useEffect(() => {
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+        setIsDarkTheme(theme === 'dark');
+        document.documentElement.setAttribute('data-theme', theme);
+    }, []);
+
+    // Переключение темы
+    const toggleTheme = (checked) => {
+        setIsDarkTheme(checked);
+        const theme = checked ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+    };
 
     // Определяем, является ли устройство мобильным
     const isMobile = !screens.md;
@@ -58,7 +78,7 @@ const Navbar = () => {
 
     const showLogoutConfirm = () => {
         setLogoutConfirmOpen(true);
-        setMobileMenuOpen(false); // Закрываем меню при открытии подтверждения выхода
+        setMobileMenuOpen(false);
     };
 
     const handleLogoutCancel = () => {
@@ -101,7 +121,24 @@ const Navbar = () => {
         }] : [])
     ];
 
-    // Пункт меню для выхода (только для авторизованных)
+    // Пункт меню для переключателя темы (для мобильной версии)
+    const themeMenuItem = [{
+        key: 'theme',
+        label: (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span>Тёмная тема</span>
+                <Switch
+                    checked={isDarkTheme}
+                    onChange={toggleTheme}
+                    size="small"
+                    checkedChildren={<MoonOutlined />}
+                    unCheckedChildren={<SunOutlined />}
+                />
+            </div>
+        ),
+    }];
+
+    // Пункт меню для выхода
     const logoutMenuItem = isAuthenticated ? [{
         key: 'logout',
         label: (
@@ -113,7 +150,7 @@ const Navbar = () => {
     }] : [];
 
     // Полный список пунктов меню для мобильной версии
-    const mobileMenuItems = [...mainMenuItems, ...logoutMenuItem];
+    const mobileMenuItems = [...mainMenuItems, ...themeMenuItem, ...logoutMenuItem];
 
     // Десктопная версия навбара
     const desktopNavbar = (
@@ -124,6 +161,14 @@ const Navbar = () => {
                 style={{ justifyContent: 'center', flex: 1 }}
             />
             <Space style={{ position: 'absolute', right: 20, top: 10 }}>
+                {/* Переключатель темы */}
+                <Switch
+                    checked={isDarkTheme}
+                    onChange={toggleTheme}
+                    checkedChildren={<MoonOutlined />}
+                    unCheckedChildren={<SunOutlined />}
+                />
+
                 {isAuthenticated ? (
                     <Button
                         type="text"
@@ -160,7 +205,15 @@ const Navbar = () => {
                 </Link>
 
                 <Space>
-                    {/* Убираем кнопку выхода из верхней панели на мобильных */}
+                    {/* Переключатель темы в мобильной версии */}
+                    <Switch
+                        checked={isDarkTheme}
+                        onChange={toggleTheme}
+                        size="small"
+                        checkedChildren={<MoonOutlined />}
+                        unCheckedChildren={<SunOutlined />}
+                    />
+
                     {!isAuthenticated && (
                         <Button
                             type="text"
@@ -209,30 +262,59 @@ const Navbar = () => {
                 <Form onFinish={onLogin} layout="vertical">
                     <Form.Item
                         name="login"
-                        label="Логин или Email"
+                        label={<span style={{ color: 'var(--text-color)' }}>Логин или Email</span>}
                         rules={[{ required: true, message: 'Введите логин или email' }]}
                     >
-                        <Input placeholder="Введите логин или email" />
+                        <Input
+                            placeholder="Введите логин или email"
+                            style={{
+                                backgroundColor: 'var(--card-bg)',
+                                color: 'var(--text-color)',
+                                borderColor: 'var(--border-color)'
+                            }}
+                        />
                     </Form.Item>
                     <Form.Item
                         name="password"
-                        label="Пароль"
+                        label={<span style={{ color: 'var(--text-color)' }}>Пароль</span>}
                         rules={[{ required: true, message: 'Введите пароль' }]}
                     >
-                        <Input.Password placeholder="Введите пароль" />
+                        <Input.Password
+                            placeholder="Введите пароль"
+                            style={{
+                                backgroundColor: 'var(--card-bg)',
+                                color: 'var(--text-color)',
+                                borderColor: 'var(--border-color)'
+                            }}
+                            styles={{
+                                input: {
+                                    backgroundColor: 'var(--card-bg)',
+                                    color: 'var(--text-color)',
+                                }
+                            }}
+                        />
                     </Form.Item>
                     <Form.Item>
                         <Button
                             type="primary"
                             htmlType="submit"
                             loading={loginLoading}
-                            style={{ width: '100%', marginBottom: '10px' }}
+                            style={{
+                                width: '100%',
+                                marginBottom: '10px',
+                                backgroundColor: 'var(--hover-color)',
+                                borderColor: 'var(--hover-color)'
+                            }}
                         >
                             Войти
                         </Button>
                         <Button
                             type="link"
-                            style={{ width: '100%', textAlign: 'center' }}
+                            style={{
+                                width: '100%',
+                                textAlign: 'center',
+                                color: 'var(--primary-color)'
+                            }}
                             onClick={handleRegisterClick}
                         >
                             Нет аккаунта? Зарегистрироваться
@@ -251,10 +333,36 @@ const Navbar = () => {
                 cancelText="Отмена"
                 okType="danger"
                 closable={false}
+                style={{
+                    color: 'var(--text-color)'
+                }}
+                styles={{
+                    content: {
+                        backgroundColor: 'var(--card-bg)',
+                        color: 'var(--text-color)'
+                    },
+                    header: {
+                        backgroundColor: 'var(--card-bg)',
+                        color: 'var(--text-color)',
+                        borderBottom: '1px solid var(--border-color)'
+                    },
+                    body: {
+                        color: 'var(--text-color)',
+                        backgroundColor: 'var(--card-bg)'
+                    },
+                    footer: {
+                        backgroundColor: 'var(--card-bg)',
+                        borderTop: '1px solid var(--border-color)'
+                    }
+                }}
             >
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-                    <ExclamationCircleOutlined style={{ color: '#faad14', fontSize: '24px', marginRight: '12px' }} />
-                    <span>Вы точно хотите выйти?</span>
+                    <ExclamationCircleOutlined style={{
+                        color: 'var(--accent-color)',
+                        fontSize: '24px',
+                        marginRight: '12px'
+                    }} />
+                    <span style={{ color: 'var(--text-color)' }}>Вы точно хотите выйти?</span>
                 </div>
             </Modal>
         </>

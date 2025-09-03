@@ -50,19 +50,27 @@ const EditProfile = () => {
     };
 
     if (!profile) {
-        return <div>Загрузка...</div>;
+        return <div style={{ color: 'var(--text-color)' }}>Загрузка...</div>;
     }
 
     return (
         <div style={{ padding: '20px', maxWidth: '500px', margin: '0 auto' }}>
-            <Card>
+            <Card
+                style={{
+                    backgroundColor: 'var(--card-bg)',
+                    borderColor: 'var(--border-color)'
+                }}
+            >
                 <Space style={{ marginBottom: 20, alignItems: 'center' }}>
                     <Button
                         icon={<ArrowLeftOutlined />}
                         onClick={handleCancel}
                         type="text"
+                        style={{ color: 'var(--text-color)' }}
                     />
-                    <Title level={4} style={{ margin: 0 }}>Редактирование профиля</Title>
+                    <Title level={4} style={{ margin: 0, color: 'var(--text-color)' }}>
+                        Редактирование профиля
+                    </Title>
                 </Space>
 
                 <Form
@@ -72,52 +80,94 @@ const EditProfile = () => {
                     autoComplete="off"
                 >
                     <Form.Item
-                        label="Логин"
+                        label={<span style={{ color: 'var(--text-color)' }}>Логин</span>}
                         name="username"
                         rules={[
                             { required: true, message: 'Пожалуйста, введите логин' },
                             { min: 3, message: 'Логин должен содержать минимум 3 символа' }
                         ]}
                     >
-                        <Input placeholder="Введите логин" />
+                        <Input
+                            placeholder="Введите логин"
+                            style={{
+                                backgroundColor: 'var(--card-bg)',
+                                color: 'var(--text-color)',
+                                borderColor: 'var(--border-color)'
+                            }}
+                        />
                     </Form.Item>
 
                     <Form.Item
-                        label="Имя"
+                        label={<span style={{ color: 'var(--text-color)' }}>Имя</span>}
                         name="firstName"
                         rules={[
                             { required: true, message: 'Пожалуйста, введите имя' }
                         ]}
                     >
-                        <Input placeholder="Введите имя" />
+                        <Input
+                            placeholder="Введите имя"
+                            style={{
+                                backgroundColor: 'var(--card-bg)',
+                                color: 'var(--text-color)',
+                                borderColor: 'var(--border-color)'
+                            }}
+                        />
                     </Form.Item>
 
                     <Form.Item
-                        label="Фамилия"
+                        label={<span style={{ color: 'var(--text-color)' }}>Фамилия</span>}
                         name="lastName"
                         rules={[
                             { required: true, message: 'Пожалуйста, введите фамилию' }
                         ]}
                     >
-                        <Input placeholder="Введите фамилию" />
+                        <Input
+                            placeholder="Введите фамилию"
+                            style={{
+                                backgroundColor: 'var(--card-bg)',
+                                color: 'var(--text-color)',
+                                borderColor: 'var(--border-color)'
+                            }}
+                        />
                     </Form.Item>
 
                     <Form.Item
-                        label="Email"
+                        label={<span style={{ color: 'var(--text-color)' }}>Email</span>}
                         name="email"
                         rules={[
                             { type: 'email', message: 'Введите корректный email' }
                         ]}
                     >
-                        <Input placeholder="Введите email" />
+                        <Input
+                            placeholder="Введите email"
+                            style={{
+                                backgroundColor: 'var(--card-bg)',
+                                color: 'var(--text-color)',
+                                borderColor: 'var(--border-color)'
+                            }}
+                        />
                     </Form.Item>
 
                     <Form.Item>
                         <Space>
-                            <Button type="primary" htmlType="submit" loading={loading}>
+                            <Button
+                                type="primary"
+                                htmlType="submit"
+                                loading={loading}
+                                style={{
+                                    backgroundColor: 'var(--hover-color)',
+                                    borderColor: 'var(--hover-color)'
+                                }}
+                            >
                                 Сохранить
                             </Button>
-                            <Button onClick={handleCancel}>
+                            <Button
+                                onClick={handleCancel}
+                                style={{
+                                    color: 'var(--text-color)',
+                                    borderColor: 'var(--border-color)'
+                                }}
+                            >
                                 Отмена
                             </Button>
                         </Space>

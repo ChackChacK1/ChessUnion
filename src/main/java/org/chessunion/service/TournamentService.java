@@ -9,6 +9,8 @@ import org.chessunion.dto.UpdateTournamentDto;
 import org.chessunion.entity.Player;
 import org.chessunion.entity.Tournament;
 import org.chessunion.entity.User;
+import org.chessunion.exception.NotEnoughPlayersException;
+import org.chessunion.exception.TooManyPlayersException;
 import org.chessunion.exception.TournamentNotFoundException;
 import org.chessunion.exception.UserAlreadyRegisteredTournamentException;
 import org.chessunion.repository.PlayerRepository;
@@ -116,6 +118,13 @@ public class TournamentService {
             tournamentRepository.save(tournament);
             return tournament.getCurrentRound();
         }
+        if (tournament.getPlayers().size() < tournament.getMinAmountOfPlayers()){
+            throw new NotEnoughPlayersException(tournament.getPlayers().size(), tournament.getMinAmountOfPlayers());
+        }
+        if (tournament.getPlayers().size() > tournament.getMaxAmountOfPlayers()){
+            throw new TooManyPlayersException(tournament.getPlayers().size(), tournament.getMinAmountOfPlayers());
+        }
+
         tournament.setCurrentRound(tournament.getCurrentRound() + 1);
         if (tournament.getCurrentRound() == 0) {
             generateFirstRound(tournament);

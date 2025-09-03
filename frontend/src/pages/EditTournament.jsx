@@ -11,7 +11,8 @@ import {
     InputNumber,
     Spin,
     Row,
-    Col
+    Col,
+    Tag
 } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -33,9 +34,24 @@ const EditTournament = () => {
         const fetchTournament = async () => {
             try {
                 const response = await client.get(`/api/tournament/${tournamentId}`);
-                const tournamentData = response.data.body; // Достаем данные из body
+
+                // Исправление: проверяем разные форматы ответа
+                let tournamentData = response.data;
+
+                // Если данные в поле body
+                if (response.data && response.data.body) {
+                    tournamentData = response.data.body;
+                }
+                // Если это прямой объект
+                else if (response.data && response.data.id) {
+                    tournamentData = response.data;
+                }
 
                 console.log('Tournament data:', tournamentData); // Для отладки
+
+                if (!tournamentData || !tournamentData.id) {
+                    throw new Error('Турнир не найден');
+                }
 
                 setTournament(tournamentData);
 
@@ -89,11 +105,33 @@ const EditTournament = () => {
         navigate('/admin');
     };
 
+    const getStageColor = (stage) => {
+        const colors = {
+            'ANNOUNCED': 'blue',
+            'REGISTRATION': 'green',
+            'IN_PROGRESS': 'orange',
+            'FINISHED': 'red',
+            'CANCELLED': 'gray'
+        };
+        return colors[stage] || 'default';
+    };
+
+    const translateStage = (stage) => {
+        const translations = {
+            'ANNOUNCED': 'Анонсирован',
+            'REGISTRATION': 'Регистрация',
+            'IN_PROGRESS': 'В процессе',
+            'FINISHED': 'Завершен',
+            'CANCELLED': 'Отменен'
+        };
+        return translations[stage] || stage;
+    };
+
     if (fetching) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
                 <Spin size="large" />
-                <Text style={{ marginLeft: 10 }}>Загрузка данных турнира...</Text>
+                <Text style={{ marginLeft: 10, color: 'var(--text-color)' }}>Загрузка данных турнира...</Text>
             </div>
         );
     }
@@ -101,9 +139,12 @@ const EditTournament = () => {
     if (!tournament) {
         return (
             <div style={{ padding: '20px', textAlign: 'center' }}>
-                <Text>Турнир не найден</Text>
+                <Text style={{ color: 'var(--text-color)' }}>Турнир не найден</Text>
                 <br />
-                <Button onClick={handleCancel} style={{ marginTop: 10 }}>
+                <Button
+                    onClick={handleCancel}
+                    style={{ marginTop: 10 }}
+                >
                     Вернуться назад
                 </Button>
             </div>
@@ -112,29 +153,45 @@ const EditTournament = () => {
 
     return (
         <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
-            <Card>
+            <Card
+                style={{
+                    backgroundColor: 'var(--card-bg)',
+                    borderColor: 'var(--border-color)'
+                }}
+            >
                 <Space style={{ marginBottom: 20, alignItems: 'center' }}>
                     <Button
                         icon={<ArrowLeftOutlined />}
                         onClick={handleCancel}
                         type="text"
+                        style={{ color: 'var(--text-color)' }}
                     />
-                    <Title level={4} style={{ margin: 0 }}>
+                    <Title level={4} style={{ margin: 0, color: 'var(--text-color)' }}>
                         Редактирование турнира: {tournament.name}
                     </Title>
                 </Space>
 
                 {/* Информация о текущем состоянии */}
-                <div style={{ marginBottom: 20, padding: '10px', backgroundColor: '#f5f5f5', borderRadius: '6px' }}>
-                    <Text strong>Текущая информация:</Text>
+                <div style={{
+                    marginBottom: 20,
+                    padding: '15px',
+                    backgroundColor: 'var(--bg-color)',
+                    borderRadius: '6px',
+                    border: '1px solid var(--border-color)'
+                }}>
+                    <Text strong style={{ color: 'var(--text-color)' }}>Текущая информация:</Text>
                     <br />
-                    <Text>ID: {tournament.id}</Text>
+                    <Text style={{ color: 'var(--text-color)' }}>ID: {tournament.id}</Text>
                     <br />
-                    <Text>Статус: {tournament.stage}</Text>
+                    <Text style={{ color: 'var(--text-color)' }}>
+                        Статус: <Tag color={getStageColor(tournament.stage)}>
+                        {translateStage(tournament.stage)}
+                    </Tag>
+                    </Text>
                     <br />
-                    <Text>Текущий раунд: {tournament.currentRound + 1}</Text>
+                    <Text style={{ color: 'var(--text-color)' }}>Текущий раунд: {tournament.currentRound + 1}</Text>
                     <br />
-                    <Text>Зарегистрировано игроков: {tournament.players?.length || 0}</Text>
+                    <Text style={{ color: 'var(--text-color)' }}>Зарегистрировано игроков: {tournament.players?.length || 0}</Text>
                 </div>
 
                 <Form
@@ -142,35 +199,39 @@ const EditTournament = () => {
                     layout="vertical"
                     onFinish={handleSubmit}
                     autoComplete="off"
-                    initialValues={{
-                        name: tournament.name,
-                        description: tournament.description || '',
-                        startDateTime: dayjs(tournament.startDateTime),
-                        maxAmountOfPlayers: tournament.maxAmountOfPlayers,
-                        minAmountOfPlayers: tournament.minAmountOfPlayers,
-                        amountOfRounds: tournament.amountOfRounds
-                    }}
                 >
                     <Form.Item
-                        label="Название турнира"
+                        label={<span style={{ color: 'var(--text-color)' }}>Название турнира</span>}
                         name="name"
                         rules={[{ required: true, message: 'Введите название турнира' }]}
                     >
-                        <Input placeholder="Введите название турнира" />
+                        <Input
+                            placeholder="Введите название турнира"
+                            style={{
+                                backgroundColor: 'var(--card-bg)',
+                                color: 'var(--text-color)',
+                                borderColor: 'var(--border-color)'
+                            }}
+                        />
                     </Form.Item>
 
                     <Form.Item
-                        label="Описание турнира"
+                        label={<span style={{ color: 'var(--text-color)' }}>Описание турнира</span>}
                         name="description"
                     >
                         <TextArea
                             rows={3}
                             placeholder="Введите описание турнира"
+                            style={{
+                                backgroundColor: 'var(--card-bg)',
+                                color: 'var(--text-color)',
+                                borderColor: 'var(--border-color)'
+                            }}
                         />
                     </Form.Item>
 
                     <Form.Item
-                        label="Дата и время начала"
+                        label={<span style={{ color: 'var(--text-color)' }}>Дата и время начала</span>}
                         name="startDateTime"
                         rules={[{ required: true, message: 'Выберите дату и время' }]}
                     >
@@ -186,7 +247,7 @@ const EditTournament = () => {
                     <Row gutter={16}>
                         <Col span={8}>
                             <Form.Item
-                                label="Минимальное количество игроков"
+                                label={<span style={{ color: 'var(--text-color)' }}>Минимальное количество игроков</span>}
                                 name="minAmountOfPlayers"
                                 rules={[
                                     { required: true, message: 'Введите минимальное количество' },
@@ -198,13 +259,18 @@ const EditTournament = () => {
                                     max={100}
                                     style={{ width: '100%' }}
                                     placeholder="Минимум игроков"
+                                    controlsStyle={{
+                                        backgroundColor: 'var(--card-bg)',
+                                        color: 'var(--text-color)',
+                                        borderColor: 'var(--border-color)'
+                                    }}
                                 />
                             </Form.Item>
                         </Col>
 
                         <Col span={8}>
                             <Form.Item
-                                label="Максимальное количество игроков"
+                                label={<span style={{ color: 'var(--text-color)' }}>Максимальное количество игроков</span>}
                                 name="maxAmountOfPlayers"
                                 rules={[
                                     { required: true, message: 'Введите максимальное количество' },
@@ -216,13 +282,18 @@ const EditTournament = () => {
                                     max={100}
                                     style={{ width: '100%' }}
                                     placeholder="Максимум игроков"
+                                    controlsStyle={{
+                                        backgroundColor: 'var(--card-bg)',
+                                        color: 'var(--text-color)',
+                                        borderColor: 'var(--border-color)'
+                                    }}
                                 />
                             </Form.Item>
                         </Col>
 
                         <Col span={8}>
                             <Form.Item
-                                label="Количество раундов"
+                                label={<span style={{ color: 'var(--text-color)' }}>Количество раундов</span>}
                                 name="amountOfRounds"
                                 rules={[
                                     { required: true, message: 'Введите количество раундов' },
@@ -234,6 +305,11 @@ const EditTournament = () => {
                                     max={20}
                                     style={{ width: '100%' }}
                                     placeholder="Количество раундов"
+                                    controlsStyle={{
+                                        backgroundColor: 'var(--card-bg)',
+                                        color: 'var(--text-color)',
+                                        borderColor: 'var(--border-color)'
+                                    }}
                                 />
                             </Form.Item>
                         </Col>
@@ -241,10 +317,24 @@ const EditTournament = () => {
 
                     <Form.Item>
                         <Space>
-                            <Button type="primary" htmlType="submit" loading={loading}>
+                            <Button
+                                type="primary"
+                                htmlType="submit"
+                                loading={loading}
+                                style={{
+                                    backgroundColor: 'var(--hover-color)',
+                                    borderColor: 'var(--hover-color)'
+                                }}
+                            >
                                 Сохранить изменения
                             </Button>
-                            <Button onClick={handleCancel}>
+                            <Button
+                                onClick={handleCancel}
+                                style={{
+                                    color: 'var(--text-color)',
+                                    borderColor: 'var(--border-color)'
+                                }}
+                            >
                                 Отмена
                             </Button>
                         </Space>

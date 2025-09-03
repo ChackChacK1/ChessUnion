@@ -31,7 +31,6 @@ const Profile = () => {
         navigate('/profile/edit');
     };
 
-    // Функция для отображения результата матча
     const getResultText = (result) => {
         switch (result) {
             case 1: return 'Победа белых';
@@ -41,7 +40,6 @@ const Profile = () => {
         }
     };
 
-    // Функция для цвета тега результата
     const getResultColor = (result) => {
         switch (result) {
             case 1: return 'green';
@@ -56,54 +54,98 @@ const Profile = () => {
     }
 
     if (!profile) {
-        return <Text>Профиль не найден</Text>;
+        return <Text style={{ color: 'var(--text-color)' }}>Профиль не найден</Text>;
     }
 
     return (
         <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
             <Card
-                title="Профиль пользователя"
+                title={
+                    <span style={{ color: 'var(--text-color)' }}>
+                        Профиль пользователя
+                    </span>
+                }
                 bordered={false}
+                style={{
+                    backgroundColor: 'var(--card-bg)',
+                    borderColor: 'var(--border-color)'
+                }}
                 extra={
                     <Button
                         icon={<EditOutlined />}
                         onClick={handleEdit}
                         type="primary"
+                        style={{
+                            backgroundColor: 'var(--hover-color)',
+                            borderColor: 'var(--hover-color)'
+                        }}
                     >
                         Редактировать
                     </Button>
                 }
             >
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
-                    <UserOutlined style={{ fontSize: 24, marginRight: 10 }} />
-                    <Title level={4} style={{ margin: 0 }}>
+                    <UserOutlined style={{
+                        fontSize: 24,
+                        marginRight: 10,
+                        color: 'var(--text-secondary)'
+                    }} />
+                    <Title level={4} style={{ margin: 0, color: 'var(--text-color)' }}>
                         {profile.firstName} {profile.lastName}
                     </Title>
                 </div>
 
-                <Divider orientation="left">Основная информация</Divider>
+                <Divider orientation="left" style={{
+                    color: 'var(--text-color)',
+                    borderColor: 'var(--border-color)'
+                }}>
+                    Основная информация
+                </Divider>
+
                 <div style={{ marginBottom: 20 }}>
-                    <p>
-                        <Text strong>Логин:</Text> {profile.username}
+                    <p style={{ color: 'var(--text-color)' }}>
+                        <Text strong style={{ color: 'var(--text-color)' }}>Логин:</Text> {profile.username}
                     </p>
-                    <p>
-                        <Text strong>Email:</Text> {profile.email || 'Не указан'}
+                    <p style={{ color: 'var(--text-color)' }}>
+                        <Text strong style={{ color: 'var(--text-color)' }}>Email:</Text> {profile.email || 'Не указан'}
                     </p>
-                    <p>
-                        <Text strong>Рейтинг:</Text> <Tag color="gold">{profile.rating || 'Нет данных'}</Tag>
+                    <p style={{ color: 'var(--text-color)' }}>
+                        <Text strong style={{ color: 'var(--text-color)' }}>Рейтинг:</Text>
+                        <Tag color="gold" style={{
+                            color: 'var(--text-color)',
+                            borderColor: 'var(--border-color)'
+                        }}>
+                            {profile.rating || 'Нет данных'}
+                        </Tag>
                     </p>
-                    <p>
-                        <CalendarOutlined style={{ marginRight: 8 }} />
-                        <Text strong>Дата регистрации:</Text> {dayjs(profile.createdAt).format('DD.MM.YYYY HH:mm')}
+                    <p style={{ color: 'var(--text-color)' }}>
+                        <CalendarOutlined style={{
+                            marginRight: 8,
+                            color: 'var(--text-secondary)'
+                        }} />
+                        <Text strong style={{ color: 'var(--text-color)' }}>Дата регистрации:</Text>
+                        <span style={{ color: 'var(--text-color)' }}>
+                            {dayjs(profile.createdAt).format('DD.MM.YYYY HH:mm')}
+                        </span>
                     </p>
                 </div>
 
-                <Divider orientation="left">История матчей</Divider>
+                <Divider orientation="left" style={{
+                    color: 'var(--text-color)',
+                    borderColor: 'var(--border-color)'
+                }}>
+                    История матчей
+                </Divider>
+
                 {profile.matches && profile.matches.length > 0 ? (
                     <List
                         dataSource={profile.matches}
+                        style={{ color: 'var(--text-color)' }}
                         renderItem={(match) => (
-                            <List.Item>
+                            <List.Item style={{
+                                borderBottom: '1px solid var(--border-color)',
+                                padding: '12px 0'
+                            }}>
                                 <div style={{ width: '100%' }}>
                                     {/* Заголовки столбцов */}
                                     <div style={{
@@ -111,7 +153,8 @@ const Profile = () => {
                                         gridTemplateColumns: '1fr auto 1fr',
                                         textAlign: 'center',
                                         marginBottom: 8,
-                                        fontWeight: 'bold'
+                                        fontWeight: 'bold',
+                                        color: 'var(--text-color)'
                                     }}>
                                         <span>Белые</span>
                                         <span>Результат</span>
@@ -123,22 +166,34 @@ const Profile = () => {
                                         display: 'grid',
                                         gridTemplateColumns: '1fr auto 1fr',
                                         alignItems: 'center',
-                                        textAlign: 'center'
+                                        textAlign: 'center',
+                                        color: 'var(--text-color)'
                                     }}>
-                                        <Text strong>{match.whitePlayer?.fullName || 'Неизвестный игрок'}</Text>
+                                        <Text strong style={{ color: 'var(--text-color)' }}>
+                                            {match.whitePlayer?.fullName || 'Неизвестный игрок'}
+                                        </Text>
 
-                                        <Tag color={getResultColor(match.result)} style={{ margin: '0 10px' }}>
+                                        <Tag
+                                            color={getResultColor(match.result)}
+                                            style={{
+                                                margin: '0 10px',
+                                                color: 'var(--text-color)',
+                                                borderColor: 'var(--border-color)'
+                                            }}
+                                        >
                                             {getResultText(match.result)}
                                         </Tag>
 
-                                        <Text strong>{match.blackPlayer?.fullName || 'Неизвестный игрок'}</Text>
+                                        <Text strong style={{ color: 'var(--text-color)' }}>
+                                            {match.blackPlayer?.fullName || 'Неизвестный игрок'}
+                                        </Text>
                                     </div>
                                 </div>
                             </List.Item>
                         )}
                     />
                 ) : (
-                    <Text>Матчей пока нет</Text>
+                    <Text style={{ color: 'var(--text-color)' }}>Матчей пока нет</Text>
                 )}
             </Card>
         </div>

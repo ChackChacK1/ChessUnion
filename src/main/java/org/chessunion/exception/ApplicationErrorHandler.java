@@ -24,6 +24,14 @@ public class ApplicationErrorHandler {
         ), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(PlayerNotFoundException.class)
+    public ResponseEntity<AppErrorResponse> handlePlayerNotFoundException(PlayerNotFoundException e) {
+        return new ResponseEntity<>(new AppErrorResponse(
+                "Player with this id was not found! Id below:",
+                e.getMessage()
+        ), HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(UserAlreadyRegisteredTournamentException.class)
     public ResponseEntity<AppErrorResponse> handleMatchAlreadyHasResultException(UserAlreadyRegisteredTournamentException e) {
         return new ResponseEntity<>(new AppErrorResponse(
@@ -52,6 +60,22 @@ public class ApplicationErrorHandler {
     public ResponseEntity<AppErrorResponse> handleMatchHasNotResultException(MatchHasNotResultException e) {
         return new ResponseEntity<>(new AppErrorResponse(
                 "Match has not result.",
+                e.getMessage()
+        ), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(NotEnoughPlayersException.class)
+    public ResponseEntity<AppErrorResponse> handleNotEnoughPlayersException(NotEnoughPlayersException e) {
+        return new ResponseEntity<>(new AppErrorResponse(
+                "Not enough players to start the tournament!.",
+                e.getMessage()
+        ), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(TooManyPlayersException.class)
+    public ResponseEntity<AppErrorResponse> handleNotEnoughPlayersException(TooManyPlayersException e) {
+        return new ResponseEntity<>(new AppErrorResponse(
+                "To many players to start the tournament!.",
                 e.getMessage()
         ), HttpStatus.NOT_FOUND);
     }

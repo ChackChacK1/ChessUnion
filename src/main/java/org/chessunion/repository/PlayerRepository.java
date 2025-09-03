@@ -17,4 +17,5 @@ public interface PlayerRepository extends JpaRepository<Player, Integer> {
     @EntityGraph(attributePaths = {"user"})
     List<Player> findAllByTournament_Id(Integer tournamentId);
 
+
 }

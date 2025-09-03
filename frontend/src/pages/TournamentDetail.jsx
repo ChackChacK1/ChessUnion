@@ -131,7 +131,7 @@ const TournamentDetail = () => {
     }
 
     if (!tournament) {
-        return <Text>Турнир не найден</Text>;
+        return <Text style={{ color: 'var(--text-color)' }}>Турнир не найден</Text>;
     }
 
     return (
@@ -142,13 +142,13 @@ const TournamentDetail = () => {
                     type="text"
                     icon={<ArrowLeftOutlined />}
                     onClick={() => navigate('/tournaments')}
-                    style={{ marginBottom: 16 }}
+                    style={{ marginBottom: 16, color: 'var(--text-color)' }}
                 >
                     Назад
                 </Button>
             )}
 
-            <Title level={isMobile ? 3 : 2} style={{ marginBottom: 24 }}>
+            <Title level={isMobile ? 3 : 2} style={{ marginBottom: 24, color: 'var(--text-color)' }}>
                 {tournament.name || 'Без названия'}
             </Title>
 
@@ -156,15 +156,26 @@ const TournamentDetail = () => {
                 {/* Основная информация */}
                 <Col xs={24} lg={16}>
                     <Card
-                        style={{ marginBottom: 20 }}
+                        style={{
+                            marginBottom: 20,
+                            backgroundColor: 'var(--card-bg)',
+                            borderColor: 'var(--border-color)'
+                        }}
                         bodyStyle={{ padding: isMobile ? '16px' : '24px' }}
                     >
                         <Space direction="vertical" size="middle" style={{ width: '100%' }}>
                             {/* Статус */}
                             <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <TrophyOutlined style={{ marginRight: 8, color: '#faad14' }} />
-                                <Text strong>Стадия: </Text>
-                                <Tag color={getStageColor(tournament.stage)} style={{ marginLeft: 8 }}>
+                                <TrophyOutlined style={{ marginRight: 8, color: 'var(--accent-color)' }} />
+                                <Text strong style={{ color: 'var(--text-color)' }}>Стадия: </Text>
+                                <Tag
+                                    color={getStageColor(tournament.stage)}
+                                    style={{
+                                        marginLeft: 8,
+                                        color: 'var(--text-color)',
+                                        borderColor: 'var(--border-color)'
+                                    }}
+                                >
                                     {translateStage(tournament.stage)}
                                 </Tag>
                             </div>
@@ -172,34 +183,42 @@ const TournamentDetail = () => {
                             {/* Описание */}
                             {tournament.description && (
                                 <div>
-                                    <Text strong>Описание: </Text>
-                                    <Paragraph style={{ marginBottom: 0, marginTop: 8 }}>
+                                    <Text strong style={{ color: 'var(--text-color)' }}>Описание: </Text>
+                                    <Paragraph style={{
+                                        marginBottom: 0,
+                                        marginTop: 8,
+                                        color: 'var(--text-color)'
+                                    }}>
                                         {tournament.description}
                                     </Paragraph>
                                 </div>
                             )}
 
-                            <Divider style={{ margin: '16px 0' }} />
+                            <Divider style={{ margin: '16px 0', borderColor: 'var(--border-color)' }} />
 
                             {/* Адрес проведения */}
                             {tournament.address && (
                                 <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-                                    <EnvironmentOutlined style={{ marginRight: 8, color: '#ff4d4f', marginTop: '4px' }} />
+                                    <EnvironmentOutlined style={{
+                                        marginRight: 8,
+                                        color: 'var(--accent-color)',
+                                        marginTop: '4px'
+                                    }} />
                                     <div>
-                                        <Text strong>Адрес проведения: </Text>
-                                        <Text>{tournament.address}</Text>
+                                        <Text strong style={{ color: 'var(--text-color)' }}>Адрес проведения: </Text>
+                                        <Text style={{ color: 'var(--text-color)' }}>{tournament.address}</Text>
                                     </div>
                                 </div>
                             )}
 
-                            <Divider style={{ margin: '16px 0' }} />
+                            <Divider style={{ margin: '16px 0', borderColor: 'var(--border-color)' }} />
 
                             {/* Даты */}
                             <Space direction="vertical" style={{ width: '100%' }} size="small">
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                                    <CalendarOutlined style={{ marginRight: 8, color: '#1890ff' }} />
-                                    <Text strong>Дата начала: </Text>
-                                    <Text style={{ marginLeft: 8 }}>
+                                    <CalendarOutlined style={{ marginRight: 8, color: 'var(--primary-color)' }} />
+                                    <Text strong style={{ color: 'var(--text-color)' }}>Дата начала: </Text>
+                                    <Text style={{ marginLeft: 8, color: 'var(--text-color)' }}>
                                         {tournament.startDateTime ?
                                             dayjs(tournament.startDateTime).format('DD.MM.YYYY HH:mm') :
                                             'Не указана'}
@@ -207,9 +226,9 @@ const TournamentDetail = () => {
                                 </div>
 
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                                    <ClockCircleOutlined style={{ marginRight: 8, color: '#722ed1' }} />
-                                    <Text strong>Создан: </Text>
-                                    <Text style={{ marginLeft: 8 }}>
+                                    <ClockCircleOutlined style={{ marginRight: 8, color: 'var(--primary-color)' }} />
+                                    <Text strong style={{ color: 'var(--text-color)' }}>Создан: </Text>
+                                    <Text style={{ marginLeft: 8, color: 'var(--text-color)' }}>
                                         {tournament.createdAt ?
                                             dayjs(tournament.createdAt).format('DD.MM.YYYY HH:mm') :
                                             'Не указано'}
@@ -217,27 +236,35 @@ const TournamentDetail = () => {
                                 </div>
                             </Space>
 
-                            <Divider style={{ margin: '16px 0' }} />
+                            <Divider style={{ margin: '16px 0', borderColor: 'var(--border-color)' }} />
 
                             {/* Статистика турнира */}
-                            <Title level={5}>Информация о турнире</Title>
+                            <Title level={5} style={{ color: 'var(--text-color)' }}>Информация о турнире</Title>
 
                             <Row gutter={16}>
                                 <Col xs={12} sm={8}>
                                     <div style={{ textAlign: isMobile ? 'left' : 'center' }}>
-                                        <Title level={4} style={{ margin: 0, color: '#1890ff' }}>
+                                        <Title level={4} style={{ margin: 0, color: 'var(--primary-color)' }}>
                                             {tournament.currentRound || 0}
                                         </Title>
-                                        <Text type="secondary" style={{ fontSize: '12px' }}>Текущий раунд</Text>
+                                        <Text style={{
+                                            fontSize: '12px',
+                                            color: 'var(--text-secondary)'
+                                        }}>
+                                            Текущий раунд
+                                        </Text>
                                     </div>
                                 </Col>
 
                                 <Col xs={12} sm={8}>
                                     <div style={{ textAlign: isMobile ? 'left' : 'center' }}>
-                                        <Title level={4} style={{ margin: 0, color: '#52c41a' }}>
+                                        <Title level={4} style={{ margin: 0, color: 'var(--primary-color)' }}>
                                             {tournament.players?.length || 0}
                                         </Title>
-                                        <Text type="secondary" style={{ fontSize: '12px' }}>
+                                        <Text style={{
+                                            fontSize: '12px',
+                                            color: 'var(--text-secondary)'
+                                        }}>
                                             Участников
                                         </Text>
                                     </div>
@@ -246,10 +273,13 @@ const TournamentDetail = () => {
                                 {tournament.maxAmountOfPlayers && (
                                     <Col xs={12} sm={8}>
                                         <div style={{ textAlign: isMobile ? 'left' : 'center' }}>
-                                            <Title level={4} style={{ margin: 0, color: '#fa541c' }}>
+                                            <Title level={4} style={{ margin: 0, color: 'var(--primary-color)' }}>
                                                 {tournament.maxAmountOfPlayers}
                                             </Title>
-                                            <Text type="secondary" style={{ fontSize: '12px' }}>
+                                            <Text style={{
+                                                fontSize: '12px',
+                                                color: 'var(--text-secondary)'
+                                            }}>
                                                 Макс. участников
                                             </Text>
                                         </div>
@@ -261,25 +291,25 @@ const TournamentDetail = () => {
                             <Space direction="vertical" style={{ width: '100%' }} size="small">
                                 {tournament.minAmountOfPlayers && (
                                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                                        <InfoCircleOutlined style={{ marginRight: 8, color: '#13c2c2' }} />
-                                        <Text strong>Минимальное количество игроков: </Text>
-                                        <Text style={{ marginLeft: 8 }}>{tournament.minAmountOfPlayers}</Text>
+                                        <InfoCircleOutlined style={{ marginRight: 8, color: 'var(--accent-color)' }} />
+                                        <Text strong style={{ color: 'var(--text-color)' }}>Минимальное количество игроков: </Text>
+                                        <Text style={{ marginLeft: 8, color: 'var(--text-color)' }}>{tournament.minAmountOfPlayers}</Text>
                                     </div>
                                 )}
 
                                 {tournament.maxAmountOfPlayers && (
                                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                                        <InfoCircleOutlined style={{ marginRight: 8, color: '#eb2f96' }} />
-                                        <Text strong>Максимальное количество игроков: </Text>
-                                        <Text style={{ marginLeft: 8 }}>{tournament.maxAmountOfPlayers}</Text>
+                                        <InfoCircleOutlined style={{ marginRight: 8, color: 'var(--accent-color)' }} />
+                                        <Text strong style={{ color: 'var(--text-color)' }}>Максимальное количество игроков: </Text>
+                                        <Text style={{ marginLeft: 8, color: 'var(--text-color)' }}>{tournament.maxAmountOfPlayers}</Text>
                                     </div>
                                 )}
 
                                 {tournament.maxAmountOfPlayers && tournament.players?.length && (
                                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                                        <TeamOutlined style={{ marginRight: 8, color: '#722ed1' }} />
-                                        <Text strong>Свободных мест: </Text>
-                                        <Text style={{ marginLeft: 8 }}>
+                                        <TeamOutlined style={{ marginRight: 8, color: 'var(--accent-color)' }} />
+                                        <Text strong style={{ color: 'var(--text-color)' }}>Свободных мест: </Text>
+                                        <Text style={{ marginLeft: 8, color: 'var(--text-color)' }}>
                                             {tournament.maxAmountOfPlayers - tournament.players.length}
                                         </Text>
                                     </div>
@@ -293,10 +323,16 @@ const TournamentDetail = () => {
                         <Card
                             title={
                                 <Space>
-                                    <TeamOutlined />
-                                    <span>Участники ({tournament.players.length})</span>
+                                    <TeamOutlined style={{ color: 'var(--text-color)' }} />
+                                    <span style={{ color: 'var(--text-color)' }}>
+                                        Участники ({tournament.players.length})
+                                    </span>
                                 </Space>
                             }
+                            style={{
+                                backgroundColor: 'var(--card-bg)',
+                                borderColor: 'var(--border-color)'
+                            }}
                             bodyStyle={{ padding: isMobile ? '12px' : '16px' }}
                         >
                             <Space direction="vertical" style={{ width: '100%' }} size="small">
@@ -308,15 +344,25 @@ const TournamentDetail = () => {
                                             justifyContent: 'space-between',
                                             alignItems: 'center',
                                             padding: '8px 0',
-                                            borderBottom: index < tournament.players.length - 1 ? '1px solid #f0f0f0' : 'none'
+                                            borderBottom: index < tournament.players.length - 1 ?
+                                                '1px solid var(--border-color)' : 'none'
                                         }}
                                     >
                                         <Space>
-                                            <UserOutlined style={{ color: '#1890ff' }} />
-                                            <Text>{player.fullName || 'Неизвестный игрок'}</Text>
+                                            <UserOutlined style={{ color: 'var(--primary-color)' }} />
+                                            <Text style={{ color: 'var(--text-color)' }}>
+                                                {player.fullName || 'Неизвестный игрок'}
+                                            </Text>
                                         </Space>
                                         {player.rating && (
-                                            <Tag color="blue" style={{ margin: 0 }}>
+                                            <Tag
+                                                color="blue"
+                                                style={{
+                                                    margin: 0,
+                                                    color: 'var(--text-color)',
+                                                    borderColor: 'var(--border-color)'
+                                                }}
+                                            >
                                                 Рейтинг: {player.rating}
                                             </Tag>
                                         )}
@@ -330,9 +376,13 @@ const TournamentDetail = () => {
                 {/* Блок действий */}
                 <Col xs={24} lg={8}>
                     <Card
-                        title="Действия"
+                        title={<span style={{ color: 'var(--text-color)' }}>Действия</span>}
+                        style={{
+                            marginBottom: isMobile ? 20 : 0,
+                            backgroundColor: 'var(--card-bg)',
+                            borderColor: 'var(--border-color)'
+                        }}
                         bodyStyle={{ padding: isMobile ? '16px' : '24px' }}
-                        style={{ marginBottom: isMobile ? 20 : 0 }}
                     >
                         <Space direction="vertical" style={{ width: '100%' }} size="middle">
                             <Button
@@ -340,6 +390,10 @@ const TournamentDetail = () => {
                                 block
                                 size={isMobile ? 'large' : 'middle'}
                                 onClick={() => navigate(`/matches/${tournament.id}`)}
+                                style={{
+                                    backgroundColor: 'var(--hover-color)',
+                                    borderColor: 'var(--hover-color)'
+                                }}
                             >
                                 Посмотреть матчи
                             </Button>
@@ -347,7 +401,11 @@ const TournamentDetail = () => {
                             {checkingRegistration ? (
                                 <div style={{ textAlign: 'center' }}>
                                     <Spin size="small" />
-                                    <div style={{ fontSize: '12px', color: '#999', marginTop: 4 }}>
+                                    <div style={{
+                                        fontSize: '12px',
+                                        color: 'var(--text-secondary)',
+                                        marginTop: 4
+                                    }}>
                                         Проверка регистрации...
                                     </div>
                                 </div>
@@ -368,8 +426,8 @@ const TournamentDetail = () => {
                                     onClick={handleRegistration}
                                     size={isMobile ? 'large' : 'middle'}
                                     style={{
-                                        background: '#52c41a',
-                                        borderColor: '#52c41a',
+                                        background: 'var(--accent-color)',
+                                        borderColor: 'var(--accent-color)',
                                         height: isMobile ? '48px' : '40px'
                                     }}
                                 >
@@ -381,6 +439,7 @@ const TournamentDetail = () => {
                                     block
                                     size={isMobile ? 'large' : 'middle'}
                                     onClick={() => navigate('/login')}
+                                    style={{ color: 'var(--text-color)' }}
                                 >
                                     Войдите, чтобы зарегистрироваться
                                 </Button>
@@ -398,6 +457,7 @@ const TournamentDetail = () => {
                                     type="default"
                                     block
                                     onClick={() => navigate('/tournaments')}
+                                    style={{ color: '#4a4a4a' }}
                                 >
                                     Назад к списку турниров
                                 </Button>

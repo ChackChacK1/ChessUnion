@@ -14,14 +14,12 @@ const TournamentManagement = () => {
     const [updating, setUpdating] = useState(false);
     const [tournamentInfo, setTournamentInfo] = useState(null);
 
-    // Загрузка матчей турнира
     const fetchMatches = async () => {
         try {
             setLoading(true);
             const response = await client.get(`/api/match/byTournament/${tournamentId}/${roundId}`);
             setMatches(response.data);
 
-            // Также загружаем информацию о турнире
             const tournamentResponse = await client.get(`/api/tournament/${tournamentId}`);
             setTournamentInfo(tournamentResponse.data);
         } catch (error) {
@@ -35,13 +33,12 @@ const TournamentManagement = () => {
         fetchMatches();
     }, [tournamentId, roundId]);
 
-    // Установка результата матча
     const setMatchResult = async (matchId, result) => {
         try {
             setUpdating(true);
             await client.patch(`/api/admin/match/${matchId}/setResult`, { result });
             message.success('Результат установлен!');
-            fetchMatches(); // Обновляем список матчей
+            fetchMatches();
         } catch (error) {
             message.error('Ошибка установки результата: ' + error.response?.data?.message || error.message);
         } finally {
@@ -49,7 +46,6 @@ const TournamentManagement = () => {
         }
     };
 
-    // Создание следующего раунда
     const createNextRound = async () => {
         try {
             setUpdating(true);
@@ -64,7 +60,19 @@ const TournamentManagement = () => {
         }
     };
 
-    // Начать жеребьевку (первый раунд)
+    const endTournament = async () => {
+        try {
+            setUpdating(true);
+            await client.post(`/api/admin/tournament/${tournamentId}/round`);
+            message.success(`Турнир завершен!`);
+            navigate(`/tournament/${tournamentId}`);
+        } catch (error) {
+            message.error('Ошибка завершения турнира: ' + error.response?.data?.message || error.message);
+        } finally {
+            setUpdating(false);
+        }
+    };
+
     const startTournamentDraw = async () => {
         try {
             setUpdating(true);
@@ -79,17 +87,18 @@ const TournamentManagement = () => {
         }
     };
 
-    // Проверяем, является ли это первым раундом и турнир еще не начат
     const isFirstRoundAndNotStarted = () => {
         return parseInt(roundId) === 0 && matches.length === 0;
     };
 
-    // Проверяем, можно ли создавать следующий раунд
+    const isLastRound = () => {
+        return tournamentInfo && parseInt(roundId) === tournamentInfo.amountOfRounds - 1;
+    };
+
     const canCreateNextRound = () => {
         return !matches.some(match => match.result === null);
     };
 
-    // Меню для выбора результата
     const getResultMenu = (match) => [
         {
             key: '1',
@@ -108,7 +117,6 @@ const TournamentManagement = () => {
         }
     ];
 
-    // Текст результата
     const getResultText = (result) => {
         switch (result) {
             case 1: return '1-0';
@@ -118,7 +126,6 @@ const TournamentManagement = () => {
         }
     };
 
-    // Цвет результата
     const getResultColor = (result) => {
         switch (result) {
             case 1: return 'green';
@@ -134,12 +141,12 @@ const TournamentManagement = () => {
 
     return (
         <div style={{ padding: '20px', maxWidth: '1000px', margin: '0 auto' }}>
-            <Title level={2}>
+            <Title level={2} style={{ color: 'var(--text-color)' }}>
                 Управление турниром: {tournamentInfo?.name || `ID: ${tournamentId}`}
             </Title>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <Text strong>Раунд: {parseInt(roundId) + 1}</Text>
+                <Text strong style={{ color: 'var(--text-color)' }}>Раунд: {parseInt(roundId) + 1}</Text>
 
                 {isFirstRoundAndNotStarted() ? (
                     <Button
@@ -147,22 +154,52 @@ const TournamentManagement = () => {
                         icon={<PlayCircleOutlined />}
                         onClick={startTournamentDraw}
                         loading={updating}
+                        style={{
+                            backgroundColor: 'var(--hover-color)',
+                            borderColor: 'var(--hover-color)'
+                        }}
                     >
                         Начать жеребьевку
                     </Button>
                 ) : (
-                    <Button
-                        type="primary"
-                        onClick={createNextRound}
-                        loading={updating}
-                        disabled={!canCreateNextRound()}
-                    >
-                        Следующий раунд
-                    </Button>
+                    isLastRound() ? (
+                        <Button
+                            type="primary"
+                            onClick={endTournament}
+                            loading={updating}
+                            disabled={!canCreateNextRound()}
+                            style={{
+                                backgroundColor: 'var(--hover-color)',
+                                borderColor: 'var(--hover-color)'
+                            }}
+                        >
+                            Завершить турнир
+                        </Button>
+                    ) : (
+                        <Button
+                            type="primary"
+                            onClick={createNextRound}
+                            loading={updating}
+                            disabled={!canCreateNextRound()}
+                            style={{
+                                backgroundColor: 'var(--hover-color)',
+                                borderColor: 'var(--hover-color)'
+                            }}
+                        >
+                            Следующий раунд
+                        </Button>
+                    )
                 )}
             </div>
 
-            <Card title="Матчи раунда" bordered={false}>
+            <Card
+                title={<span style={{ color: 'var(--text-color)' }}>Матчи раунда</span>}
+                bordered={false}
+                style={{
+                    backgroundColor: 'var(--card-bg)',
+                    borderColor: 'var(--border-color)'
+                }}
+            >
                 {/* Заголовки колонок */}
                 <div style={{
                     display: 'grid',
@@ -170,7 +207,8 @@ const TournamentManagement = () => {
                     gap: '16px',
                     padding: '16px',
                     fontWeight: 'bold',
-                    borderBottom: '2px solid #f0f0f0'
+                    borderBottom: '2px solid var(--border-color)',
+                    color: 'var(--text-color)'
                 }}>
                     <span>ID</span>
                     <span>Белые</span>
@@ -182,7 +220,7 @@ const TournamentManagement = () => {
                     <List
                         dataSource={matches}
                         renderItem={(match) => (
-                            <List.Item>
+                            <List.Item style={{ borderBottom: '1px solid var(--border-color)' }}>
                                 <div style={{
                                     display: 'grid',
                                     gridTemplateColumns: '60px 1fr auto 1fr',
@@ -192,20 +230,31 @@ const TournamentManagement = () => {
                                     padding: '12px'
                                 }}>
                                     {/* ID матча */}
-                                    <Text strong>#{match.id}</Text>
+                                    <Text strong style={{ color: 'var(--text-color)' }}>#{match.id}</Text>
 
                                     {/* Белые */}
                                     <div style={{ textAlign: 'center' }}>
-                                        <Text strong>{match.whitePlayer?.fullName}</Text>
+                                        <Text strong style={{ color: 'var(--text-color)' }}>
+                                            {match.whitePlayer?.fullName}
+                                        </Text>
                                         <div>
-                                            <Text type="secondary">({match.whitePlayer?.score})</Text>
+                                            <Text style={{ color: 'var(--text-secondary)' }}>
+                                                ({match.whitePlayer?.score})
+                                            </Text>
                                         </div>
                                     </div>
 
                                     {/* Результат */}
                                     <div style={{ textAlign: 'center' }}>
                                         {match.result !== null ? (
-                                            <Tag color={getResultColor(match.result)} style={{ margin: 0 }}>
+                                            <Tag
+                                                color={getResultColor(match.result)}
+                                                style={{
+                                                    margin: 0,
+                                                    color: 'var(--text-color)',
+                                                    borderColor: 'var(--border-color)'
+                                                }}
+                                            >
                                                 {getResultText(match.result)}
                                             </Tag>
                                         ) : (
@@ -214,7 +263,14 @@ const TournamentManagement = () => {
                                                 trigger={['click']}
                                                 disabled={updating}
                                             >
-                                                <Button type="dashed" loading={updating}>
+                                                <Button
+                                                    type="dashed"
+                                                    loading={updating}
+                                                    style={{
+                                                        color: 'var(--text-color)',
+                                                        borderColor: 'var(--border-color)'
+                                                    }}
+                                                >
                                                     Выбрать результат <DownOutlined />
                                                 </Button>
                                             </Dropdown>
@@ -223,9 +279,13 @@ const TournamentManagement = () => {
 
                                     {/* Чёрные */}
                                     <div style={{ textAlign: 'center' }}>
-                                        <Text strong>{match.blackPlayer?.fullName}</Text>
+                                        <Text strong style={{ color: 'var(--text-color)' }}>
+                                            {match.blackPlayer?.fullName}
+                                        </Text>
                                         <div>
-                                            <Text type="secondary">({match.blackPlayer?.score})</Text>
+                                            <Text style={{ color: 'var(--text-secondary)' }}>
+                                                ({match.blackPlayer?.score})
+                                            </Text>
                                         </div>
                                     </div>
                                 </div>
@@ -233,7 +293,7 @@ const TournamentManagement = () => {
                         )}
                     />
                 ) : (
-                    <Text>Матчей в этом раунде пока нет</Text>
+                    <Text style={{ color: 'var(--text-secondary)' }}>Матчей в этом раунде пока нет</Text>
                 )}
             </Card>
         </div>
