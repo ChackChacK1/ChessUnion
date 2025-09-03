@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     Card, Typography, Tag, Spin, message, Button,
-    Row, Col, Space, Alert, Grid, Divider
+    Row, Col, Space, Alert, Grid, Divider, Table
 } from 'antd';
 import {
     CalendarOutlined, TrophyOutlined, TeamOutlined,
@@ -28,6 +28,29 @@ const TournamentDetail = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isRegistered, setIsRegistered] = useState(false);
     const [checkingRegistration, setCheckingRegistration] = useState(false);
+
+    // Функции для получения цвета и перевода стадии
+    const getStageColor = (stage) => {
+        const colors = {
+            'ANNOUNCED': 'blue',
+            'REGISTRATION': 'green',
+            'IN_PROGRESS': 'orange',
+            'FINISHED': 'red',
+            'CANCELLED': 'gray'
+        };
+        return colors[stage] || 'default';
+    };
+
+    const translateStage = (stage) => {
+        const translations = {
+            'ANNOUNCED': 'Анонсирован',
+            'REGISTRATION': 'Регистрация',
+            'IN_PROGRESS': 'В процессе',
+            'FINISHED': 'Завершен',
+            'CANCELLED': 'Отменен'
+        };
+        return translations[stage] || stage;
+    };
 
     useEffect(() => {
         fetchTournament();
@@ -96,34 +119,129 @@ const TournamentDetail = () => {
         }
     };
 
-    const getStageColor = (stage) => {
-        const colors = {
-            'ANNOUNCED': 'blue',
-            'REGISTRATION': 'green',
-            'IN_PROGRESS': 'orange',
-            'FINISHED': 'red',
-            'CANCELLED': 'gray'
-        };
-        return colors[stage] || 'default';
-    };
-
-    const translateStage = (stage) => {
-        const translations = {
-            'ANNOUNCED': 'Анонсирован',
-            'REGISTRATION': 'Регистрация',
-            'IN_PROGRESS': 'В процессе',
-            'FINISHED': 'Завершен',
-            'CANCELLED': 'Отменен'
-        };
-        return translations[stage] || stage;
-    };
-
     const canRegister = () => {
         if (!isAuthenticated) return false;
         if (tournament.stage !== 'REGISTRATION') return false;
         if (tournament.maxAmountOfPlayers && tournament.players?.length >= tournament.maxAmountOfPlayers) return false;
         if (isRegistered) return false;
         return true;
+    };
+
+    // Колонки для таблицы участников (стадия регистрации)
+    const registrationColumns = [
+        {
+            title: <span style={{ color: 'var(--text-color)' }}>Игрок</span>,
+            dataIndex: 'fullName',
+            key: 'fullName',
+            render: (name) => (
+                <Text style={{ color: 'var(--text-color)' }}>{name || 'Неизвестный игрок'}</Text>
+            )
+        },
+        {
+            title: <span style={{ color: 'var(--text-color)' }}>Рейтинг</span>,
+            dataIndex: 'rating',
+            key: 'rating',
+            width: 100,
+            align: 'center',
+            render: (rating) => (
+                <Tag color="blue" style={{
+                    color: 'var(--text-color)',
+                    borderColor: 'var(--border-color)'
+                }}>
+                    {rating || '-'}
+                </Tag>
+            )
+        }
+    ];
+
+// Колонки для турнирной таблицы (стадия IN_PROGRESS или FINISHED)
+    const tournamentTableColumns = [
+        {
+            title: <span style={{ color: 'var(--text-color)' }}>Место</span>,
+            dataIndex: 'place',
+            key: 'place',
+            width: 80,
+            align: 'center',
+            render: (place) => (
+                <Tag color="blue" style={{
+                    color: 'var(--text-color)',
+                    borderColor: 'var(--border-color)'
+                }}>
+                    {place || '-'}
+                </Tag>
+            )
+        },
+        {
+            title: <span style={{ color: 'var(--text-color)' }}>Игрок</span>,
+            dataIndex: 'fullName',
+            key: 'fullName',
+            render: (name) => (
+                <Text style={{ color: 'var(--text-color)' }}>{name || 'Неизвестный игрок'}</Text>
+            )
+        },
+        {
+            title: <span style={{ color: 'var(--text-color)' }}>Очки</span>,
+            dataIndex: 'score',
+            key: 'score',
+            width: 100,
+            align: 'center',
+            render: (score) => (
+                <Tag color="green" style={{
+                    color: 'var(--text-color)',
+                    borderColor: 'var(--border-color)'
+                }}>
+                    {score || '0'}
+                </Tag>
+            )
+        },
+        {
+            title: <span style={{ color: 'var(--text-color)' }}>Доп. очки</span>,
+            dataIndex: 'secondScore',
+            key: 'secondScore',
+            width: 120,
+            align: 'center',
+            render: (secondScore) => (
+                <Tag color="orange" style={{
+                    color: 'var(--text-color)',
+                    borderColor: 'var(--border-color)'
+                }}>
+                    {secondScore || '0'}
+                </Tag>
+            )
+        },
+        {
+            title: <span style={{ color: 'var(--text-color)' }}>Рейтинг</span>,
+            dataIndex: 'rating',
+            key: 'rating',
+            width: 100,
+            align: 'center',
+            render: (rating) => (
+                <Tag color="blue" style={{
+                    color: 'var(--text-color)',
+                    borderColor: 'var(--border-color)'
+                }}>
+                    {rating || '-'}
+                </Tag>
+            )
+        }
+    ];
+
+    // Выбираем какие колонки использовать в зависимости от стадии турнира
+    const getTableColumns = () => {
+        if (tournament.stage === 'REGISTRATION' || tournament.stage === 'ANNOUNCED') {
+            return registrationColumns;
+        } else {
+            return tournamentTableColumns;
+        }
+    };
+
+    // Выбираем заголовок в зависимости от стадии турнира
+    const getTableTitle = () => {
+        if (tournament.stage === 'REGISTRATION' || tournament.stage === 'ANNOUNCED') {
+            return `Участники (${tournament.players?.length || 0})`;
+        } else {
+            return `Турнирная таблица (${tournament.players?.length || 0})`;
+        }
     };
 
     if (loading) {
@@ -325,7 +443,7 @@ const TournamentDetail = () => {
                                 <Space>
                                     <TeamOutlined style={{ color: 'var(--text-color)' }} />
                                     <span style={{ color: 'var(--text-color)' }}>
-                                        Участники ({tournament.players.length})
+                                        {getTableTitle()}
                                     </span>
                                 </Space>
                             }
@@ -335,40 +453,22 @@ const TournamentDetail = () => {
                             }}
                             bodyStyle={{ padding: isMobile ? '12px' : '16px' }}
                         >
-                            <Space direction="vertical" style={{ width: '100%' }} size="small">
-                                {tournament.players.map((player, index) => (
-                                    <div
-                                        key={index}
-                                        style={{
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            padding: '8px 0',
-                                            borderBottom: index < tournament.players.length - 1 ?
-                                                '1px solid var(--border-color)' : 'none'
-                                        }}
-                                    >
-                                        <Space>
-                                            <UserOutlined style={{ color: 'var(--primary-color)' }} />
-                                            <Text style={{ color: 'var(--text-color)' }}>
-                                                {player.fullName || 'Неизвестный игрок'}
-                                            </Text>
-                                        </Space>
-                                        {player.rating && (
-                                            <Tag
-                                                color="blue"
-                                                style={{
-                                                    margin: 0,
-                                                    color: 'var(--text-color)',
-                                                    borderColor: 'var(--border-color)'
-                                                }}
-                                            >
-                                                Рейтинг: {player.rating}
-                                            </Tag>
-                                        )}
-                                    </div>
-                                ))}
-                            </Space>
+                            <Table
+                                columns={getTableColumns()}
+                                dataSource={tournament.players.map((player, index) => ({
+                                    ...player,
+                                    key: index,
+                                    // Добавляем place для турнирной таблицы
+                                    place: (tournament.stage !== 'REGISTRATION' && tournament.stage !== 'ANNOUNCED')
+                                        ? index + 1
+                                        : undefined
+                                }))}
+                                pagination={false}
+                                size="small"
+                                locale={{
+                                    emptyText: 'Нет данных'
+                                }}
+                            />
                         </Card>
                     )}
                 </Col>
