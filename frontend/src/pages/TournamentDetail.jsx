@@ -110,7 +110,17 @@ const TournamentDetail = () => {
 
             if (response.status === 200) {
                 message.success('Вы успешно зарегистрировались на турнир!');
-                window.location.reload();
+
+                // 1. Мгновенно обновляем статус регистрации
+                setIsRegistered(true);
+
+                // 2. Обновляем данные турнира
+                const updatedResponse = await client.get(`/api/tournament/${id}`);
+                const updatedData = updatedResponse.data.body || updatedResponse.data;
+                setTournament(updatedData);
+
+                // 3. Перепроверяем регистрацию (на всякий случай)
+                await checkRegistration();
             }
         } catch (error) {
             message.error('Ошибка регистрации: ' + (error.response?.data?.message || error.message));

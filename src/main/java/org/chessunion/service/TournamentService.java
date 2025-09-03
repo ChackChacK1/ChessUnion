@@ -66,6 +66,10 @@ public class TournamentService {
     public void registrationTournament(String username, int id){
         Tournament tournament = tournamentRepository.findById(id).orElseThrow(()-> new TournamentNotFoundException(id));
 
+        if (tournament.getPlayers().size() >= tournament.getMaxAmountOfPlayers()){
+            throw new TooManyPlayersException(tournament.getPlayers().size(), tournament.getMaxAmountOfPlayers());
+        }
+
         User user = userRepository.findByUsername(username).orElseThrow(()-> new UsernameNotFoundException(username));
 
         boolean alreadyRegistered = playerRepository.existsByUserAndTournament(user, tournament);
