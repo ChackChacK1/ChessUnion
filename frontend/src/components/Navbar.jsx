@@ -101,23 +101,30 @@ const Navbar = () => {
         {
             key: 'home',
             label: <Link to="/" onClick={() => setMobileMenuOpen(false)}>ChessUnion</Link>,
-            icon: <HomeOutlined />,
+            icon: <HomeOutlined style={{
+                color: 'var(--text-color)'
+            }} />,
         },
         {
             key: 'tournaments',
             label: <Link to="/tournaments" onClick={() => setMobileMenuOpen(false)}>Турниры</Link>,
-            icon: <TrophyOutlined />,
+            icon: <TrophyOutlined style={{
+                color: 'var(--text-color)'
+            }}/>,
         },
-        {
+        ...(isAuthenticated ? [{
             key: 'profile',
             label: <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>Профиль</Link>,
-            icon: <UserOutlined />,
-            disabled: !isAuthenticated,
-        },
+            icon: <UserOutlined style={{
+                color: 'var(--text-color)'
+            }}/>,
+        }] : []),
         ...(isAdmin ? [{
             key: 'admin',
             label: <Link to="/admin" onClick={() => setMobileMenuOpen(false)}>Администрирование</Link>,
-            icon: <LockOutlined />,
+            icon: <LockOutlined style={{
+                color: 'var(--text-color)'
+            }}/>,
         }] : [])
     ];
 
@@ -125,8 +132,8 @@ const Navbar = () => {
     const themeMenuItem = [{
         key: 'theme',
         label: (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span>Тёмная тема</span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: 'var(--text-color)'}}>
+                <span>Тёмная тема </span>
                 <Switch
                     checked={isDarkTheme}
                     onChange={toggleTheme}
@@ -198,10 +205,11 @@ const Navbar = () => {
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 padding: '0 16px',
-                height: '64px'
+                height: '64px',
+                backgroundColor: 'var(--navbar-background-color)'
             }}>
                 <Link to="/" style={{ color: 'inherit', textDecoration: 'none' }}>
-                    <span style={{ fontWeight: 'bold', fontSize: '18px' }}>ChessUnion</span>
+                    <span style={{ fontWeight: 'bold', fontSize: '18px', color: 'var(--text-color)' }}>ChessUnion</span>
                 </Link>
 
                 <Space>
@@ -220,12 +228,36 @@ const Navbar = () => {
                             icon={<LoginOutlined />}
                             onClick={showAuthModal}
                             size="small"
+                            style={{
+                                color: 'var(--text-color)',
+                                backgroundColor: 'transparent'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = 'var(--hover-color)';
+                                e.currentTarget.style.color = 'var(--primary-color)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = 'transparent';
+                                e.currentTarget.style.color = 'var(--text-color)';
+                            }}
                         />
                     )}
                     <Button
                         type="text"
                         icon={<MenuOutlined />}
                         onClick={() => setMobileMenuOpen(true)}
+                        style={{
+                            color: 'var(--text-color)',
+                            backgroundColor: 'transparent'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = 'var(--hover-color)';
+                            e.currentTarget.style.color = 'var(--primary-color)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.color = 'var(--text-color)';
+                        }}
                     />
                 </Space>
             </div>
@@ -235,12 +267,25 @@ const Navbar = () => {
                 placement="right"
                 onClose={() => setMobileMenuOpen(false)}
                 open={mobileMenuOpen}
-                bodyStyle={{ padding: 0 }}
+                styles={{
+                    body: {
+                        padding: 0,
+                        backgroundColor: 'var(--navbar-background-color)'
+                    },
+                    header: {
+                        backgroundColor: 'var(--navbar-background-color)',
+                        color: 'var(--text-color)',
+                        borderBottom: '1px solid var(--border-color)'
+                    }
+                }}
             >
                 <Menu
                     mode="vertical"
                     items={mobileMenuItems}
-                    style={{ border: 'none' }}
+                    style={{
+                        border: 'none',
+                        backgroundColor: 'var(--navbar-background-color)'
+                    }}
                 />
             </Drawer>
         </>
