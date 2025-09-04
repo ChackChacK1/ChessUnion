@@ -5,13 +5,17 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.chessunion.dto.DeleteUserRequest;
 import org.chessunion.dto.ProfileDto;
+import org.chessunion.dto.TopListElementDto;
 import org.chessunion.dto.UpdateProfileDto;
 import org.chessunion.service.UserService;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/user")
@@ -45,5 +49,11 @@ public class UserController {
     public ResponseEntity<String> updateProfile(Principal principal, @RequestBody UpdateProfileDto updateProfileDto){
         userService.updateProfile(principal, updateProfileDto);
         return ResponseEntity.ok("Profile update successfully");
+    }
+
+    @PreAuthorize("permitAll()")
+    @GetMapping("/top")
+    public ResponseEntity<List<TopListElementDto>> getTopList(@PageableDefault Pageable pageable) {
+        return ResponseEntity.ok(userService.getTopList(pageable));
     }
 }

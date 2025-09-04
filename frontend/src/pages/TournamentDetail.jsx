@@ -549,7 +549,7 @@ const TournamentDetail = () => {
                                     block
                                     size={isMobile ? 'large' : 'middle'}
                                     onClick={() => navigate('/login')}
-                                    style={{ color: 'var(--text-color)' }}
+                                    style={{ color: '#222121' }}
                                 >
                                     Войдите, чтобы зарегистрироваться
                                 </Button>

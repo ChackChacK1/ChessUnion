@@ -4,6 +4,7 @@ package org.chessunion.service;
 import lombok.RequiredArgsConstructor;
 import org.chessunion.dto.ProfileDto;
 import org.chessunion.dto.RegistrationRequest;
+import org.chessunion.dto.TopListElementDto;
 import org.chessunion.dto.UpdateProfileDto;
 import org.chessunion.entity.Player;
 import org.chessunion.entity.User;
@@ -13,6 +14,7 @@ import org.chessunion.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -99,5 +102,14 @@ public class UserService {
         user.setEmail(updateProfile.getEmail());
 
         userRepository.save(user);
+    }
+
+    public List<TopListElementDto> getTopList(Pageable pageable) {
+        return userRepository.findAll(pageable).stream().sorted(Comparator.comparingDouble(User::getRating)).map(player -> {
+            TopListElementDto topListElementDto = new TopListElementDto();
+            topListElementDto.setFullName(player.getFirstName() + " " + player.getLastName());
+            topListElementDto.setRating((int) Math.round(player.getRating()));
+            return topListElementDto;
+        }).toList().reversed();
     }
 }

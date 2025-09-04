@@ -7,7 +7,7 @@ import {
     HomeOutlined, TrophyOutlined, UserOutlined,
     LockOutlined, MenuOutlined, LoginOutlined,
     LogoutOutlined, ExclamationCircleOutlined,
-    MoonOutlined, SunOutlined
+    MoonOutlined, SunOutlined, StarOutlined
 } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import client from '../api/client';
@@ -109,6 +109,13 @@ const Navbar = () => {
             key: 'tournaments',
             label: <Link to="/tournaments" onClick={() => setMobileMenuOpen(false)}>Турниры</Link>,
             icon: <TrophyOutlined style={{
+                color: 'var(--text-color)'
+            }}/>,
+        },
+        {
+            key: 'topList',
+            label: <Link to="/top" onClick={() => setMobileMenuOpen(false)}>Топ</Link>,
+            icon: <StarOutlined style={{
                 color: 'var(--text-color)'
             }}/>,
         },

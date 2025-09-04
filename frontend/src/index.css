@@ -1317,7 +1317,7 @@ h1, h2, h3, h4, h5, h6,
 }
 
 .ant-table-tbody > tr:hover > td {
-  background-color: var(--hover-color) !important;
+  background-color: var(--menu-target-color) !important;
 }
 
 .ant-table-placeholder {
@@ -1371,4 +1371,44 @@ h1, h2, h3, h4, h5, h6,
 
 .ant-menu-item-selected .ant-menu-title-content {
   color: var(--text-secondary) !important;
+}
+/* Стили для топа игроков */
+.top-player-gold {
+  background: linear-gradient(135deg, #ffd700, #ffed4e) !important;
+  color: #000 !important;
+  font-weight: bold !important;
+}
+
+.top-player-silver {
+  background: linear-gradient(135deg, #c0c0c0, #e0e0e0) !important;
+  color: #000 !important;
+  font-weight: bold !important;
+}
+
+.top-player-bronze {
+  background: linear-gradient(135deg, #cd7f32, #e39e54) !important;
+  color: #000 !important;
+  font-weight: bold !important;
+}
+
+/* Стили для иконок в тегах */
+.ant-tag .anticon {
+  margin-right: 4px;
+}
+
+/* Стили для таблицы рейтинга */
+.top-players-table .ant-table-tbody > tr:hover > td {
+  background-color: var(--menu-target-color) !important;
+}
+
+.top-players-table .ant-table-tbody > tr:first-child > td {
+  background-color: rgba(255, 215, 0, 0.1) !important;
+}
+
+.top-players-table .ant-table-tbody > tr:nth-child(2) > td {
+  background-color: rgba(192, 192, 192, 0.1) !important;
+}
+
+.top-players-table .ant-table-tbody > tr:nth-child(3) > td {
+  background-color: rgba(205, 127, 50, 0.1) !important;
 }

@@ -62,6 +62,7 @@ public class SecurityConfig {
                                 "/api/tournament/all",
                                 "/api/tournament/*",
                                 "/api/match/**",
+                                "/api/user/top",
                                 "/swagger-ui/**").permitAll()
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
