@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
     Menu, Button, Space, Modal, Form, Input, message,
-    Drawer, Grid, Switch
+    Drawer, Grid, Switch, Alert
 } from 'antd';
 import {
     HomeOutlined, TrophyOutlined, UserOutlined,
@@ -21,6 +21,7 @@ const Navbar = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
     const [isDarkTheme, setIsDarkTheme] = useState(false);
+    const [loginError, setLoginError] = useState(''); // Новое состояние для ошибки
     const navigate = useNavigate();
     const screens = useBreakpoint();
 
@@ -48,13 +49,19 @@ const Navbar = () => {
     const showAuthModal = () => {
         setIsAuthModalOpen(true);
         setMobileMenuOpen(false);
+        setLoginError(''); // Сбрасываем ошибку при открытии модального окна
     };
 
-    const handleAuthCancel = () => setIsAuthModalOpen(false);
+    const handleAuthCancel = () => {
+        setIsAuthModalOpen(false);
+        setLoginError(''); // Сбрасываем ошибку при закрытии модального окна
+    };
 
     const onLogin = async (values) => {
         try {
             setLoginLoading(true);
+            setLoginError(''); // Сбрасываем ошибку перед отправкой запроса
+
             const response = await client.post('/api/auth/login', values);
 
             localStorage.setItem('token', response.data.token);
@@ -64,7 +71,33 @@ const Navbar = () => {
             setIsAuthModalOpen(false);
             window.location.reload();
         } catch (error) {
-            message.error('Ошибка входа: ' + (error.response?.data?.message || error.message));
+            // Правильная обработка ошибки авторизации
+            let errorMessage = 'Ошибка входа';
+
+            if (error.response) {
+                // Сервер вернул ошибку
+                const errorData = error.response.data;
+
+                // Проверяем разные форматы ошибок
+                if (errorData.error === 'Bad credentials!') {
+                    errorMessage = 'Неверный логин или пароль';
+                } else if (errorData.message) {
+                    errorMessage = errorData.message;
+                } else if (errorData.body) {
+                    errorMessage = errorData.body;
+                } else if (typeof errorData === 'string') {
+                    errorMessage = errorData;
+                }
+            } else if (error.request) {
+                // Запрос был сделан, но ответ не получен
+                errorMessage = 'Нет ответа от сервера. Проверьте соединение.';
+            } else {
+                // Что-то пошло не так при настройке запроса
+                errorMessage = error.message || 'Неизвестная ошибка';
+            }
+
+            // Устанавливаем ошибку в состояние для отображения в форме
+            setLoginError(errorMessage);
         } finally {
             setLoginLoading(false);
         }
@@ -346,6 +379,21 @@ const Navbar = () => {
                             }}
                         />
                     </Form.Item>
+
+                    {/* Отображение ошибки авторизации */}
+                    {loginError && (
+                        <Alert
+                            message={loginError}
+                            type="error"
+                            showIcon
+                            style={{
+                                marginBottom: '16px',
+                                backgroundColor: 'var(--error-bg)',
+                                borderColor: 'var(--error-border)'
+                            }}
+                        />
+                    )}
+
                     <Form.Item>
                         <Button
                             type="primary"
