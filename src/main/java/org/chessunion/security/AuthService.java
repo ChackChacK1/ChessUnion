@@ -23,6 +23,7 @@ public class AuthService {
 
     public AuthResponse createToken(AuthRequest authRequest) {
         String login;
+        authRequest.setLogin(authRequest.getLogin().trim());
 
         if (authRequest.getLogin().contains("@")){
             login = userRepository.findByEmail(authRequest.getLogin())

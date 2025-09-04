@@ -55,6 +55,7 @@ public class UserService {
     public void registerUser(RegistrationRequest registrationRequest) {
         User user = modelMapper.map(registrationRequest, User.class);
 
+        user.setUsername(registrationRequest.getUsername().trim());
         // шифрование пароля
         user.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));
 
