@@ -83,7 +83,7 @@ public class SecurityConfig {
                 "http://192.168.0.103:5173",
                 "https://chess-union.ru",
                 "https://www.chess-union.ru",
-                "http://192.168.0.100:5173",
+                "http://192.168.48.1:5173",
                 url
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));

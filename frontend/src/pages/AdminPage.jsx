@@ -14,7 +14,8 @@ import {
     Tabs,
     Tag,
     Spin,
-    Space
+    Space,
+    Grid
 } from 'antd';
 import { PlusOutlined, SettingOutlined, EditOutlined, EnvironmentOutlined, UserOutlined, TeamOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -24,6 +25,7 @@ import dayjs from 'dayjs';
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 const { TabPane } = Tabs;
+const { useBreakpoint } = Grid;
 
 const AdminPage = () => {
     const [form] = Form.useForm();
@@ -31,6 +33,9 @@ const AdminPage = () => {
     const [runningTournaments, setRunningTournaments] = useState([]);
     const [tournamentsLoading, setTournamentsLoading] = useState(false);
     const navigate = useNavigate();
+    const screens = useBreakpoint();
+
+    const isMobile = !screens.md;
 
     const fetchRunningTournaments = async () => {
         try {
@@ -98,30 +103,35 @@ const AdminPage = () => {
     };
 
     return (
-        <div style={{ padding: '20px', maxWidth: '1000px', margin: '0 auto' }}>
-            <Title level={2} style={{ color: 'var(--text-color)' }}>Панель администратора</Title>
+        <div style={{ padding: isMobile ? '12px' : '20px', maxWidth: '1200px', margin: '0 auto' }}>
+            <Title level={isMobile ? 3 : 2} style={{ color: 'var(--text-color)', marginBottom: 24 }}>
+                Панель администратора
+            </Title>
 
             <Tabs
                 defaultActiveKey="management"
-                type="card"
-                style={{ color: 'var(--text-color)'}}
+                type={isMobile ? "line" : "card"}
+                style={{ color: 'var(--text-color)' }}
+                tabPosition={isMobile ? "top" : "top"}
+                size={isMobile ? "small" : "middle"}
             >
                 <TabPane
                     tab={
                         <span style={{color: 'var(--text-color)'}}>
                             <SettingOutlined />
-                            Управление турнирами
+                            {isMobile ? 'Турниры' : 'Управление турнирами'}
                         </span>
                     }
                     key="management"
                 >
                     <Card
-                        title={<span style={{ color: 'var(--text-color)' }}>Активные турниры</span>}
+                        title={<span style={{ color: 'var(--text-color)', fontSize: isMobile ? '16px' : '18px' }}>Активные турниры</span>}
                         bordered={false}
                         style={{
                             backgroundColor: 'var(--card-bg)',
                             borderColor: 'var(--border-color)'
                         }}
+                        bodyStyle={{ padding: isMobile ? '12px' : '24px' }}
                     >
                         {tournamentsLoading ? (
                             <Spin size="large" style={{ display: 'flex', justifyContent: 'center', margin: '20px 0' }} />
@@ -132,7 +142,7 @@ const AdminPage = () => {
                                     <List.Item
                                         style={{
                                             cursor: 'pointer',
-                                            padding: '12px 16px',
+                                            padding: isMobile ? '8px 12px' : '12px 16px',
                                             border: '1px solid var(--border-color)',
                                             borderRadius: '6px',
                                             marginBottom: '8px',
@@ -150,29 +160,31 @@ const AdminPage = () => {
                                             e.currentTarget.style.borderColor = 'var(--border-color)';
                                         }}
                                     >
+                                        {/* Кнопка управления игроками */}
                                         <Button
                                             icon={<TeamOutlined />}
                                             type="text"
-                                            size="large"
+                                            size={isMobile ? "small" : "large"}
                                             style={{
                                                 position: 'absolute',
-                                                top: '8px',
-                                                right: '48px', // Смещаем правее, чтобы не перекрывать кнопку редактирования
+                                                top: isMobile ? '4px' : '8px',
+                                                right: isMobile ? '36px' : '48px',
                                                 zIndex: 30,
                                                 color: 'var(--text-color)'
                                             }}
                                             onClick={(e) => handleManagePlayers(tournament, e)}
                                             onMouseEnter={(e) => e.stopPropagation()}
                                         />
+
                                         {/* Кнопка редактирования */}
                                         <Button
                                             icon={<EditOutlined />}
                                             type="text"
-                                            size="large"
+                                            size={isMobile ? "small" : "large"}
                                             style={{
                                                 position: 'absolute',
-                                                top: '8px',
-                                                right: '8px',
+                                                top: isMobile ? '4px' : '8px',
+                                                right: isMobile ? '8px' : '8px',
                                                 zIndex: 30,
                                                 color: 'var(--text-color)'
                                             }}
@@ -182,14 +194,27 @@ const AdminPage = () => {
 
                                         <List.Item.Meta
                                             title={
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                    <Text strong style={{ color: 'var(--text-color)' }}>{tournament.name}</Text>
+                                                <div style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '8px',
+                                                    flexWrap: isMobile ? 'wrap' : 'nowrap',
+                                                    marginRight: isMobile ? '40px' : '0'
+                                                }}>
+                                                    <Text strong style={{
+                                                        color: 'var(--text-color)',
+                                                        fontSize: isMobile ? '14px' : '16px'
+                                                    }}>
+                                                        {tournament.name}
+                                                    </Text>
                                                     {getStageTag(tournament.stage)}
                                                     <Tag
                                                         color='var(--hover-color)'
                                                         style={{
                                                             color: 'var(--text-color)',
-                                                            borderColor: 'var(--border-color)'
+                                                            borderColor: 'var(--border-color)',
+                                                            fontSize: isMobile ? '11px' : '12px',
+                                                            margin: isMobile ? '2px 0' : '0'
                                                         }}
                                                     >
                                                         {tournament.players?.length || 0} игроков
@@ -198,7 +223,8 @@ const AdminPage = () => {
                                                         color="orange"
                                                         style={{
                                                             color: 'var(--text-color)',
-                                                            borderColor: 'var(--border-color)'
+                                                            borderColor: 'var(--border-color)',
+                                                            fontSize: isMobile ? '11px' : '12px'
                                                         }}
                                                     >
                                                         Раунд: {tournament.currentRound + 1}/{tournament.amountOfRounds}
@@ -206,25 +232,47 @@ const AdminPage = () => {
                                                 </div>
                                             }
                                             description={
-                                                <div>
-                                                    <Text style={{ color: 'var(--text-secondary)' }}>
-                                                        Дата проведения: {dayjs(tournament.startDateTime).format('DD.MM.YYYY HH:mm')}
+                                                <div style={{ marginTop: isMobile ? '8px' : '0' }}>
+                                                    <Text style={{
+                                                        color: 'var(--text-secondary)',
+                                                        fontSize: isMobile ? '12px' : '14px'
+                                                    }}>
+                                                        Дата: {dayjs(tournament.startDateTime).format('DD.MM.YYYY HH:mm')}
                                                     </Text>
                                                     {tournament.address && (
                                                         <div style={{ marginTop: '4px' }}>
-                                                            <Space size="small">
-                                                                <EnvironmentOutlined style={{ color: 'var(--accent-color)' }} />
-                                                                <Text style={{ color: 'var(--text-secondary)' }}>{tournament.address}</Text>
+                                                            <Space size="small" wrap>
+                                                                <EnvironmentOutlined style={{
+                                                                    color: 'var(--accent-color)',
+                                                                    fontSize: isMobile ? '12px' : '14px'
+                                                                }} />
+                                                                <Text style={{
+                                                                    color: 'var(--text-secondary)',
+                                                                    fontSize: isMobile ? '12px' : '14px'
+                                                                }}>
+                                                                    {tournament.address}
+                                                                </Text>
                                                             </Space>
                                                         </div>
                                                     )}
                                                     {tournament.description && (
                                                         <div style={{ marginTop: '4px' }}>
-                                                            <Text style={{ color: 'var(--text-secondary)' }}>{tournament.description}</Text>
+                                                            <Text style={{
+                                                                color: 'var(--text-secondary)',
+                                                                fontSize: isMobile ? '12px' : '14px'
+                                                            }}>
+                                                                {tournament.description.length > 50 && isMobile
+                                                                    ? `${tournament.description.substring(0, 50)}...`
+                                                                    : tournament.description
+                                                                }
+                                                            </Text>
                                                         </div>
                                                     )}
                                                     <div style={{ marginTop: '4px' }}>
-                                                        <Text style={{ color: 'var(--text-secondary)' }}>
+                                                        <Text style={{
+                                                            color: 'var(--text-secondary)',
+                                                            fontSize: isMobile ? '11px' : '12px'
+                                                        }}>
                                                             ID: {tournament.id}
                                                         </Text>
                                                     </div>
@@ -244,18 +292,19 @@ const AdminPage = () => {
                     tab={
                         <span style={{ color: 'var(--text-color)' }}>
                             <PlusOutlined />
-                            Создание турнира
+                            {isMobile ? 'Создать' : 'Создание турнира'}
                         </span>
                     }
                     key="creation"
                 >
                     <Card
-                        title={<span style={{ color: 'var(--text-color)' }}>Создание нового турнира</span>}
+                        title={<span style={{ color: 'var(--text-color)', fontSize: isMobile ? '16px' : '18px' }}>Создание нового турнира</span>}
                         bordered={false}
                         style={{
                             backgroundColor: 'var(--card-bg)',
                             borderColor: 'var(--border-color)'
                         }}
+                        bodyStyle={{ padding: isMobile ? '16px' : '24px' }}
                     >
                         <Form
                             form={form}
@@ -263,8 +312,8 @@ const AdminPage = () => {
                             onFinish={onFinish}
                             autoComplete="off"
                         >
-                            <Row gutter={16}>
-                                <Col span={12}>
+                            <Row gutter={isMobile ? 8 : 16}>
+                                <Col xs={24} md={12}>
                                     <Form.Item
                                         name="name"
                                         label={<span style={{ color: 'var(--text-color)' }}>Название турнира</span>}
@@ -272,6 +321,7 @@ const AdminPage = () => {
                                     >
                                         <Input
                                             placeholder="Введите название"
+                                            size={isMobile ? "small" : "middle"}
                                             style={{
                                                 backgroundColor: 'var(--card-bg)',
                                                 color: 'var(--text-color)',
@@ -281,7 +331,7 @@ const AdminPage = () => {
                                     </Form.Item>
                                 </Col>
 
-                                <Col span={12}>
+                                <Col xs={24} md={12}>
                                     <Form.Item
                                         name="startDateTime"
                                         label={<span style={{ color: 'var(--text-color)' }}>Дата и время начала</span>}
@@ -296,9 +346,9 @@ const AdminPage = () => {
                                                 color: 'var(--text-color)',
                                                 borderColor: 'var(--border-color)'
                                             }}
+                                            size={isMobile ? "small" : "middle"}
                                             placeholder="Выберите дату и время"
                                             disabledDate={(current) => current && current < dayjs().startOf('day')}
-                                            className="custom-date-picker"
                                         />
                                     </Form.Item>
                                 </Col>
@@ -312,6 +362,7 @@ const AdminPage = () => {
                                 <Input
                                     placeholder="Введите адрес проведения турнира"
                                     prefix={<EnvironmentOutlined style={{ color: 'var(--text-secondary)' }} />}
+                                    size={isMobile ? "small" : "middle"}
                                     style={{
                                         backgroundColor: 'var(--card-bg)',
                                         color: 'var(--text-color)',
@@ -327,6 +378,7 @@ const AdminPage = () => {
                                 <TextArea
                                     rows={3}
                                     placeholder="Введите описание турнира (необязательно)"
+                                    size={isMobile ? "small" : "middle"}
                                     style={{
                                         backgroundColor: 'var(--card-bg)',
                                         color: 'var(--text-color)',
@@ -335,69 +387,51 @@ const AdminPage = () => {
                                 />
                             </Form.Item>
 
-                            <Row gutter={16}>
-                                <Col span={8}>
+                            <Row gutter={isMobile ? 8 : 16}>
+                                <Col xs={24} sm={8}>
                                     <Form.Item
                                         name="minAmountOfPlayers"
-                                        label={<span style={{ color: 'var(--text-color)' }}>Минимальное количество игроков</span>}
+                                        label={<span style={{ color: 'var(--text-color)' }}>Мин. игроков</span>}
                                         rules={[{ required: true, message: 'Введите минимальное количество' }]}
                                     >
                                         <InputNumber
                                             min={2}
                                             max={100}
-                                            style={{
-                                                width: '100%',
-                                                backgroundColor: 'var(--card-bg)',
-                                                color: 'var(--text-color)',
-                                                borderColor: 'var(--border-color)'
-                                            }}
-                                            placeholder="Минимум игроков"
-                                            controlsStyle={{
-                                                backgroundColor: 'var(--card-bg)',
-                                                color: 'var(--text-color)',
-                                                borderColor: 'var(--border-color)'
-                                            }}
-                                            className="custom-input-number"
+                                            style={{ width: '100%' }}
+                                            size={isMobile ? "small" : "middle"}
+                                            placeholder="Минимум"
                                         />
                                     </Form.Item>
                                 </Col>
 
-                                <Col span={8}>
+                                <Col xs={24} sm={8}>
                                     <Form.Item
                                         name="maxAmountOfPlayers"
-                                        label={<span style={{ color: 'var(--text-color)' }}>Максимальное количество игроков</span>}
+                                        label={<span style={{ color: 'var(--text-color)' }}>Макс. игроков</span>}
                                         rules={[{ required: true, message: 'Введите максимальное количество' }]}
                                     >
                                         <InputNumber
                                             min={2}
                                             max={100}
                                             style={{ width: '100%' }}
-                                            placeholder="Максимум игроков"
-                                            controlsStyle={{
-                                                backgroundColor: 'var(--card-bg)',
-                                                color: 'var(--text-color)',
-                                                borderColor: 'var(--border-color)'
-                                            }}
+                                            size={isMobile ? "small" : "middle"}
+                                            placeholder="Максимум"
                                         />
                                     </Form.Item>
                                 </Col>
 
-                                <Col span={8}>
+                                <Col xs={24} sm={8}>
                                     <Form.Item
                                         name="amountOfRounds"
-                                        label={<span style={{ color: 'var(--text-color)' }}>Количество раундов</span>}
+                                        label={<span style={{ color: 'var(--text-color)' }}>Раунды</span>}
                                         rules={[{ required: true, message: 'Введите количество раундов' }]}
                                     >
                                         <InputNumber
                                             min={1}
                                             max={20}
                                             style={{ width: '100%' }}
-                                            placeholder="Количество раундов"
-                                            controlsStyle={{
-                                                backgroundColor: 'var(--card-bg)',
-                                                color: 'var(--text-color)',
-                                                borderColor: 'var(--border-color)'
-                                            }}
+                                            size={isMobile ? "small" : "middle"}
+                                            placeholder="Раунды"
                                         />
                                     </Form.Item>
                                 </Col>
@@ -409,10 +443,11 @@ const AdminPage = () => {
                                     htmlType="submit"
                                     icon={<PlusOutlined />}
                                     loading={loading}
-                                    size="large"
+                                    size={isMobile ? "middle" : "large"}
                                     style={{
                                         backgroundColor: 'var(--hover-color)',
-                                        borderColor: 'var(--hover-color)'
+                                        borderColor: 'var(--hover-color)',
+                                        width: isMobile ? '100%' : 'auto'
                                     }}
                                 >
                                     Создать турнир
