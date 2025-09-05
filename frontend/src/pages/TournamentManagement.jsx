@@ -51,7 +51,7 @@ const TournamentManagement = () => {
             setUpdating(true);
             const response = await client.post(`/api/admin/tournament/${tournamentId}/round`);
             const newRound = response.data;
-            message.success(`Раунд ${newRound + 1} создан!`);
+            message.success(`Раунд ${newRound} создан!`);
             navigate(`/admin/tournament/${tournamentId}/${newRound}`);
         } catch (error) {
             message.error('Ошибка создания раунда: ' + error.response?.data?.message || error.message);
@@ -92,7 +92,7 @@ const TournamentManagement = () => {
     };
 
     const isLastRound = () => {
-        return tournamentInfo && parseInt(roundId) === tournamentInfo.amountOfRounds - 1;
+        return tournamentInfo && parseInt(roundId) === tournamentInfo.amountOfRounds;
     };
 
     const canCreateNextRound = () => {
@@ -146,7 +146,7 @@ const TournamentManagement = () => {
             </Title>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <Text strong style={{ color: 'var(--text-color)' }}>Раунд: {parseInt(roundId) + 1}</Text>
+                <Text strong style={{ color: 'var(--text-color)' }}>Раунд: {parseInt(roundId)}</Text>
 
                 {isFirstRoundAndNotStarted() ? (
                     <Button

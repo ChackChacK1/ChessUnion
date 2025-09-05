@@ -78,9 +78,12 @@ public class TournamentService {
         }
 
         Player player = new Player();
-
-        player.setUser(user);
+        player.setAmountOfDraws(user.getAmountOfDraws());
+        player.setAmountOfWins(user.getAmountOfWins());
+        player.setAmountOfLosses(user.getAmountOfLosses());
+        player.setAmountOfMatches(user.getAmountOfMatches());
         player.setRating(user.getRating());
+        player.setUser(user);
         player.setTournament(tournament);
         player.setCreatedAt(LocalDateTime.now());
 
@@ -129,10 +132,13 @@ public class TournamentService {
             throw new TooManyPlayersException(tournament.getPlayers().size(), tournament.getMinAmountOfPlayers());
         }
 
-        tournament.setCurrentRound(tournament.getCurrentRound() + 1);
+
         if (tournament.getCurrentRound() == 0) {
+            tournament.setCurrentRound(1);
+            tournament.setStage(Tournament.Stage.PLAYING);
             generateFirstRound(tournament);
         } else {
+            tournament.setCurrentRound(tournament.getCurrentRound() + 1);
             generateNonFirstRound(tournament);
         }
         tournamentRepository.save(tournament);

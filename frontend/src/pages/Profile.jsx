@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Card, List, Typography, Divider, Tag, Spin, message, Button } from 'antd';
-import { UserOutlined, MailOutlined, TrophyOutlined, CalendarOutlined, EditOutlined } from '@ant-design/icons';
+import { Card, List, Typography, Divider, Tag, Spin, message, Button, Space, Row, Col, Statistic } from 'antd'; // Добавили Row, Col, Statistic
+import { UserOutlined, MailOutlined, TrophyOutlined, CalendarOutlined, EditOutlined, LockOutlined, CrownOutlined, FallOutlined, MinusOutlined, BarChartOutlined } from '@ant-design/icons'; // Добавили иконки для статистики
 import { useNavigate } from 'react-router-dom';
 import client from '../api/client';
 import dayjs from 'dayjs';
@@ -31,6 +31,10 @@ const Profile = () => {
         navigate('/profile/edit');
     };
 
+    const handleChangePassword = () => {
+        navigate('/change-password');
+    };
+
     const getResultText = (result) => {
         switch (result) {
             case 1: return 'Победа белых';
@@ -49,6 +53,12 @@ const Profile = () => {
         }
     };
 
+    // Функция для расчета процента побед
+    const calculateWinPercentage = () => {
+        if (!profile?.amountOfMatches || profile.amountOfMatches === 0) return 0;
+        return ((profile.amountOfWins / profile.amountOfMatches) * 100).toFixed(1);
+    };
+
     if (loading) {
         return <Spin size="large" style={{ display: 'flex', justifyContent: 'center', marginTop: 50 }} />;
     }
@@ -58,7 +68,7 @@ const Profile = () => {
     }
 
     return (
-        <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
+        <div style={{ padding: '20px', maxWidth: '1000px', margin: '0 auto' }}>
             <Card
                 title={
                     <span style={{ color: 'var(--text-color)' }}>
@@ -71,17 +81,30 @@ const Profile = () => {
                     borderColor: 'var(--border-color)'
                 }}
                 extra={
-                    <Button
-                        icon={<EditOutlined />}
-                        onClick={handleEdit}
-                        type="primary"
-                        style={{
-                            backgroundColor: 'var(--hover-color)',
-                            borderColor: 'var(--hover-color)'
-                        }}
-                    >
-                        Редактировать
-                    </Button>
+                    <Space>
+                        <Button
+                            icon={<LockOutlined />}
+                            onClick={handleChangePassword}
+                            style={{
+                                backgroundColor: 'var(--primary-color)',
+                                borderColor: 'var(--primary-color)',
+                                color: 'white'
+                            }}
+                        >
+                            Смена пароля
+                        </Button>
+                        <Button
+                            icon={<EditOutlined />}
+                            onClick={handleEdit}
+                            type="primary"
+                            style={{
+                                backgroundColor: 'var(--hover-color)',
+                                borderColor: 'var(--hover-color)'
+                            }}
+                        >
+                            Редактировать
+                        </Button>
+                    </Space>
                 }
             >
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
@@ -130,6 +153,118 @@ const Profile = () => {
                     </p>
                 </div>
 
+                {/* Новая секция со статистикой */}
+                <Divider orientation="left" style={{
+                    color: 'var(--text-color)',
+                    borderColor: 'var(--border-color)'
+                }}>
+                    Статистика игр
+                </Divider>
+
+                <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
+                    <Col xs={12} sm={6}>
+                        <Card
+                            size="small"
+                            style={{
+                                backgroundColor: 'var(--card-bg)',
+                                borderColor: 'var(--border-color)'
+                            }}
+                        >
+                            <Statistic
+                                title="Всего игр"
+                                value={profile.amountOfMatches || 0}
+                                prefix={<BarChartOutlined />}
+                                valueStyle={{ color: 'var(--text-color)' }}
+                            />
+                        </Card>
+                    </Col>
+                    <Col xs={12} sm={6}>
+                        <Card
+                            size="small"
+                            style={{
+                                backgroundColor: 'var(--card-bg)',
+                                borderColor: 'var(--border-color)'
+                            }}
+                        >
+                            <Statistic
+                                title="Победы"
+                                value={profile.amountOfWins || 0}
+                                prefix={<CrownOutlined style={{ color: '#52c41a' }} />}
+                                valueStyle={{ color: '#52c41a' }}
+                            />
+                        </Card>
+                    </Col>
+                    <Col xs={12} sm={6}>
+                        <Card
+                            size="small"
+                            style={{
+                                backgroundColor: 'var(--card-bg)',
+                                borderColor: 'var(--border-color)'
+                            }}
+                        >
+                            <Statistic
+                                title="Поражения"
+                                value={profile.amountOfLosses || 0}
+                                prefix={<FallOutlined style={{ color: '#ff4d4f' }} />}
+                                valueStyle={{ color: '#ff4d4f' }}
+                            />
+                        </Card>
+                    </Col>
+                    <Col xs={12} sm={6}>
+                        <Card
+                            size="small"
+                            style={{
+                                backgroundColor: 'var(--card-bg)',
+                                borderColor: 'var(--border-color)'
+                            }}
+                        >
+                            <Statistic
+                                title="Ничьи"
+                                value={profile.amountOfDraws || 0}
+                                prefix={<MinusOutlined style={{ color: '#1890ff' }} />}
+                                valueStyle={{ color: '#1890ff' }}
+                            />
+                        </Card>
+                    </Col>
+                </Row>
+
+                {/* Дополнительная статистика */}
+                {profile.amountOfMatches > 0 && (
+                    <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
+                        <Col xs={12} sm={6}>
+                            <Card
+                                size="small"
+                                style={{
+                                    backgroundColor: 'var(--card-bg)',
+                                    borderColor: 'var(--border-color)'
+                                }}
+                            >
+                                <Statistic
+                                    title="Процент побед"
+                                    value={calculateWinPercentage()}
+                                    suffix="%"
+                                    valueStyle={{ color: 'var(--text-color)' }}
+                                />
+                            </Card>
+                        </Col>
+                        <Col xs={12} sm={6}>
+                            <Card
+                                size="small"
+                                style={{
+                                    backgroundColor: 'var(--card-bg)',
+                                    borderColor: 'var(--border-color)'
+                                }}
+                            >
+                                <Statistic
+                                    title="Очков набрано"
+                                    value={(profile.amountOfWins * 1 + profile.amountOfDraws * 0.5).toFixed(1)}
+                                    valueStyle={{ color: 'var(--text-color)' }}
+                                />
+                            </Card>
+                        </Col>
+                    </Row>
+                )}
+
                 <Divider orientation="left" style={{
                     color: 'var(--text-color)',
                     borderColor: 'var(--border-color)'
@@ -147,7 +282,6 @@ const Profile = () => {
                                 padding: '12px 0'
                             }}>
                                 <div style={{ width: '100%' }}>
-                                    {/* Заголовки столбцов */}
                                     <div style={{
                                         display: 'grid',
                                         gridTemplateColumns: '1fr auto 1fr',
@@ -161,7 +295,6 @@ const Profile = () => {
                                         <span>Чёрные</span>
                                     </div>
 
-                                    {/* Данные матча */}
                                     <div style={{
                                         display: 'grid',
                                         gridTemplateColumns: '1fr auto 1fr',

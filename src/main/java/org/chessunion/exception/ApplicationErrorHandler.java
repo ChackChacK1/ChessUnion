@@ -24,6 +24,14 @@ public class ApplicationErrorHandler {
         ), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(UsernameAlreadyExistsException.class)
+    public ResponseEntity<AppErrorResponse> handleUsernameAlreadyExistsException(UsernameAlreadyExistsException e) {
+        return new ResponseEntity<>(new AppErrorResponse(
+                "Username already being used!:",
+                e.getMessage()
+        ), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(PlayerNotFoundException.class)
     public ResponseEntity<AppErrorResponse> handlePlayerNotFoundException(PlayerNotFoundException e) {
         return new ResponseEntity<>(new AppErrorResponse(

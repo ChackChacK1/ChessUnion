@@ -17,7 +17,15 @@ import {
     Space,
     Grid
 } from 'antd';
-import { PlusOutlined, SettingOutlined, EditOutlined, EnvironmentOutlined, UserOutlined, TeamOutlined } from '@ant-design/icons';
+import {
+    PlusOutlined,
+    SettingOutlined,
+    EditOutlined,
+    EnvironmentOutlined,
+    UserOutlined,
+    TeamOutlined,
+    UserAddOutlined
+} from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import client from '../api/client';
 import dayjs from 'dayjs';
@@ -29,7 +37,9 @@ const { useBreakpoint } = Grid;
 
 const AdminPage = () => {
     const [form] = Form.useForm();
+    const [adminForm] = Form.useForm(); // Форма для назначения администратора
     const [loading, setLoading] = useState(false);
+    const [adminLoading, setAdminLoading] = useState(false); // Loading для назначения админа
     const [runningTournaments, setRunningTournaments] = useState([]);
     const [tournamentsLoading, setTournamentsLoading] = useState(false);
     const navigate = useNavigate();
@@ -75,6 +85,31 @@ const AdminPage = () => {
             message.error('Ошибка создания турнира: ' + (error.response?.data?.message || error.message));
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Функция для назначения администратора
+    const onAssignAdmin = async (values) => {
+        try {
+            setAdminLoading(true);
+
+            // Создаем объект PromoteToAdminDto
+            const promoteToAdminDto = {
+                username: values.username
+            };
+
+            await client.patch('/api/user/setAdmin', promoteToAdminDto, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            message.success('Пользователь успешно назначен администратором!');
+            adminForm.resetFields();
+        } catch (error) {
+            message.error('Ошибка назначения администратора: ' + (error.response?.data?.message || error.message));
+        } finally {
+            setAdminLoading(false);
         }
     };
 
@@ -227,7 +262,7 @@ const AdminPage = () => {
                                                             fontSize: isMobile ? '11px' : '12px'
                                                         }}
                                                     >
-                                                        Раунд: {tournament.currentRound + 1}/{tournament.amountOfRounds}
+                                                        Раунд: {tournament.currentRound}/{tournament.amountOfRounds}
                                                     </Tag>
                                                 </div>
                                             }
@@ -454,6 +489,83 @@ const AdminPage = () => {
                                 </Button>
                             </Form.Item>
                         </Form>
+                    </Card>
+                </TabPane>
+
+                <TabPane
+                    tab={
+                        <span style={{ color: 'var(--text-color)' }}>
+                            <UserAddOutlined />
+                            {isMobile ? 'Админ' : 'Назначить админа'}
+                        </span>
+                    }
+                    key="admin-assign"
+                >
+                    <Card
+                        title={<span style={{ color: 'var(--text-color)', fontSize: isMobile ? '16px' : '18px' }}>Назначение администратора</span>}
+                        bordered={false}
+                        style={{
+                            backgroundColor: 'var(--card-bg)',
+                            borderColor: 'var(--border-color)',
+                            maxWidth: '500px',
+                            margin: '0 auto'
+                        }}
+                        bodyStyle={{ padding: isMobile ? '16px' : '24px' }}
+                    >
+                        <Form
+                            form={adminForm}
+                            layout="vertical"
+                            onFinish={onAssignAdmin}
+                            autoComplete="off"
+                        >
+                            <Form.Item
+                                name="username"
+                                label={<span style={{ color: 'var(--text-color)' }}>Логин пользователя</span>}
+                                rules={[{
+                                    required: true,
+                                    message: 'Введите логин пользователя'
+                                }]}
+                            >
+                                <Input
+                                    placeholder="Введите логин пользователя"
+                                    prefix={<UserOutlined style={{ color: 'var(--text-secondary)' }} />}
+                                    size={isMobile ? "small" : "middle"}
+                                    style={{
+                                        backgroundColor: 'var(--card-bg)',
+                                        color: 'var(--text-color)',
+                                        borderColor: 'var(--border-color)'
+                                    }}
+                                />
+                            </Form.Item>
+
+                            <Form.Item>
+                                <Button
+                                    type="primary"
+                                    htmlType="submit"
+                                    loading={adminLoading}
+                                    size={isMobile ? "middle" : "large"}
+                                    style={{
+                                        backgroundColor: 'var(--hover-color)',
+                                        borderColor: 'var(--hover-color)',
+                                        width: '100%'
+                                    }}
+                                >
+                                    Назначить администратором
+                                </Button>
+                            </Form.Item>
+                        </Form>
+
+                        <div style={{
+                            marginTop: '20px',
+                            padding: '12px',
+                            backgroundColor: 'var(--bg-color)',
+                            borderRadius: '6px',
+                            border: '1px solid var(--border-color)'
+                        }}>
+                            <Text style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
+                                💡 После назначения пользователь получит права администратора и доступ к этой панели управления.
+                            </Text>
+                        </div>
                     </Card>
                 </TabPane>
             </Tabs>

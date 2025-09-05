@@ -20,6 +20,10 @@ public class ProfileDto implements Serializable {
     private String lastName;
     private String email;
     private Double rating;
+    private Integer amountOfMatches;
+    private Integer amountOfWins;
+    private Integer amountOfLosses;
+    private Integer amountOfDraws;
     private List<MatchDto> matches;
     private LocalDateTime createdAt;
 }

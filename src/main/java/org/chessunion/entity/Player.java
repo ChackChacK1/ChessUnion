@@ -34,6 +34,18 @@ public class Player {
     @ManyToOne(fetch = FetchType.LAZY)
     private Tournament tournament;
 
+    @Column(name = "amount_of_matches", nullable = false)
+    private int amountOfMatches;
+
+    @Column(name = "amount_of_wins", nullable = false)
+    private int amountOfWins;
+
+    @Column(name = "amount_of_losses", nullable = false)
+    private int amountOfLosses;
+
+    @Column(name = "amount_of_draws", nullable = false)
+    private int amountOfDraws;
+
     @OneToMany(mappedBy = "whitePlayer", fetch = FetchType.LAZY)
     private Set<Match> matchesPlayedWhite = new HashSet<>();
 

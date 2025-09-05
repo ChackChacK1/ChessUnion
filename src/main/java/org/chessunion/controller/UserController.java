@@ -3,10 +3,7 @@ package org.chessunion.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
-import org.chessunion.dto.DeleteUserRequest;
-import org.chessunion.dto.ProfileDto;
-import org.chessunion.dto.TopListElementDto;
-import org.chessunion.dto.UpdateProfileDto;
+import org.chessunion.dto.*;
 import org.chessunion.service.UserService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -29,6 +26,20 @@ public class UserController {
     public ResponseEntity<String> deleteUser(@RequestBody DeleteUserRequest deleteUserRequest) {
         userService.deleteUser(deleteUserRequest.getUsername());
         return ResponseEntity.ok("User deleted successfully");
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PatchMapping("/changePassword")
+    public ResponseEntity<String> changePassword(Principal principal, @RequestBody ChangePasswordRequest changePasswordRequest) {
+        userService.changePassword(principal, changePasswordRequest.getNewPassword());
+        return ResponseEntity.ok("Password changed successfully");
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/setAdmin")
+    public ResponseEntity<String> setAdmin(@RequestBody PromoteToAdminDto promoteToAdminDto) {
+        userService.promoteToAdmin(promoteToAdminDto.getUsername());
+        return ResponseEntity.ok("Admin promoted successfully");
     }
 
     @PreAuthorize("isAuthenticated()")

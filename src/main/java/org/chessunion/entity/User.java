@@ -39,6 +39,18 @@ public class User {
     @Column(nullable = false)
     private Double rating;
 
+    @Column(name = "amount_of_matches", nullable = false)
+    private Integer amountOfMatches;
+
+    @Column(name = "amount_of_wins", nullable = false)
+    private int amountOfWins;
+
+    @Column(name = "amount_of_losses", nullable = false)
+    private int amountOfLosses;
+
+    @Column(name = "amount_of_draws", nullable = false)
+    private int amountOfDraws;
+
     @ManyToMany
     @JoinTable(
             name = "users_roles",

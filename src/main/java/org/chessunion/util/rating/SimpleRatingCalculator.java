@@ -24,9 +24,41 @@ public class SimpleRatingCalculator implements RatingCalculator {
 
         double matchResult = match.getResult();
 
-        playerWhite.setRating(ratingOfFirstPlayer + 30 * (matchResult - expectedRatingDifferenceOfFirstPlayer));
+        int whiteK = 40;
+        int blackK = 40;
+
+        if (playerWhite.getAmountOfMatches() > 30){
+            if (playerWhite.getRating() < 2400) {
+                whiteK = 20;
+            } else {
+                whiteK = 10;
+            }
+        }
+
+        if (playerBlack.getAmountOfMatches() > 30){
+            if (playerBlack.getRating() < 2400) {
+                blackK = 20;
+            } else {
+                blackK = 10;
+            }
+        }
+        playerWhite.setAmountOfMatches(playerWhite.getAmountOfMatches() + 1);
+        playerBlack.setAmountOfMatches(playerBlack.getAmountOfMatches() + 1);
+
+        if (matchResult == 1) {
+            playerWhite.setAmountOfWins(playerWhite.getAmountOfWins() + 1);
+            playerBlack.setAmountOfLosses(playerBlack.getAmountOfLosses() + 1);
+        } else if (matchResult == 0.5){
+             playerWhite.setAmountOfDraws(playerWhite.getAmountOfDraws() + 1);
+             playerBlack.setAmountOfDraws(playerBlack.getAmountOfDraws() + 1);
+        } else {
+            playerWhite.setAmountOfLosses(playerWhite.getAmountOfLosses() + 1);
+            playerBlack.setAmountOfWins(playerBlack.getAmountOfWins() + 1);
+        }
+
+        playerWhite.setRating(ratingOfFirstPlayer + whiteK * (matchResult - expectedRatingDifferenceOfFirstPlayer));
         matchResult = Math.abs(matchResult-1);
-        playerBlack.setRating(ratingOfSecondPlayer + 30 * (matchResult - expectedRatingDifferenceOfSecondPlayer));
+        playerBlack.setRating(ratingOfSecondPlayer + blackK * (matchResult - expectedRatingDifferenceOfSecondPlayer));
 
         match.setWhitePlayer(playerWhite);
         match.setBlackPlayer(playerBlack);

@@ -7,7 +7,9 @@ import org.chessunion.dto.RegistrationRequest;
 import org.chessunion.dto.TopListElementDto;
 import org.chessunion.dto.UpdateProfileDto;
 import org.chessunion.entity.Player;
+import org.chessunion.entity.Role;
 import org.chessunion.entity.User;
+import org.chessunion.exception.UsernameAlreadyExistsException;
 import org.chessunion.repository.PlayerRepository;
 import org.chessunion.repository.RoleRepository;
 import org.chessunion.repository.UserRepository;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -62,6 +65,10 @@ public class UserService {
         user.setRating(1000.00);
         user.setRoles(Set.of(roleRepository.findById(1).orElseThrow()));
         user.setCreatedAt(LocalDateTime.now());
+        user.setAmountOfMatches(0);
+        user.setAmountOfLosses(0);
+        user.setAmountOfDraws(0);
+        user.setAmountOfWins(0);
 
         userRepository.save(user);
     }
@@ -84,23 +91,56 @@ public class UserService {
     }
 
     @Transactional
+    public void changePassword(Principal principal, String newPassword) {
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new UsernameNotFoundException(principal.getName()));
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    @Transactional
     public void saveRatings(Integer tournamentId) {
         List<Player> players = playerRepository.findAllByTournament_Id(tournamentId);
         for (Player player : players) {
             User user = player.getUser();
             user.setRating(player.getRating());
+            user.setAmountOfWins(player.getAmountOfWins());
+            user.setAmountOfLosses(player.getAmountOfLosses());
+            user.setAmountOfMatches(player.getAmountOfMatches());
+            user.setAmountOfDraws(player.getAmountOfDraws());
             userRepository.save(user);
         }
     }
 
     @Transactional
+    @CachePut(cacheNames = "profiles", key = "#principal.getName()", unless = "#result == null")
     public void updateProfile(Principal principal, UpdateProfileDto updateProfile){
         User user = userRepository.findByUsername(principal.getName()).orElseThrow(() -> new UsernameNotFoundException(principal.getName()));
+
+        if (!updateProfile.getUsername().equals(user.getUsername())) {
+            if (userRepository.existsByUsername(updateProfile.getUsername())){
+                throw new UsernameAlreadyExistsException(updateProfile.getUsername());
+            };
+        }
 
         user.setUsername(updateProfile.getUsername());
         user.setFirstName(updateProfile.getFirstName());
         user.setLastName(updateProfile.getLastName());
         user.setEmail(updateProfile.getEmail());
+
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void promoteToAdmin(String username) {
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
+
+        Role adminRole = roleRepository.findById(2)
+                .orElseThrow(() -> new RuntimeException("Admin role not found"));
+
+        Set<Role> roles = new HashSet<>();
+        roles.add(adminRole);
+        user.setRoles(roles);
 
         userRepository.save(user);
     }
