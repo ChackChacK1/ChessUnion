@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Table, Card, Typography, Spin, message, Tag } from 'antd';
+import { Table, Card, Typography, Spin, message, Tag, Pagination } from 'antd';
 import { CrownOutlined, TrophyOutlined, StarFilled } from '@ant-design/icons';
 import client from '../api/client';
 
@@ -8,22 +8,35 @@ const { Title, Text } = Typography;
 const TopPlayers = () => {
     const [players, setPlayers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalElements, setTotalElements] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
 
     useEffect(() => {
-        fetchTopPlayers();
-    }, []);
+        fetchTopPlayers(currentPage, pageSize);
+    }, [currentPage, pageSize]);
 
-    const fetchTopPlayers = async () => {
+    const fetchTopPlayers = async (page = 1, size = 10) => {
         try {
             setLoading(true);
-            const response = await client.get('/api/user/top');
-            const playersData = response.data;
-            setPlayers(Array.isArray(playersData) ? playersData : []);
+            // Вычитаем 1 из page, так как бэкенд использует zero-based пагинацию
+            const response = await client.get(`/api/user/top?page=${page - 1}&size=${size}`);
+            const pageData = response.data;
+
+            setPlayers(Array.isArray(pageData.content) ? pageData.content : []);
+            setTotalPages(pageData.totalPages || 0);
+            setTotalElements(pageData.totalElements || 0);
         } catch (error) {
             message.error('Ошибка загрузки рейтинга: ' + (error.response?.data?.message || error.message));
         } finally {
             setLoading(false);
         }
+    };
+
+    const handlePageChange = (page, size) => {
+        setCurrentPage(page);
+        setPageSize(size);
     };
 
     const columns = [
@@ -32,7 +45,8 @@ const TopPlayers = () => {
             key: 'place',
             width: 100,
             render: (_, __, index) => {
-                const place = index + 1;
+                // Рассчитываем глобальное место с учетом пагинации
+                const globalPlace = (currentPage - 1) * pageSize + index + 1;
 
                 return (
                     <div style={{
@@ -49,7 +63,7 @@ const TopPlayers = () => {
                              e.currentTarget.style.backgroundColor = 'transparent';
                          }}
                     >
-                        {place === 1 && (
+                        {globalPlace === 1 && (
                             <div style={{
                                 width: '32px',
                                 height: '32px',
@@ -65,7 +79,7 @@ const TopPlayers = () => {
                                 <CrownOutlined />
                             </div>
                         )}
-                        {place === 2 && (
+                        {globalPlace === 2 && (
                             <div style={{
                                 width: '32px',
                                 height: '32px',
@@ -81,7 +95,7 @@ const TopPlayers = () => {
                                 <StarFilled />
                             </div>
                         )}
-                        {place === 3 && (
+                        {globalPlace === 3 && (
                             <div style={{
                                 width: '32px',
                                 height: '32px',
@@ -97,7 +111,7 @@ const TopPlayers = () => {
                                 <StarFilled />
                             </div>
                         )}
-                        {place > 3 && (
+                        {globalPlace > 3 && (
                             <div style={{
                                 width: '32px',
                                 height: '32px',
@@ -111,7 +125,7 @@ const TopPlayers = () => {
                                 fontWeight: 'bold',
                                 color: 'var(--text-color)'
                             }}>
-                                {place}
+                                {globalPlace}
                             </div>
                         )}
                     </div>
@@ -122,17 +136,20 @@ const TopPlayers = () => {
             title: <span style={{ color: 'var(--text-color)' }}>Игрок</span>,
             dataIndex: 'fullName',
             key: 'fullName',
-            render: (name, record, index) => (
-                <Text
-                    strong
-                    style={{
-                        color: 'var(--text-color)',
-                        fontSize: index < 3 ? '16px' : '14px'
-                    }}
-                >
-                    {name || 'Неизвестный игрок'}
-                </Text>
-            )
+            render: (name, record, index) => {
+                const globalPlace = (currentPage - 1) * pageSize + index + 1;
+                return (
+                    <Text
+                        strong
+                        style={{
+                            color: 'var(--text-color)',
+                            fontSize: globalPlace < 4 ? '16px' : '14px'
+                        }}
+                    >
+                        {name || 'Неизвестный игрок'}
+                    </Text>
+                );
+            }
         },
         {
             title: <span style={{ color: 'var(--text-color)' }}>Рейтинг</span>,
@@ -140,21 +157,24 @@ const TopPlayers = () => {
             key: 'rating',
             width: 120,
             align: 'center',
-            render: (rating, record, index) => (
-                <Tag
-                    color={index < 3 ? "blue" : "default"}
-                    style={{
-                        margin: 0,
-                        color: index < 3 ? '#fff' : 'var(--text-color)',
-                        borderColor: 'var(--border-color)',
-                        fontWeight: 'bold',
-                        fontSize: index < 3 ? '16px' : '14px',
-                        backgroundColor: index < 3 ? '#1890ff' : 'transparent'
-                    }}
-                >
-                    {rating || 0}
-                </Tag>
-            )
+            render: (rating, record, index) => {
+                const globalPlace = (currentPage - 1) * pageSize + index + 1;
+                return (
+                    <Tag
+                        color={globalPlace < 4 ? "blue" : "default"}
+                        style={{
+                            margin: 0,
+                            color: globalPlace < 4 ? '#fff' : 'var(--text-color)',
+                            borderColor: 'var(--border-color)',
+                            fontWeight: 'bold',
+                            fontSize: globalPlace < 4 ? '16px' : '14px',
+                            backgroundColor: globalPlace < 4 ? '#1890ff' : 'transparent'
+                        }}
+                    >
+                        {rating || 0}
+                    </Tag>
+                );
+            }
         }
     ];
 
@@ -185,7 +205,7 @@ const TopPlayers = () => {
                     columns={columns}
                     dataSource={players.map((player, index) => ({
                         ...player,
-                        key: index
+                        key: (currentPage - 1) * pageSize + index
                     }))}
                     loading={loading}
                     pagination={false}
@@ -199,6 +219,29 @@ const TopPlayers = () => {
                     <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
                         <TrophyOutlined style={{ fontSize: '48px', marginBottom: '16px', color: 'var(--text-secondary)' }} />
                         <div>Рейтинг игроков пока пуст</div>
+                    </div>
+                )}
+
+                {totalPages > 1 && (
+                    <div style={{
+                        marginTop: 24,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        padding: '16px 0'
+                    }}>
+                        <Pagination
+                            current={currentPage}
+                            pageSize={pageSize}
+                            total={totalElements}
+                            onChange={handlePageChange}
+                            onShowSizeChange={handlePageChange}
+                            showSizeChanger={true}
+                            pageSizeOptions={['10', '20', '50']}
+                            showTotal={(total, range) =>
+                                `Показано ${range[0]}-${range[1]} из ${total} игроков`
+                            }
+                            style={{ color: 'var(--text-color)' }}
+                        />
                     </div>
                 )}
             </Card>

@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.chessunion.dto.*;
 import org.chessunion.service.UserService;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -64,7 +65,7 @@ public class UserController {
 
     @PreAuthorize("permitAll()")
     @GetMapping("/top")
-    public ResponseEntity<List<TopListElementDto>> getTopList(@PageableDefault Pageable pageable) {
+    public ResponseEntity<Page<TopListElementDto>> getTopList(@PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.ok(userService.getTopList(pageable));
     }
 }

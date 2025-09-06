@@ -18,6 +18,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -147,12 +149,14 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public List<TopListElementDto> getTopList(Pageable pageable) {
-        return userRepository.findAll().stream().sorted(Comparator.comparingDouble(User::getRating)).map(player -> {
+    public Page<TopListElementDto> getTopList(Pageable pageable) {
+        Page<User> userPage = userRepository.findAllByOrderByRatingDesc(pageable);
+
+        return userPage.map(player -> {
             TopListElementDto topListElementDto = new TopListElementDto();
             topListElementDto.setFullName(player.getFirstName() + " " + player.getLastName());
             topListElementDto.setRating((int) Math.round(player.getRating()));
             return topListElementDto;
-        }).toList().reversed();
+        });
     }
 }
