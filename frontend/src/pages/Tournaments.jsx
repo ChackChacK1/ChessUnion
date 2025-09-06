@@ -98,7 +98,7 @@ const Tournaments = () => {
     if (!tournaments || tournaments.length === 0) {
         return (
             <div style={{ padding: '20px', textAlign: 'center' }}>
-                <Title level={4}>Турниры не найдены</Title>
+                <Title style = {{color: 'var(--text-color'}} level={4}>Турниры не найдены</Title>
                 <Text>На данный момент нет активных турниров.</Text>
             </div>
         );

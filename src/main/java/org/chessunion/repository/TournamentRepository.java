@@ -10,5 +10,5 @@ import java.util.List;
 
 @Repository
 public interface TournamentRepository extends JpaRepository<Tournament, Integer> {
-    List<Tournament> findByStageNot(Tournament.Stage stage, Pageable pageable);
+    List<Tournament> findByStageNot(Tournament.Stage stage);
 }

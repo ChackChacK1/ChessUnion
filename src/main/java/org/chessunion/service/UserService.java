@@ -13,9 +13,11 @@ import org.chessunion.exception.UsernameAlreadyExistsException;
 import org.chessunion.repository.PlayerRepository;
 import org.chessunion.repository.RoleRepository;
 import org.chessunion.repository.UserRepository;
+import org.hibernate.annotations.Cache;
 import org.modelmapper.ModelMapper;
-import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -81,13 +83,12 @@ public class UserService {
     }
 
     @Transactional
-    @CachePut(cacheNames = "profiles", key = "#username")
-    public String updateEmail(String username, String email) {
+    @CacheEvict(cacheNames = "profiles", key = "#username")
+    public void updateEmail(String username, String email) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(username));
         user.setEmail(email);
         userRepository.save(user);
-        return email;
     }
 
     @Transactional
@@ -99,6 +100,7 @@ public class UserService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "profiles", allEntries = true)
     public void saveRatings(Integer tournamentId) {
         List<Player> players = playerRepository.findAllByTournament_Id(tournamentId);
         for (Player player : players) {
@@ -113,7 +115,7 @@ public class UserService {
     }
 
     @Transactional
-    @CachePut(cacheNames = "profiles", key = "#principal.getName()", unless = "#result == null")
+    @CacheEvict(cacheNames = "profiles", key = "#principal.getName()")
     public void updateProfile(Principal principal, UpdateProfileDto updateProfile){
         User user = userRepository.findByUsername(principal.getName()).orElseThrow(() -> new UsernameNotFoundException(principal.getName()));
 
@@ -146,7 +148,7 @@ public class UserService {
     }
 
     public List<TopListElementDto> getTopList(Pageable pageable) {
-        return userRepository.findAll(pageable).stream().sorted(Comparator.comparingDouble(User::getRating)).map(player -> {
+        return userRepository.findAll().stream().sorted(Comparator.comparingDouble(User::getRating)).map(player -> {
             TopListElementDto topListElementDto = new TopListElementDto();
             topListElementDto.setFullName(player.getFirstName() + " " + player.getLastName());
             topListElementDto.setRating((int) Math.round(player.getRating()));

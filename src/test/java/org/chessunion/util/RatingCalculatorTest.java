@@ -40,8 +40,8 @@ public class RatingCalculatorTest {
 
         Match resultOfCalculation = ratingCalculator.calculate(match);
 
-        Assertions.assertEquals(1515.00, resultOfCalculation.getWhitePlayer().getRating());
-        Assertions.assertEquals(1485.00, resultOfCalculation.getBlackPlayer().getRating());
+        Assertions.assertEquals(1520.00, resultOfCalculation.getWhitePlayer().getRating());
+        Assertions.assertEquals(1480.00, resultOfCalculation.getBlackPlayer().getRating());
     }
 
     @Test
@@ -52,8 +52,8 @@ public class RatingCalculatorTest {
 
         Match resultOfCalculation = ratingCalculator.calculate(match);
 
-        Assertions.assertEquals(1485.00, resultOfCalculation.getWhitePlayer().getRating());
-        Assertions.assertEquals(1515.00, resultOfCalculation.getBlackPlayer().getRating());
+        Assertions.assertEquals(1480.00, resultOfCalculation.getWhitePlayer().getRating());
+        Assertions.assertEquals(1520.00, resultOfCalculation.getBlackPlayer().getRating());
     }
 
     @Test

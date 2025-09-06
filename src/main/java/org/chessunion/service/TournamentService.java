@@ -39,7 +39,8 @@ public class TournamentService {
     private final UserService userService;
 
     public List<TournamentDto> getAllTournaments(Pageable pageable) {
-        return tournamentRepository.findAll(pageable).stream()
+        return tournamentRepository.findAll().stream()
+                .sorted(Comparator.comparing(Tournament::getStartDateTime))
                 .map(this::tournamentToDto).toList();
     }
 
@@ -109,7 +110,7 @@ public class TournamentService {
     }
 
     public List<TournamentDto> getRunningTournaments(Pageable pageable){
-        List<Tournament> tournaments = tournamentRepository.findByStageNot(Tournament.Stage.FINISHED, pageable);
+        List<Tournament> tournaments = tournamentRepository.findByStageNot(Tournament.Stage.FINISHED);
 
         return tournaments.stream()
                 .map(this::tournamentToDto)

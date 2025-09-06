@@ -259,6 +259,7 @@ const Profile = () => {
                                     title="Очков набрано"
                                     value={(profile.amountOfWins * 1 + profile.amountOfDraws * 0.5).toFixed(1)}
                                     valueStyle={{ color: 'var(--text-color)' }}
+                                    titleStyle={{ color: 'var(--text-secondary)' }}
                                 />
                             </Card>
                         </Col>
