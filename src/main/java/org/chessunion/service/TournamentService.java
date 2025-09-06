@@ -2,10 +2,7 @@ package org.chessunion.service;
 
 
 import lombok.RequiredArgsConstructor;
-import org.chessunion.dto.PlayerDto;
-import org.chessunion.dto.TournamentCreateRequest;
-import org.chessunion.dto.TournamentDto;
-import org.chessunion.dto.UpdateTournamentDto;
+import org.chessunion.dto.*;
 import org.chessunion.entity.Player;
 import org.chessunion.entity.Tournament;
 import org.chessunion.entity.User;
@@ -37,6 +34,7 @@ public class TournamentService {
     private final ModelMapper modelMapper;
     private final UserRepository userRepository;
     private final UserService userService;
+    private final TransliterationService transliterationService;
 
     public List<TournamentDto> getAllTournaments(Pageable pageable) {
         return tournamentRepository.findAll().stream()
@@ -258,5 +256,30 @@ public class TournamentService {
 
         dto.setPlayers(playerDtoList);
         return dto;
+    }
+
+    @Transactional
+    public void registerCustomUser(int id, RegisterCustomUserRequest registerCustomUserRequest) {
+        String fullName = registerCustomUserRequest.getFullName();
+        String firstName = fullName.split(" ")[0];
+        String lastName = fullName.split(" ")[1];
+        List<User> userList = userRepository.findAllByFirstNameAndLastName(firstName, lastName);
+
+        if (userList.isEmpty()) {
+            RegistrationRequest registrationRequest = new RegistrationRequest();
+            registrationRequest.setFirstName(firstName);
+            registrationRequest.setLastName(lastName);
+            String username = transliterationService.transliterate(firstName + lastName);
+            registrationRequest.setUsername(username);
+            registrationRequest.setPassword("12345678");
+            userService.registerUser(registrationRequest);
+
+            registrationTournament(username, id);
+        } else if (userList.size() == 1) {
+            User user = userList.getFirst();
+            registrationTournament(user.getUsername(), id);
+        } else {
+            throw new RuntimeException("There are 2 or more users with this fullName!");
+        }
     }
 }

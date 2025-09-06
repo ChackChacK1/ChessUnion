@@ -1,7 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Table, Card, Typography, Button, message, Spin, Space, Tag, Grid } from 'antd';
-import { DeleteOutlined, ArrowLeftOutlined, TeamOutlined } from '@ant-design/icons';
+import {
+    Table,
+    Card,
+    Typography,
+    Button,
+    message,
+    Spin,
+    Space,
+    Tag,
+    Grid,
+    Input,
+    Row,
+    Col
+} from 'antd';
+import { DeleteOutlined, ArrowLeftOutlined, TeamOutlined, UserAddOutlined } from '@ant-design/icons';
 import client from '../api/client';
 
 const { Title, Text } = Typography;
@@ -17,6 +30,8 @@ const TournamentPlayersManagement = () => {
     const [loading, setLoading] = useState(true);
     const [tournamentInfo, setTournamentInfo] = useState(null);
     const [deleting, setDeleting] = useState(false);
+    const [addingPlayer, setAddingPlayer] = useState(false);
+    const [fullName, setFullName] = useState('');
 
     // Функции для получения цвета и перевода стадии
     const getStageColor = (stage) => {
@@ -79,6 +94,27 @@ const TournamentPlayersManagement = () => {
             message.error('Ошибка удаления игрока: ' + (error.response?.data?.message || error.message));
         } finally {
             setDeleting(false);
+        }
+    };
+
+    const handleAddPlayer = async () => {
+        if (!fullName.trim()) {
+            message.warning('Введите Фамилию и Имя игрока');
+            return;
+        }
+
+        try {
+            setAddingPlayer(true);
+            await client.post(`/api/admin/tournament/${tournamentId}/addUser`, {
+                fullName: fullName.trim()
+            });
+            message.success('Игрок успешно добавлен в турнир');
+            setFullName(''); // Очищаем поле ввода
+            fetchPlayers(); // Обновляем список игроков
+        } catch (error) {
+            message.error('Ошибка добавления игрока: ' + (error.response?.data?.message || error.message));
+        } finally {
+            setAddingPlayer(false);
         }
     };
 
@@ -234,6 +270,50 @@ const TournamentPlayersManagement = () => {
                     )}
                 </Card>
             )}
+
+            {/* Поле для добавления нового игрока */}
+            <Card
+                style={{
+                    marginBottom: 20,
+                    backgroundColor: 'var(--card-bg)',
+                    borderColor: 'var(--border-color)'
+                }}
+                bodyStyle={{ padding: isMobile ? '12px' : '16px' }}
+            >
+                <Title level={isMobile ? 5 : 4} style={{ color: 'var(--text-color)', marginBottom: 16 }}>
+                    Добавить игрока
+                </Title>
+
+                <Row gutter={[16, 16]} align="middle">
+                    <Col xs={24} md={16}>
+                        <Input
+                            placeholder="Введите Фамилию и Имя (например: Иванов Иван)"
+                            value={fullName}
+                            onChange={(e) => setFullName(e.target.value)}
+                            onPressEnter={handleAddPlayer}
+                            disabled={addingPlayer}
+                            size={isMobile ? "small" : "middle"}
+                            style={{
+                                backgroundColor: 'var(--input-bg)',
+                                borderColor: 'var(--border-color)',
+                                color: 'var(--text-color)'
+                            }}
+                        />
+                    </Col>
+                    <Col xs={24} md={8}>
+                        <Button
+                            type="primary"
+                            icon={<UserAddOutlined />}
+                            loading={addingPlayer}
+                            onClick={handleAddPlayer}
+                            size={isMobile ? "small" : "middle"}
+                            style={{ width: isMobile ? '100%' : 'auto' }}
+                        >
+                            Добавить игрока
+                        </Button>
+                    </Col>
+                </Row>
+            </Card>
 
             <Card
                 style={{

@@ -62,6 +62,10 @@ public class UserService {
     public void registerUser(RegistrationRequest registrationRequest) {
         User user = modelMapper.map(registrationRequest, User.class);
 
+        if (userRepository.existsByUsername(registrationRequest.getUsername().trim())){
+            throw new UsernameAlreadyExistsException(registrationRequest.getUsername());
+        }
+
         user.setUsername(registrationRequest.getUsername().trim());
         // шифрование пароля
         user.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));
@@ -117,7 +121,7 @@ public class UserService {
     }
 
     @Transactional
-    @CacheEvict(cacheNames = "profiles", key = "#principal.getName()")
+    @CacheEvict(cacheNames = "profiles", allEntries = true)
     public void updateProfile(Principal principal, UpdateProfileDto updateProfile){
         User user = userRepository.findByUsername(principal.getName()).orElseThrow(() -> new UsernameNotFoundException(principal.getName()));
 

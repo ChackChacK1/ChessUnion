@@ -3,6 +3,7 @@ package org.chessunion.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import org.chessunion.dto.RegisterCustomUserRequest;
 import org.chessunion.dto.TournamentDto;
 import org.chessunion.service.TournamentService;
 import org.springframework.data.domain.Pageable;

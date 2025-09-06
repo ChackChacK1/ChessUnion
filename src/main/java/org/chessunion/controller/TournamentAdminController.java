@@ -3,6 +3,7 @@ package org.chessunion.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import org.chessunion.dto.RegisterCustomUserRequest;
 import org.chessunion.dto.TournamentCreateRequest;
 import org.chessunion.dto.TournamentDto;
 import org.chessunion.dto.UpdateTournamentDto;
@@ -45,5 +46,11 @@ public class TournamentAdminController {
                                               @RequestBody UpdateTournamentDto updateTournamentDto){
         tournamentService.updateTournament(id, updateTournamentDto);
         return ResponseEntity.ok("Tournament update successfully");
+    }
+
+    @PostMapping("/{id}/addUser")
+    public ResponseEntity<String> registerCustomUser(@PathVariable int id, @RequestBody RegisterCustomUserRequest registerCustomUserRequest) {
+        tournamentService.registerCustomUser(id, registerCustomUserRequest);
+        return ResponseEntity.ok("User registered successfully");
     }
 }
