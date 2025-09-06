@@ -1346,8 +1346,8 @@ h1, h2, h3, h4, h5, h6,
 }
 
 .ant-btn-text:hover {
-  color: var(--text-secondary) !important;
-  background-color: var(--text-secondary) !important;
+  color: var(--text-color) !important;
+  background-color: var(--menu-target-color) !important;
 }
 
 .ant-btn-text:active,
@@ -1415,4 +1415,13 @@ h1, h2, h3, h4, h5, h6,
 
 .ant-statistic-title {
   color: var(--text-color) !important;
+}
+/* Убедимся, что цвет иконки не меняется при hover */
+.ant-btn:hover .anticon {
+  color: var(--text-color) !important; /* Фиксированный цвет иконки */
+}
+
+/* Убираем стандартное изменение цвета иконки в Ant Design */
+.ant-btn-text:hover .anticon {
+  color: inherit !important;
 }

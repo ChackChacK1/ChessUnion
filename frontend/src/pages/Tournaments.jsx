@@ -124,6 +124,12 @@ const Tournaments = () => {
                         <Link to={`/tournament/${tournament.id}`}>
                             <Card
                                 hoverable
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'var(--card-target)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'var(--card-bg)';
+                                }}
                                 style={{
                                     minHeight: '180px',
                                     backgroundColor: 'var(--card-bg)',

@@ -285,18 +285,20 @@ const Navbar = () => {
                     <Button
                         type="text"
                         icon={<MenuOutlined />}
-                        onClick={() => setMobileMenuOpen(true)}
-                        style={{
-                            color: 'var(--text-color)',
-                            backgroundColor: 'transparent'
+                        onClick={(e) => {
+                            setMobileMenuOpen(true);
+                            // Сбрасываем фокус после клика
+                            e.currentTarget.blur();
                         }}
                         onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = 'var(--hover-color)';
-                            e.currentTarget.style.color = 'var(--primary-color)';
+                            e.currentTarget.style.backgroundColor = 'var(--card-target)';
                         }}
                         onMouseLeave={(e) => {
                             e.currentTarget.style.backgroundColor = 'transparent';
-                            e.currentTarget.style.color = 'var(--text-color)';
+                        }}
+                        style={{
+                            color: 'var(--text-color)',
+                            backgroundColor: 'transparent'
                         }}
                     />
                 </Space>
