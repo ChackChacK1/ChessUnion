@@ -58,6 +58,23 @@ public class Player {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    public Player(Player player) {
+        this.id = player.getId();
+        this.score = player.getScore();
+        this.colorBalance = player.getColorBalance();
+        this.user = player.getUser();
+        this.rating = player.getRating();
+        this.amountOfMatches = player.getAmountOfMatches();
+        this.amountOfWins = player.getAmountOfWins();
+        this.amountOfLosses = player.getAmountOfLosses();
+        this.amountOfDraws = player.getAmountOfDraws();
+        this.hadBye = player.isHadBye();
+        this.createdAt = player.getCreatedAt();
+        this.tournament = player.getTournament();
+        this.matchesPlayedWhite = player.getMatchesPlayedWhite();
+        this.matchesPlayedBlack = player.getMatchesPlayedBlack();
+    }
+
     public void addScore(double score) {
         this.score += score;
     }

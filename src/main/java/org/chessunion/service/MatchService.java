@@ -3,14 +3,17 @@ package org.chessunion.service;
 
 import lombok.RequiredArgsConstructor;
 import org.chessunion.dto.MatchDto;
+import org.chessunion.dto.MatchResultSetRequest;
 import org.chessunion.dto.PlayerDto;
 import org.chessunion.entity.Match;
 import org.chessunion.entity.Player;
+import org.chessunion.entity.PlayerHistory;
 import org.chessunion.entity.Tournament;
 import org.chessunion.exception.MatchAlreadyHasResultException;
 import org.chessunion.exception.MatchNotFoundException;
 import org.chessunion.exception.TournamentNotFoundException;
 import org.chessunion.repository.MatchRepository;
+import org.chessunion.repository.PlayerHistoryRepository;
 import org.chessunion.repository.PlayerRepository;
 import org.chessunion.util.rating.SimpleRatingCalculator;
 import org.modelmapper.ModelMapper;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -31,6 +35,8 @@ public class MatchService {
     private final PlayerRepository playerRepository;
     private final ModelMapper modelMapper;
     private final PlayerService playerService;
+    private final PlayerHistoryRepository playerHistoryRepository;
+    private final PlayerHistoryService playerHistoryService;
 
 
     @Transactional
@@ -41,9 +47,16 @@ public class MatchService {
         match.setRoundNumber(tournament.getCurrentRound());
         match.setCreatedAt(LocalDateTime.now());
 
+        PlayerHistory firstPlayerHistory = new PlayerHistory(tournament.getId(), firstPlayer.getId(), LocalDateTime.now(), tournament.getCurrentRound());
+        PlayerHistory secondPlayerHistory = new PlayerHistory(tournament.getId(), secondPlayer.getId(), LocalDateTime.now(), tournament.getCurrentRound());
 
         firstPlayer.setColorBalance(firstPlayer.getColorBalance() - 1);
+        firstPlayerHistory.setColorBalanceChanges(-1);
+        firstPlayerHistory.setGeneratedWithRound(true);
+
         secondPlayer.setColorBalance(secondPlayer.getColorBalance() + 1);
+        secondPlayerHistory.setColorBalanceChanges(1);
+        secondPlayerHistory.setGeneratedWithRound(true);
 
         match.setWhitePlayer(firstPlayer);
         match.setBlackPlayer(secondPlayer);
@@ -52,7 +65,8 @@ public class MatchService {
         playerRepository.save(firstPlayer);
         playerRepository.save(secondPlayer);
         matchRepository.save(match);
-
+        playerHistoryRepository.save(firstPlayerHistory);
+        playerHistoryRepository.save(secondPlayerHistory);
     }
 
 
@@ -68,16 +82,30 @@ public class MatchService {
         }
 
         match.setResult(result);
+        Player whitePlayerBefore = match.getWhitePlayer();
+        Player blackPlayerBefore = match.getBlackPlayer();
         match = simpleRatingCalculator.calculate(match);
 
         match.getWhitePlayer().addScore(result);
         match.getBlackPlayer().addScore(Math.abs(result - 1));
+
+        playerHistoryService.savePlayerDifference(whitePlayerBefore, match.getWhitePlayer(), match.getTournament().getId(), match.getTournament().getCurrentRound());
+        playerHistoryService.savePlayerDifference(blackPlayerBefore, match.getBlackPlayer(), match.getTournament().getId(), match.getTournament().getCurrentRound());
 
         playerRepository.save(match.getWhitePlayer());
         playerRepository.save(match.getBlackPlayer());
         matchRepository.save(match);
 
         return matchToMatchDto(match);
+    }
+
+    @Transactional
+    public List<MatchDto> setResultToListOfMatches(List<MatchResultSetRequest> matches) {
+        List<MatchDto> matchDtoList = new ArrayList<>();
+        for (MatchResultSetRequest match : matches) {
+            matchDtoList.add(setMatchResult(match.getId(), match.getResult()));
+        }
+        return matchDtoList;
     }
 
 
@@ -120,12 +148,22 @@ public class MatchService {
                 .toList();
     }
 
-    public List<MatchDto> findMatchesByTournamentRound(int tournamentId, int roundNumber, Pageable pageable) {
-        return matchRepository.findAllByTournamentIdAndRoundNumber(tournamentId, roundNumber, pageable).stream()
+    public List<MatchDto> findMatchesByTournamentRound(int tournamentId, int roundNumber) {
+        return matchRepository.findAllByTournamentIdAndRoundNumber(tournamentId, roundNumber).stream()
                 .map(this::matchToMatchDto)
                 .toList();
     }
 
+    public List<Integer> findMatchIdsByTournamentRound(int tournamentId, int roundNumber) {
+        return matchRepository.findAllByTournamentIdAndRoundNumber(tournamentId, roundNumber).stream()
+                .map(Match::getId)
+                .toList();
+    }
+
+    @Transactional
+    public void deleteMatchById(int id) {
+        matchRepository.deleteById(id);
+    }
 
 
 

@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/admin/match")
 @PreAuthorize("hasRole('ADMIN')")
@@ -18,8 +20,8 @@ public class MatchAdminController {
 
     private final MatchService matchService;
 
-    @PatchMapping("/{id}/setResult")
-    public ResponseEntity<MatchDto> setMatchResult(@PathVariable int id, @RequestBody MatchResultSetRequest matchResult) {
-        return ResponseEntity.ok(matchService.setMatchResult(id, matchResult.getResult()));
+    @PatchMapping("/setResults")
+    public ResponseEntity<List<MatchDto>> setMatchResult(@RequestBody List<MatchResultSetRequest> matchResultsSet) {
+        return ResponseEntity.ok(matchService.setResultToListOfMatches(matchResultsSet));
     }
 }

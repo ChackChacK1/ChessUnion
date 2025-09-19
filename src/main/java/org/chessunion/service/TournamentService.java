@@ -3,16 +3,12 @@ package org.chessunion.service;
 
 import lombok.RequiredArgsConstructor;
 import org.chessunion.dto.*;
-import org.chessunion.entity.Player;
-import org.chessunion.entity.Tournament;
-import org.chessunion.entity.User;
+import org.chessunion.entity.*;
 import org.chessunion.exception.NotEnoughPlayersException;
 import org.chessunion.exception.TooManyPlayersException;
 import org.chessunion.exception.TournamentNotFoundException;
 import org.chessunion.exception.UserAlreadyRegisteredTournamentException;
-import org.chessunion.repository.PlayerRepository;
-import org.chessunion.repository.TournamentRepository;
-import org.chessunion.repository.UserRepository;
+import org.chessunion.repository.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -35,6 +31,9 @@ public class TournamentService {
     private final UserRepository userRepository;
     private final UserService userService;
     private final TransliterationService transliterationService;
+    private final PlayerHistoryService playerHistoryService;
+    private final PlayerHistoryRepository playerHistoryRepository;
+    private final MatchRepository matchRepository;
 
     public List<TournamentDto> getAllTournaments(Pageable pageable) {
         return tournamentRepository.findAll().stream()
@@ -153,6 +152,10 @@ public class TournamentService {
             Player byePlayer = players.removeLast();
             byePlayer.setScore(byePlayer.getScore() + 1);
             byePlayer.setHadBye(true);
+            PlayerHistory playerHistory = new PlayerHistory(tournament.getId(), byePlayer.getId(), LocalDateTime.now(), tournament.getCurrentRound());
+            playerHistory.setHadByeChanges(true);
+            playerHistory.setScoreChanges(1.0);
+            playerHistoryRepository.save(playerHistory);
         }
 
         int half = players.size() / 2;
@@ -185,6 +188,10 @@ public class TournamentService {
                 byePlayer.setScore(byePlayer.getScore() + 1);
                 byePlayer.setHadBye(true);
                 players.removeLast();
+                PlayerHistory playerHistory = new PlayerHistory(tournament.getId(), byePlayer.getId(), LocalDateTime.now(), tournament.getCurrentRound());
+                playerHistory.setHadByeChanges(true);
+                playerHistory.setScoreChanges(1.0);
+                playerHistoryRepository.save(playerHistory);
             } else {
                 // если уже получал bye — ищем следующего кандидата
                 for (int i = players.size() - 1; i >= 0; i--) {
@@ -193,6 +200,10 @@ public class TournamentService {
                         candidate.setScore(candidate.getScore() + 1);
                         candidate.setHadBye(true);
                         players.remove(i);
+                        PlayerHistory playerHistory = new PlayerHistory(tournament.getId(), candidate.getId(), LocalDateTime.now(), tournament.getCurrentRound());
+                        playerHistory.setHadByeChanges(true);
+                        playerHistory.setScoreChanges(1.0);
+                        playerHistoryRepository.save(playerHistory);
                         break;
                     }
                 }
@@ -217,9 +228,44 @@ public class TournamentService {
                 remainingPlayers.remove(bestMatch);
             } else {
                 firstPlayer.setScore(firstPlayer.getScore() + 1);
+                PlayerHistory playerHistory = new PlayerHistory(tournament.getId(), firstPlayer.getId(), LocalDateTime.now(), tournament.getCurrentRound());
+                playerHistory.setScoreChanges(1.0);
+                playerHistoryRepository.save(playerHistory);
                 playerRepository.save(firstPlayer);
             }
         }
+    }
+
+    @Transactional
+    public void rollbackRound(int id){
+        Tournament tournament = tournamentRepository.findById(id)
+                .orElseThrow(() -> new TournamentNotFoundException(id));
+
+        if (tournament.getCurrentRound() == 0 || tournament.getStage() == Tournament.Stage.REGISTRATION) {
+            throw new IllegalArgumentException("cur round is 0 or stage is registration");
+        }
+
+        if (tournament.getStage() == Tournament.Stage.FINISHED){
+            throw new IllegalStateException("tournament is finished");
+        }
+
+        int currentRound = tournament.getCurrentRound();
+
+        List<Integer> matchIds = matchService.findMatchIdsByTournamentRound(tournament.getId(), currentRound);
+        for (Integer matchId : matchIds) {
+            matchService.deleteMatchById(matchId);
+        }
+
+        List<Integer> matchIdsOfPrevRound = matchService.findMatchIdsByTournamentRound(tournament.getId(), currentRound - 1);
+        matchRepository.setResultNullToAllMatchesByIds(matchIdsOfPrevRound);
+        playerHistoryService.rollbackOneRound(tournament.getId(), currentRound);
+
+
+        tournament.setCurrentRound(currentRound - 1);
+        if (tournament.getCurrentRound() == 0) {
+            tournament.setStage(Tournament.Stage.REGISTRATION);
+        }
+        tournamentRepository.save(tournament);
     }
 
     private static Player getBestMatchPlayer(List<Player> remainingPlayers, Set<Integer> firstPlayerOpponents, Player firstPlayer) {

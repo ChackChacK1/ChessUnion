@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, List, Typography, Button, message, Spin, Dropdown, Space, Tag } from 'antd';
-import { DownOutlined, ArrowRightOutlined, PlayCircleOutlined } from '@ant-design/icons';
+import { Card, List, Typography, Button, message, Spin, Dropdown, Space, Tag, Modal } from 'antd';
+import { DownOutlined, ArrowRightOutlined, PlayCircleOutlined, RollbackOutlined } from '@ant-design/icons';
 import client from '../api/client';
 
 const { Title, Text } = Typography;
@@ -13,6 +13,8 @@ const TournamentManagement = () => {
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
     const [tournamentInfo, setTournamentInfo] = useState(null);
+    const [localResults, setLocalResults] = useState({}); // Хранение локальных результатов
+    const [isRollbackModalVisible, setIsRollbackModalVisible] = useState(false);
 
     const fetchMatches = async () => {
         try {
@@ -22,6 +24,9 @@ const TournamentManagement = () => {
 
             const tournamentResponse = await client.get(`/api/tournament/${tournamentId}`);
             setTournamentInfo(tournamentResponse.data);
+
+            // Сбрасываем локальные результаты при загрузке новых матчей
+            setLocalResults({});
         } catch (error) {
             message.error('Ошибка загрузки матчей: ' + error.response?.data?.message || error.message);
         } finally {
@@ -33,20 +38,43 @@ const TournamentManagement = () => {
         fetchMatches();
     }, [tournamentId, roundId]);
 
-    const setMatchResult = async (matchId, result) => {
+    const setLocalMatchResult = (matchId, result) => {
+        setLocalResults(prev => ({
+            ...prev,
+            [matchId]: result
+        }));
+    };
+
+    const saveAllResults = async () => {
         try {
             setUpdating(true);
-            await client.patch(`/api/admin/match/${matchId}/setResult`, { result });
-            message.success('Результат установлен!');
-            fetchMatches();
+
+            // Формируем массив результатов для отправки
+            const resultsToSave = Object.entries(localResults).map(([matchId, result]) => ({
+                id: parseInt(matchId),
+                result: result
+            }));
+
+            if (resultsToSave.length > 0) {
+                await client.patch(`/api/admin/match/setResults`, resultsToSave);
+                message.success(`Сохранено ${resultsToSave.length} результатов!`);
+                setLocalResults({}); // Очищаем локальные результаты после успешного сохранения
+            }
+
+            return true;
         } catch (error) {
-            message.error('Ошибка установки результата: ' + error.response?.data?.message || error.message);
+            message.error('Ошибка сохранения результатов: ' + error.response?.data?.message || error.message);
+            return false;
         } finally {
             setUpdating(false);
         }
     };
 
     const createNextRound = async () => {
+        // Сначала сохраняем все результаты
+        const success = await saveAllResults();
+        if (!success) return;
+
         try {
             setUpdating(true);
             const response = await client.post(`/api/admin/tournament/${tournamentId}/round`);
@@ -61,6 +89,10 @@ const TournamentManagement = () => {
     };
 
     const endTournament = async () => {
+        // Сначала сохраняем все результаты
+        const success = await saveAllResults();
+        if (!success) return;
+
         try {
             setUpdating(true);
             await client.post(`/api/admin/tournament/${tournamentId}/round`);
@@ -70,6 +102,20 @@ const TournamentManagement = () => {
             message.error('Ошибка завершения турнира: ' + error.response?.data?.message || error.message);
         } finally {
             setUpdating(false);
+        }
+    };
+
+    const rollbackRound = async () => {
+        try {
+            setUpdating(true);
+            await client.patch(`/api/admin/tournament/${tournamentId}/rollback`);
+            message.success('Откат к предыдущему раунду выполнен!');
+            navigate(`/admin/tournament/${tournamentId}/${parseInt(roundId) - 1}`);
+        } catch (error) {
+            message.error('Ошибка отката: ' + error.response?.data?.message || error.message);
+        } finally {
+            setUpdating(false);
+            setIsRollbackModalVisible(false);
         }
     };
 
@@ -87,6 +133,14 @@ const TournamentManagement = () => {
         }
     };
 
+    const showRollbackConfirm = () => {
+        setIsRollbackModalVisible(true);
+    };
+
+    const hideRollbackConfirm = () => {
+        setIsRollbackModalVisible(false);
+    };
+
     const isFirstRoundAndNotStarted = () => {
         return parseInt(roundId) === 0 && matches.length === 0;
     };
@@ -95,27 +149,63 @@ const TournamentManagement = () => {
         return tournamentInfo && parseInt(roundId) === tournamentInfo.amountOfRounds;
     };
 
-    const canCreateNextRound = () => {
-        return !matches.some(match => match.result === null);
+    const canChangeResult = (match) => {
+        // Можно менять если: либо нет результата в БД, либо есть локальный результат
+        return match.result === null || localResults[match.id] !== undefined;
     };
 
-    const getResultMenu = (match) => [
-        {
-            key: '1',
-            label: 'Победа белых',
-            onClick: () => setMatchResult(match.id, 1.0)
-        },
-        {
-            key: '0.5',
-            label: 'Ничья',
-            onClick: () => setMatchResult(match.id, 0.5)
-        },
-        {
-            key: '0',
-            label: 'Победа чёрных',
-            onClick: () => setMatchResult(match.id, 0.0)
+    const hasLocalResult = (matchId) => {
+        return localResults[matchId] !== undefined;
+    };
+
+    const canCreateNextRound = () => {
+        // Проверяем, что все матчи имеют результат (либо в БД, либо локально)
+        return !matches.some(match => {
+            const hasDbResult = match.result !== null;
+            const hasLocalResult = localResults[match.id] !== undefined;
+            return !hasDbResult && !hasLocalResult;
+        });
+    };
+
+    const hasUnsavedChanges = () => {
+        return Object.keys(localResults).length > 0;
+    };
+
+    const getResultMenu = (match) => {
+        const items = [
+            {
+                key: '1',
+                label: 'Победа белых',
+                onClick: () => setLocalMatchResult(match.id, 1.0)
+            },
+            {
+                key: '0.5',
+                label: 'Ничья',
+                onClick: () => setLocalMatchResult(match.id, 0.5)
+            },
+            {
+                key: '0',
+                label: 'Победа чёрных',
+                onClick: () => setLocalMatchResult(match.id, 0.0)
+            }
+        ];
+
+        // Добавляем сброс только если результат уже выбран
+        if (getDisplayResult(match) !== null) {
+            items.push({
+                key: 'reset',
+                label: 'Сбросить результат',
+                onClick: () => setLocalMatchResult(match.id, null)
+            });
         }
-    ];
+
+        return items;
+    };
+
+    const getDisplayResult = (match) => {
+        // Возвращаем локальный результат если есть, иначе результат из БД
+        return localResults[match.id] !== undefined ? localResults[match.id] : match.result;
+    };
 
     const getResultText = (result) => {
         switch (result) {
@@ -144,6 +234,34 @@ const TournamentManagement = () => {
             <Title level={2} style={{ color: 'var(--text-color)' }}>
                 Управление турниром: {tournamentInfo?.name || `ID: ${tournamentId}`}
             </Title>
+
+            {/* Кнопка отката (только для стадии PLAYING и не первого раунда) */}
+            {tournamentInfo?.stage === 'PLAYING' && parseInt(roundId) > 0 && (
+                <div style={{ marginBottom: 20 }}>
+                    <Button
+                        type="primary"
+                        danger
+                        icon={<RollbackOutlined />}
+                        onClick={showRollbackConfirm}
+                        loading={updating}
+                        style={{
+                            marginRight: 10
+                        }}
+                    >
+                        { (parseInt(roundId) === 1)
+                            ? "Вернуться на стадию регистрации"
+                            : "Откатиться к предыдущему раунду"
+                        }
+                    </Button>
+
+
+                    {hasUnsavedChanges() && (
+                        <Tag color="orange" style={{ marginLeft: 10 }}>
+                            Есть несохранённые изменения: {Object.keys(localResults).length}
+                        </Tag>
+                    )}
+                </div>
+            )}
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                 <Text strong style={{ color: 'var(--text-color)' }}>Раунд: {parseInt(roundId)}</Text>
@@ -219,83 +337,121 @@ const TournamentManagement = () => {
                 {matches.length > 0 ? (
                     <List
                         dataSource={matches}
-                        renderItem={(match) => (
-                            <List.Item style={{ borderBottom: '1px solid var(--border-color)' }}>
-                                <div style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: '60px 1fr auto 1fr',
-                                    gap: '16px',
-                                    alignItems: 'center',
-                                    width: '100%',
-                                    padding: '12px'
-                                }}>
-                                    {/* ID матча */}
-                                    <Text strong style={{ color: 'var(--text-color)' }}>#{match.id}</Text>
+                        renderItem={(match) => {
+                            const displayResult = getDisplayResult(match);
+                            const hasLocalResult = localResults[match.id] !== undefined;
 
-                                    {/* Белые */}
-                                    <div style={{ textAlign: 'center' }}>
-                                        <Text strong style={{ color: 'var(--text-color)' }}>
-                                            {match.whitePlayer?.fullName}
-                                        </Text>
-                                        <div>
-                                            <Text style={{ color: 'var(--text-secondary)' }}>
-                                                ({match.whitePlayer?.score})
+                            return (
+                                <List.Item style={{ borderBottom: '1px solid var(--border-color)' }}>
+                                    <div style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: '60px 1fr auto 1fr',
+                                        gap: '16px',
+                                        alignItems: 'center',
+                                        width: '100%',
+                                        padding: '12px'
+                                    }}>
+                                        {/* ID матча */}
+                                        <Text strong style={{ color: 'var(--text-color)' }}>#{match.id}</Text>
+
+                                        {/* Белые */}
+                                        <div style={{ textAlign: 'center' }}>
+                                            <Text strong style={{ color: 'var(--text-color)' }}>
+                                                {match.whitePlayer?.fullName}
                                             </Text>
+                                            <div>
+                                                <Text style={{ color: 'var(--text-secondary)' }}>
+                                                    ({match.whitePlayer?.score})
+                                                </Text>
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    {/* Результат */}
-                                    <div style={{ textAlign: 'center' }}>
-                                        {match.result !== null ? (
-                                            <Tag
-                                                color={getResultColor(match.result)}
-                                                style={{
-                                                    margin: 0,
-                                                    color: 'var(--text-color)',
-                                                    borderColor: 'var(--border-color)'
-                                                }}
-                                            >
-                                                {getResultText(match.result)}
-                                            </Tag>
-                                        ) : (
-                                            <Dropdown
-                                                menu={{ items: getResultMenu(match) }}
-                                                trigger={['click']}
-                                                disabled={updating}
-                                            >
-                                                <Button
-                                                    type="dashed"
-                                                    loading={updating}
-                                                    style={{
-                                                        color: 'var(--text-color)',
-                                                        borderColor: 'var(--border-color)'
-                                                    }}
+                                        {/* Результат */}
+                                        <div style={{ textAlign: 'center' }}>
+                                            {displayResult !== null ? (
+                                                <Dropdown
+                                                    menu={{ items: getResultMenu(match) }}
+                                                    trigger={['click']}
+                                                    disabled={!canChangeResult(match) || updating}
                                                 >
-                                                    Выбрать результат <DownOutlined />
-                                                </Button>
-                                            </Dropdown>
-                                        )}
-                                    </div>
+                                                    <Space direction="vertical" size="small">
+                                                        <Tag
+                                                            color={getResultColor(displayResult)}
+                                                            style={{
+                                                                margin: 0,
+                                                                color: 'var(--text-color)',
+                                                                borderColor: 'var(--border-color)',
+                                                                borderStyle: hasLocalResult ? 'dashed' : 'solid',
+                                                                cursor: canChangeResult(match) ? 'pointer' : 'default'
+                                                            }}
+                                                        >
+                                                            {getResultText(displayResult)}
+                                                            {hasLocalResult && ' *'}
+                                                        </Tag>
+                                                        {hasLocalResult && (
+                                                            <Text type="secondary" style={{ fontSize: '12px' }}>
+                                                                Не сохранено
+                                                            </Text>
+                                                        )}
+                                                    </Space>
+                                                </Dropdown>
+                                            ) : (
+                                                <Dropdown
+                                                    menu={{ items: getResultMenu(match) }}
+                                                    trigger={['click']}
+                                                    disabled={updating}
+                                                >
+                                                    <Button
+                                                        type="dashed"
+                                                        loading={updating}
+                                                        style={{
+                                                            color: '#4a4a4a',
+                                                            borderColor: '#404040'
+                                                        }}
+                                                    >
+                                                        Выбрать результат <DownOutlined />
+                                                    </Button>
+                                                </Dropdown>
+                                            )}
+                                        </div>
 
-                                    {/* Чёрные */}
-                                    <div style={{ textAlign: 'center' }}>
-                                        <Text strong style={{ color: 'var(--text-color)' }}>
-                                            {match.blackPlayer?.fullName}
-                                        </Text>
-                                        <div>
-                                            <Text style={{ color: 'var(--text-secondary)' }}>
-                                                ({match.blackPlayer?.score})
+                                        {/* Чёрные */}
+                                        <div style={{ textAlign: 'center' }}>
+                                            <Text strong style={{ color: 'var(--text-color)' }}>
+                                                {match.blackPlayer?.fullName}
                                             </Text>
+                                            <div>
+                                                <Text style={{ color: 'var(--text-secondary)' }}>
+                                                    ({match.blackPlayer?.score})
+                                                </Text>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </List.Item>
-                        )}
+                                </List.Item>
+                            );
+                        }}
                     />
                 ) : (
                     <Text style={{ color: 'var(--text-secondary)' }}>Матчей в этом раунде пока нет</Text>
                 )}
             </Card>
+
+            {/* Модальное окно подтверждения отката */}
+            <Modal
+                title="Подтверждение отката"
+                open={isRollbackModalVisible}
+                onOk={rollbackRound}
+                onCancel={hideRollbackConfirm}
+                okText="Да, откатиться"
+                cancelText="Отмена"
+                okType="danger"
+                confirmLoading={updating}
+            >
+                <p>Вы уверены, что хотите откатиться к предыдущему раунду?</p>
+                <p style={{ color: 'var(--text-secondary)' }}>
+                    Это действие невозможно отменить. Все матчи текущего раунда и результаты матчей предыдущего будут потеряны.
+                </p>
+            </Modal>
         </div>
     );
 };

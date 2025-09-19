@@ -287,7 +287,7 @@ const TournamentPlayersManagement = () => {
                 <Row gutter={[16, 16]} align="middle">
                     <Col xs={24} md={16}>
                         <Input
-                            placeholder="Введите Фамилию и Имя (например: Иванов Иван)"
+                            placeholder="Введите Имя и Фамилию (в формате: Иван Иванов)"
                             value={fullName}
                             onChange={(e) => setFullName(e.target.value)}
                             onPressEnter={handleAddPlayer}

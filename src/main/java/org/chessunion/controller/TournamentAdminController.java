@@ -53,4 +53,10 @@ public class TournamentAdminController {
         tournamentService.registerCustomUser(id, registerCustomUserRequest);
         return ResponseEntity.ok("User registered successfully");
     }
+
+    @PatchMapping("/{id}/rollback")
+    public ResponseEntity<String> rollback(@PathVariable int id) {
+        tournamentService.rollbackRound(id);
+        return ResponseEntity.ok("Tournament rollback completed");
+    }
 }

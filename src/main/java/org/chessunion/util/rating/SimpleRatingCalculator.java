@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.chessunion.entity.Match;
 import org.chessunion.entity.Player;
 import org.chessunion.exception.MatchHasNotResultException;
+import org.chessunion.repository.PlayerHistoryRepository;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -14,8 +15,8 @@ public class SimpleRatingCalculator implements RatingCalculator {
         if (match.getResult() == null) {
             throw new MatchHasNotResultException("SimpleRatingCalculator.calculate");
         }
-        Player playerWhite = match.getWhitePlayer();
-        Player playerBlack = match.getBlackPlayer();
+        Player playerWhite = new Player(match.getWhitePlayer());
+        Player playerBlack = new Player(match.getBlackPlayer());
         Double ratingOfFirstPlayer = playerWhite.getRating();
         Double ratingOfSecondPlayer = playerBlack.getRating();
 
@@ -42,6 +43,7 @@ public class SimpleRatingCalculator implements RatingCalculator {
                 blackK = 10;
             }
         }
+
         playerWhite.setAmountOfMatches(playerWhite.getAmountOfMatches() + 1);
         playerBlack.setAmountOfMatches(playerBlack.getAmountOfMatches() + 1);
 

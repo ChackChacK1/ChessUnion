@@ -5,6 +5,7 @@ import org.chessunion.entity.Match;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -24,8 +25,12 @@ public interface MatchRepository extends JpaRepository<Match, Integer> {
     @Query("SELECT m FROM Match m WHERE m.whitePlayer.id = ?1 OR m.blackPlayer.id = ?1")
     List<Match> findAllMatchesByPlayerId(Integer playerId);
 
-    List<Match> findAllByTournamentIdAndRoundNumber(Integer tournamentId, int roundNumber, Pageable pageable);
+    List<Match> findAllByTournamentIdAndRoundNumber(Integer tournamentId, int roundNumber);
 
     @Query("SELECT m.whitePlayer.id, m.blackPlayer.id FROM Match m WHERE m.whitePlayer.id = ?1 OR m.blackPlayer.id = ?1")
     List<Object[]> findOpponentIdsByPlayerId(Integer playerId);
+
+    @Modifying
+    @Query(value = "UPDATE matches SET result = null WHERE id IN (?1)", nativeQuery = true)
+    void setResultNullToAllMatchesByIds(List<Integer> ids);
 }

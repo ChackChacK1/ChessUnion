@@ -36,9 +36,8 @@ public class MatchController {
 
     @GetMapping("/byTournament/{tournamentId}/{roundId}")
     public ResponseEntity<List<MatchDto>> getTournamentMatchesRound(@PathVariable int tournamentId,
-                                                  @PathVariable int roundId,
-                                                  @PageableDefault Pageable pageable) {
-        return ResponseEntity.ok(matchService.findMatchesByTournamentRound(tournamentId, roundId, pageable));
+                                                  @PathVariable int roundId) {
+        return ResponseEntity.ok(matchService.findMatchesByTournamentRound(tournamentId, roundId));
     }
 
     @GetMapping("/{id}")
