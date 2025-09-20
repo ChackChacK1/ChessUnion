@@ -52,6 +52,9 @@ public class Player {
     @OneToMany(mappedBy = "blackPlayer", fetch = FetchType.LAZY)
     private Set<Match> matchesPlayedBlack = new HashSet<>();
 
+    @Column(name = "color_history")
+    private String colorHistory = "";  // W - белые B - чёрные
+
     @Column(name = "had_bye")
     private boolean hadBye = false; // Получал ли техническое очко
 
@@ -71,6 +74,7 @@ public class Player {
         this.hadBye = player.isHadBye();
         this.createdAt = player.getCreatedAt();
         this.tournament = player.getTournament();
+        this.colorHistory = player.getColorHistory();
         this.matchesPlayedWhite = player.getMatchesPlayedWhite();
         this.matchesPlayedBlack = player.getMatchesPlayedBlack();
     }

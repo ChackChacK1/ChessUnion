@@ -51,10 +51,13 @@ public class MatchService {
         PlayerHistory secondPlayerHistory = new PlayerHistory(tournament.getId(), secondPlayer.getId(), LocalDateTime.now(), tournament.getCurrentRound());
 
         firstPlayer.setColorBalance(firstPlayer.getColorBalance() - 1);
+        System.out.println(firstPlayer.getColorHistory());
+        firstPlayer.setColorHistory(firstPlayer.getColorHistory() + 'w');
         firstPlayerHistory.setColorBalanceChanges(-1);
         firstPlayerHistory.setGeneratedWithRound(true);
 
         secondPlayer.setColorBalance(secondPlayer.getColorBalance() + 1);
+        secondPlayer.setColorHistory(secondPlayer.getColorHistory() + 'b');
         secondPlayerHistory.setColorBalanceChanges(1);
         secondPlayerHistory.setGeneratedWithRound(true);
 

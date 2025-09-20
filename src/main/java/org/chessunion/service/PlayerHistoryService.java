@@ -56,6 +56,9 @@ public class PlayerHistoryService {
         player.setAmountOfDraws(player.getAmountOfDraws() - playerHistory.getAmountOfDrawsChanges());
         player.setAmountOfWins(player.getAmountOfWins() - playerHistory.getAmountOfWinsChanges());
         player.setColorBalance(player.getColorBalance() - playerHistory.getColorBalanceChanges());
+        if (!player.getColorHistory().isEmpty()) {
+            player.setColorHistory(player.getColorHistory().substring(0, player.getColorHistory().length() - 1));
+        }
         if (playerHistory.getHadByeChanges()){
             player.setHadBye(false);
         }

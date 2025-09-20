@@ -11,4 +11,6 @@ import java.util.List;
 @Repository
 public interface TournamentRepository extends JpaRepository<Tournament, Integer> {
     List<Tournament> findByStageNot(Tournament.Stage stage);
+
+    List<Tournament> findByName(String name);
 }

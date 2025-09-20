@@ -210,30 +210,170 @@ public class TournamentService {
             }
         }
 
-        // Используем итератор для безопасного удаления
-        List<Player> remainingPlayers = new ArrayList<>(players);
+        List<MatchPair> pairs = new ArrayList<>();
+        List<Player> unpairedPlayers = new ArrayList<>(players);
 
-        while (!remainingPlayers.isEmpty()) {
-            Player firstPlayer = remainingPlayers.removeFirst();
-            Set<Integer> firstPlayerOpponents = opponentsMap.get(firstPlayer.getId());
+        Map<Boolean, List<MatchPair>> pairsMap = findPairsWithBacktracking(unpairedPlayers, opponentsMap, pairs, new HashSet<>());
 
-            Player bestMatch = getBestMatchPlayer(remainingPlayers, firstPlayerOpponents, firstPlayer);
-
-            if (bestMatch != null) {
-                if (firstPlayer.getColorBalance() > bestMatch.getColorBalance()) {
-                    matchService.createMatch(firstPlayer, bestMatch, tournament);
-                } else {
-                    matchService.createMatch(bestMatch, firstPlayer, tournament);
-                }
-                remainingPlayers.remove(bestMatch);
-            } else {
-                firstPlayer.setScore(firstPlayer.getScore() + 1);
-                PlayerHistory playerHistory = new PlayerHistory(tournament.getId(), firstPlayer.getId(), LocalDateTime.now(), tournament.getCurrentRound());
-                playerHistory.setScoreChanges(1.0);
-                playerHistoryRepository.save(playerHistory);
-                playerRepository.save(firstPlayer);
+        if (!pairsMap.keySet().iterator().next()) {
+            throw new NotEnoughPlayersException(unpairedPlayers.size(), unpairedPlayers.size());
+        } else {
+            for (MatchPair pair : pairsMap.get(true)) {
+                matchService.createMatch(pair.getWhitePlayer(), pair.getBlackPlayer(), tournament);
             }
         }
+
+        // Используем итератор для безопасного удаления
+//        List<Player> remainingPlayers = new ArrayList<>(players);
+//
+//        while (!remainingPlayers.isEmpty()) {
+//            Player firstPlayer = remainingPlayers.removeFirst();
+//            Set<Integer> firstPlayerOpponents = opponentsMap.get(firstPlayer.getId());
+//
+//            Player bestMatch = getBestMatchPlayer(remainingPlayers, firstPlayerOpponents, firstPlayer);
+//
+//            if (bestMatch != null) {
+//                if (firstPlayer.getColorBalance() > bestMatch.getColorBalance()) {
+//                    matchService.createMatch(firstPlayer, bestMatch, tournament);
+//                } else {
+//                    matchService.createMatch(bestMatch, firstPlayer, tournament);
+//                }
+//                remainingPlayers.remove(bestMatch);
+//            } else {
+//                firstPlayer.setScore(firstPlayer.getScore() + 1);
+//                PlayerHistory playerHistory = new PlayerHistory(tournament.getId(), firstPlayer.getId(), LocalDateTime.now(), tournament.getCurrentRound());
+//                playerHistory.setScoreChanges(1.0);
+//                playerHistoryRepository.save(playerHistory);
+//                playerRepository.save(firstPlayer);
+//            }
+//        }
+    }
+
+//    private static Player getBestMatchPlayer(List<Player> remainingPlayers, Set<Integer> firstPlayerOpponents, Player firstPlayer) {
+//        Player bestMatch = null;
+//        int bestColorDiff = Integer.MAX_VALUE;
+//
+//        for (Player candidate : remainingPlayers) {
+//            // Проверяем по ID, а не по объектам
+//            if (!firstPlayerOpponents.contains(candidate.getId())) {
+//                int colorDiff = Math.abs(firstPlayer.getColorBalance() - candidate.getColorBalance());
+//                if (colorDiff < bestColorDiff) {
+//                    bestColorDiff = colorDiff;
+//                    bestMatch = candidate;
+//                }
+//            }
+//        }
+//        return bestMatch;
+//    }
+
+    private Map<Boolean, List<MatchPair>> findPairsWithBacktracking(List<Player> players,
+                                              Map<Integer, Set<Integer>> opponentsMap,
+                                              List<MatchPair> pairs,
+                                              Set<Integer> usedPlayers) {
+        if (players.isEmpty()) return Map.of(true, pairs);
+
+        Player current = players.getFirst();
+
+        for (int i = 1; i < players.size(); i++) {
+            Player candidate = players.get(i);
+
+
+            if (!opponentsMap.get(current.getId()).contains(candidate.getId()) &&
+                    !usedPlayers.contains(candidate.getId()) &&
+                    !(
+                            current.getColorBalance() == candidate.getColorBalance() && (current.getColorBalance() == 2 || current.getColorBalance() == -2)
+                    ) && colorCompatibilityCheck(current, candidate)) {
+
+                if (!colorCheck(current).keySet().iterator().next()) {
+                    if (colorCheck(current).get(false) == 'w') {
+                        pairs.add(new MatchPair(candidate, current));
+                    } else {
+                        pairs.add(new MatchPair(current, candidate));
+                    }
+                } else if (!colorCheck(candidate).keySet().iterator().next()) {
+                    if (colorCheck(candidate).get(false) == 'b') {
+                        pairs.add(new MatchPair(candidate, current));
+                    } else {
+                        pairs.add(new MatchPair(current, candidate));
+                    }
+                } else {
+                    if (current.getColorBalance() > candidate.getColorBalance()) {
+                        pairs.add(new MatchPair(current, candidate));
+                    } else{
+                        pairs.add(new MatchPair(candidate, current));
+                    }
+                }
+
+
+                usedPlayers.add(current.getId());
+                usedPlayers.add(candidate.getId());
+
+                List<Player> remaining = new ArrayList<>(players);
+                remaining.remove(current);
+                remaining.remove(candidate);
+
+                if (findPairsWithBacktracking(remaining, opponentsMap, pairs, usedPlayers).keySet().iterator().next()) {
+                    return Map.of(true, pairs);
+                }
+
+                // Backtrack
+                pairs.removeLast();
+                usedPlayers.remove(current.getId());
+                usedPlayers.remove(candidate.getId());
+            }
+        }
+
+        return Map.of(false, pairs);
+    }
+
+    private Boolean colorCompatibilityCheck(Player player1, Player player2) {
+        Map<Boolean, Character> colorCheckP1 = colorCheck(player1);
+        Map<Boolean, Character> colorCheckP2 = colorCheck(player2);
+        boolean keyP1 = colorCheckP1.keySet().iterator().next();
+        boolean keyP2 = colorCheckP2.keySet().iterator().next();
+        Character colorP1 = colorCheckP1.get(keyP1);
+        Character colorP2 = colorCheckP2.get(keyP2);
+
+
+        if (keyP1 && keyP2) {
+            return true;
+        } else if (!keyP2 && !keyP1) {
+            if (colorP1 == colorP2) {
+                return false;
+            } else {
+                if ((colorP1 == 'b' && player2.getColorBalance() == 2) || (colorP1 == 'w' && player2.getColorBalance() == -2)
+                || (colorP2 == 'b' && player1.getColorBalance() == 2) || (colorP2 == 'w' && player1.getColorBalance() == -2)) {
+                    return false;
+                }  else {
+                    return true;
+                }
+            }
+        } else {
+            if (!keyP2) {
+                if ((colorP2 == 'b' && player1.getColorBalance() == 2) || (colorP2 == 'w' && player1.getColorBalance() == -2)) {
+                    return false;
+                } else {
+                    return true;
+                }
+            } else {
+                if ((colorP1 == 'b' && player2.getColorBalance() == 2) || (colorP1 == 'w' && player2.getColorBalance() == -2)) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        }
+    }
+
+    private Map<Boolean, Character> colorCheck(Player player) {
+        char[] colorHistory = player.getColorHistory().toCharArray();
+        if (colorHistory.length < 2) {
+            return Map.of(true, 'n');
+        }
+        if (colorHistory[colorHistory.length - 2] == colorHistory[colorHistory.length - 1]) {
+            return Map.of(false, colorHistory[colorHistory.length - 1]);
+        }
+        return Map.of(true, 'n');
     }
 
     @Transactional
@@ -268,22 +408,7 @@ public class TournamentService {
         tournamentRepository.save(tournament);
     }
 
-    private static Player getBestMatchPlayer(List<Player> remainingPlayers, Set<Integer> firstPlayerOpponents, Player firstPlayer) {
-        Player bestMatch = null;
-        int bestColorDiff = Integer.MAX_VALUE;
 
-        for (Player candidate : remainingPlayers) {
-            // Проверяем по ID, а не по объектам
-            if (!firstPlayerOpponents.contains(candidate.getId())) {
-                int colorDiff = Math.abs(firstPlayer.getColorBalance() - candidate.getColorBalance());
-                if (colorDiff < bestColorDiff) {
-                    bestColorDiff = colorDiff;
-                    bestMatch = candidate;
-                }
-            }
-        }
-        return bestMatch;
-    }
 
     public TournamentDto tournamentToDto(Tournament tournament) {
         TournamentDto dto = modelMapper.map(tournament, TournamentDto.class);
