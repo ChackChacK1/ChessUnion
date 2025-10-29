@@ -8,10 +8,10 @@ import java.lang.annotation.*;
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Constraint(validatedBy = UniqueUserValidator.class)
-public @interface UniqueUserValidation {
+@Constraint(validatedBy = PhoneNumberFormatValidator.class)
+public @interface PhoneNumberFormatValidation {
 
-    String message() default "Логин уже занят.";
+    String message() default "Phone number is in invalid format. Right formats are +71234567890 or 81234567890";
 
     Class<?>[] groups() default {};
 

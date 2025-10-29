@@ -8,10 +8,10 @@ import java.lang.annotation.*;
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Constraint(validatedBy = UniqueUserValidator.class)
-public @interface UniqueUserValidation {
+@Constraint(validatedBy = PhoneNumberConfirmedValidator.class)
+public @interface PhoneNumberConfirmedValidation {
 
-    String message() default "Логин уже занят.";
+    String message() default "Number is not confirmed or blocked. Confirm the number, or try again later.";
 
     Class<?>[] groups() default {};
 

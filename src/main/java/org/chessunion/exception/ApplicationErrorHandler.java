@@ -24,6 +24,54 @@ public class ApplicationErrorHandler {
         ), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(PhoneNumberNotFoundException.class)
+    public ResponseEntity<AppErrorResponse> handlePhoneNumberNotFoundException(PhoneNumberNotFoundException e) {
+        return new ResponseEntity<>(new AppErrorResponse(
+                "Phone number not found:",
+                e.getMessage()
+        ), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(IllegalPhoneNumberFormatException.class)
+    public ResponseEntity<AppErrorResponse> handleIllegalPhoneNumberFormatException(IllegalPhoneNumberFormatException e) {
+        return new ResponseEntity<>(new AppErrorResponse(
+                "Wrong phone number format.",
+                e.getMessage()
+        ), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(PhoneNumberIsBlockedException.class)
+    public ResponseEntity<AppErrorResponse> handlePhoneNumberIsBlockedException(PhoneNumberIsBlockedException e) {
+        return new ResponseEntity<>(new AppErrorResponse(
+                "Your Phone number is blocked for confirmation until:",
+                e.getMessage()
+        ), HttpStatus.LOCKED);
+    }
+
+    @ExceptionHandler(PhoneNumberIsAlreadyBeingUsedException.class)
+    public ResponseEntity<AppErrorResponse> handlePhoneNumberIsAlreadyBeingUsedException(PhoneNumberIsAlreadyBeingUsedException e) {
+        return new ResponseEntity<>(new AppErrorResponse(
+                "This phone number is already being used! Probably you have already registered, or somebody is using phone number. If you need help contact with us.",
+                e.getMessage()
+        ), HttpStatus.ALREADY_REPORTED);
+    }
+
+    @ExceptionHandler(PhoneNumberAlreadyConfirmedException.class)
+    public ResponseEntity<AppErrorResponse> handlePhoneNumberAlreadyConfirmedException(PhoneNumberAlreadyConfirmedException e) {
+        return new ResponseEntity<>(new AppErrorResponse(
+                "Your phone number is already confirmed!",
+                e.getMessage()
+        ), HttpStatus.ALREADY_REPORTED);
+    }
+
+    @ExceptionHandler(WrongPhoneNumberConfirmationCodeException.class)
+    public ResponseEntity<AppErrorResponse> handleWrongPhoneNumberConfirmationCodeException(WrongPhoneNumberConfirmationCodeException e) {
+        return new ResponseEntity<>(new AppErrorResponse(
+                "Confirmation code is incorrect:",
+                e.getMessage()
+        ), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(UsernameAlreadyExistsException.class)
     public ResponseEntity<AppErrorResponse> handleUsernameAlreadyExistsException(UsernameAlreadyExistsException e) {
         return new ResponseEntity<>(new AppErrorResponse(

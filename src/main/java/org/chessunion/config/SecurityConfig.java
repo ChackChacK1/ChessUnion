@@ -63,7 +63,8 @@ public class SecurityConfig {
                                 "/api/tournament/*",
                                 "/api/match/**",
                                 "/api/user/top",
-                                "/swagger-ui/**").permitAll()
+                                "/swagger-ui/**",
+                                "/api/phone/confirmation/**").permitAll()
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session

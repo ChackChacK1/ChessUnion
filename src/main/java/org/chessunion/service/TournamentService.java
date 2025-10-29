@@ -4,10 +4,7 @@ package org.chessunion.service;
 import lombok.RequiredArgsConstructor;
 import org.chessunion.dto.*;
 import org.chessunion.entity.*;
-import org.chessunion.exception.NotEnoughPlayersException;
-import org.chessunion.exception.TooManyPlayersException;
-import org.chessunion.exception.TournamentNotFoundException;
-import org.chessunion.exception.UserAlreadyRegisteredTournamentException;
+import org.chessunion.exception.*;
 import org.chessunion.repository.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Pageable;
@@ -61,7 +58,7 @@ public class TournamentService {
     }
 
     @Transactional
-    public void registrationTournament(String username, int id){
+    public void registrationTournament(String username, int id, boolean checkPhoneNumber){
         Tournament tournament = tournamentRepository.findById(id).orElseThrow(()-> new TournamentNotFoundException(id));
 
         if (tournament.getPlayers().size() >= tournament.getMaxAmountOfPlayers()){
@@ -69,6 +66,10 @@ public class TournamentService {
         }
 
         User user = userRepository.findByUsername(username).orElseThrow(()-> new UsernameNotFoundException(username));
+
+        if (user.getPhoneNumber() == null && checkPhoneNumber) {
+            throw new PhoneNumberNotFoundException("You need to register a phone number");
+        }
 
         boolean alreadyRegistered = playerRepository.existsByUserAndTournament(user, tournament);
         if (alreadyRegistered) {
@@ -341,26 +342,14 @@ public class TournamentService {
             if (colorP1 == colorP2) {
                 return false;
             } else {
-                if ((colorP1 == 'b' && player2.getColorBalance() == 2) || (colorP1 == 'w' && player2.getColorBalance() == -2)
-                || (colorP2 == 'b' && player1.getColorBalance() == 2) || (colorP2 == 'w' && player1.getColorBalance() == -2)) {
-                    return false;
-                }  else {
-                    return true;
-                }
+                return (colorP1 != 'b' || player2.getColorBalance() != 2) && (colorP1 != 'w' || player2.getColorBalance() != -2)
+                        && (colorP2 != 'b' || player1.getColorBalance() != 2) && (colorP2 != 'w' || player1.getColorBalance() != -2);
             }
         } else {
             if (!keyP2) {
-                if ((colorP2 == 'b' && player1.getColorBalance() == 2) || (colorP2 == 'w' && player1.getColorBalance() == -2)) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return (colorP2 != 'b' || player1.getColorBalance() != 2) && (colorP2 != 'w' || player1.getColorBalance() != -2);
             } else {
-                if ((colorP1 == 'b' && player2.getColorBalance() == 2) || (colorP1 == 'w' && player2.getColorBalance() == -2)) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return (colorP1 != 'b' || player2.getColorBalance() != 2) && (colorP1 != 'w' || player2.getColorBalance() != -2);
             }
         }
     }
@@ -443,12 +432,12 @@ public class TournamentService {
             String username = transliterationService.transliterate(firstName + lastName);
             registrationRequest.setUsername(username);
             registrationRequest.setPassword("12345678");
-            userService.registerUser(registrationRequest);
+            userService.registerCustomUser(registrationRequest);
 
-            registrationTournament(username, id);
+            registrationTournament(username, id, false);
         } else if (userList.size() == 1) {
             User user = userList.getFirst();
-            registrationTournament(user.getUsername(), id);
+            registrationTournament(user.getUsername(), id, false);
         } else {
             throw new RuntimeException("There are 2 or more users with this fullName!");
         }

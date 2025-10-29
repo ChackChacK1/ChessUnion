@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class SimpleRatingCalculator implements RatingCalculator {
 
+    @Override
     public Match calculate(Match match) {
         if (match.getResult() == null) {
             throw new MatchHasNotResultException("SimpleRatingCalculator.calculate");

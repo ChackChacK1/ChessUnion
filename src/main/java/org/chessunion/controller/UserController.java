@@ -63,6 +63,16 @@ public class UserController {
         return ResponseEntity.ok("Profile update successfully");
     }
 
+    @PreAuthorize("isAuthenticated()")
+    @PatchMapping("/phone/update")
+    public ResponseEntity<String> updatePhoneNumber(Principal principal, @RequestBody PhoneNumberConfirmationRequest phoneNumberConfirmationRequest){
+        userService.updateUserPhoneNumber(principal.getName(),
+                phoneNumberConfirmationRequest.getNumber(),
+                phoneNumberConfirmationRequest.getCode());
+
+        return ResponseEntity.ok("Phone number updated successfully");
+    }
+
     @PreAuthorize("permitAll()")
     @GetMapping("/top")
     public ResponseEntity<Page<TopListElementDto>> getTopList(@PageableDefault(size = 10) Pageable pageable) {

@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.chessunion.validation.PhoneNumberFormatValidation;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -29,9 +30,15 @@ public class User {
     @Column(name = "last_name", nullable = false, length = 50)
     private String lastName;
 
-    @Column(length = 50, unique = true)
+    @Column(name = "sur_name", length = 50)
+    private String surName;
+
+    @Column(length = 50)
     @Email
     private String email;
+
+    @Column(name = "phone_number")
+    private String phoneNumber;
 
     @Column(length = 128, nullable = false)
     private String password;

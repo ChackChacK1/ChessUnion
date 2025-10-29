@@ -16,6 +16,8 @@ public class UpdateProfileDto {
     private String firstName;
     private String lastName;
 
+    //todo НОМЕР ТЕЛЕФОНА
+
     @UniqueUserValidation(message = "User with email %s already exists")
     @Email
     private String email;

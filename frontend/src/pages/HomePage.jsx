@@ -47,17 +47,6 @@ const HomePage = () => {
                 bodyStyle={{ padding: 0 }}
             >
 
-                {/*<Image*/}
-                {/*    src="src/images/sorryyourenotasigma..webp"*/}
-                {/*    preview={false}*/}
-                {/*    alt="Шахматная доска"*/}
-                {/*    style={{*/}
-                {/*        width: '100%',*/}
-                {/*        height: 'auto',*/}
-                {/*        display: 'block'*/}
-                {/*    }}*/}
-                {/*/>*/}
-
                 <div style={{ padding: '24px' }}>
                     <Title level={3} style={{ color: 'var(--text-color)', marginBottom: '16px' }}>
                         Начните играть уже сегодня!
@@ -66,7 +55,49 @@ const HomePage = () => {
                         Присоединяйтесь к нашему сообществу, участвуйте в турнирах
                         и улучшайте свои шахматные навыки вместе с нами.
                     </Paragraph>
+                    <Paragraph style={{ color: 'var(--text-secondary)' }}>
+                        Нажимайте на иконку телеграмма снизу, чтобы перейти в канал нашего клуба и следить за всеми новостями!
+                    </Paragraph>
+                    <a
+                        href="https://t.me/UnionSochy"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '50px',
+                            height: '50px',
+                            borderRadius: '50%',
+                            backgroundColor: 'var(--hover-color)',
+                            textDecoration: 'none',
+                            transition: 'all 0.3s ease',
+                            margin: '10px',
+                            overflow: 'hidden'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.target.style.transform = 'scale(1.1)';
+                            e.target.style.backgroundColor = 'var(--primary-color)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.transform = 'scale(1)';
+                            e.target.style.backgroundColor = 'var(--hover-color)';
+                        }}
+                    >
+                        <img
+                            src="/src/images/telegram_icon-icons.com_72055.png"
+                            alt="Telegram"
+                            style={{
+                                width: '60px',
+                                height: '60px',
+                                objectFit: 'contain'
+                            }}
+                        />
+                    </a>
                 </div>
+
+
+
             </Card>
         </div>
     );

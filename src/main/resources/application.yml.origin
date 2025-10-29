@@ -20,3 +20,6 @@ jwt:
   lifetime: ${JWT_LIFETIME}
 server:
   port: ${SERVER_PORT}
+
+cors:
+  url: ${CORS_URL}

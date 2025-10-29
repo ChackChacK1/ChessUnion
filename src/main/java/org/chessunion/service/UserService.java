@@ -9,7 +9,9 @@ import org.chessunion.dto.UpdateProfileDto;
 import org.chessunion.entity.Player;
 import org.chessunion.entity.Role;
 import org.chessunion.entity.User;
+import org.chessunion.exception.PhoneNumberNotFoundException;
 import org.chessunion.exception.UsernameAlreadyExistsException;
+import org.chessunion.exception.WrongPhoneNumberConfirmationCodeException;
 import org.chessunion.repository.PlayerRepository;
 import org.chessunion.repository.RoleRepository;
 import org.chessunion.repository.UserRepository;
@@ -43,7 +45,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final MatchService matchService;
     private final PlayerRepository playerRepository;
-
+    private final PhoneNumberService phoneNumberService;
 
     @Cacheable(cacheNames = "profiles", key = "#principal.getName()", unless = "#result == null")
     public ProfileDto getProfile(Principal principal) {
@@ -60,7 +62,13 @@ public class UserService {
 
     @Transactional
     public void registerUser(RegistrationRequest registrationRequest) {
+        registrationRequest.setPhoneNumber(phoneNumberService.formatPhoneNumber(registrationRequest.getPhoneNumber()));
+
         User user = modelMapper.map(registrationRequest, User.class);
+
+        if (!phoneNumberService.finalCodeConfirmationCheck(registrationRequest.getPhoneNumber(), registrationRequest.getConfirmationCode())){
+            throw new WrongPhoneNumberConfirmationCodeException();
+        }
 
         if (userRepository.existsByUsername(registrationRequest.getUsername().trim())){
             throw new UsernameAlreadyExistsException(registrationRequest.getUsername());
@@ -70,6 +78,11 @@ public class UserService {
         // шифрование пароля
         user.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));
 
+        setAndSaveUser(user);
+    }
+
+    @Transactional
+    protected void setAndSaveUser(User user) {
         user.setRating(1000.00);
         user.setRoles(Set.of(roleRepository.findById(1).orElseThrow()));
         user.setCreatedAt(LocalDateTime.now());
@@ -79,6 +92,17 @@ public class UserService {
         user.setAmountOfWins(0);
 
         userRepository.save(user);
+    }
+
+    @Transactional
+    public void registerCustomUser(RegistrationRequest registrationRequest) {
+        User user = modelMapper.map(registrationRequest, User.class);
+
+        user.setUsername(registrationRequest.getUsername().trim());
+        user.setPhoneNumber(null);
+        user.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));
+
+        setAndSaveUser(user);
     }
 
     @Transactional
@@ -128,7 +152,7 @@ public class UserService {
         if (!updateProfile.getUsername().equals(user.getUsername())) {
             if (userRepository.existsByUsername(updateProfile.getUsername())){
                 throw new UsernameAlreadyExistsException(updateProfile.getUsername());
-            };
+            }
         }
 
         user.setUsername(updateProfile.getUsername());
@@ -162,5 +186,20 @@ public class UserService {
             topListElementDto.setRating((int) Math.round(player.getRating()));
             return topListElementDto;
         });
+    }
+
+    @Transactional
+    public void updateUserPhoneNumber(String name, String number, String code) {
+        User user = userRepository.findByUsername(name).orElseThrow(() -> new UsernameNotFoundException(name));
+        number = phoneNumberService.formatPhoneNumber(number);
+        if (phoneNumberService.finalCodeConfirmationCheck(number, code)) {
+            phoneNumberService.deleteNumber(user.getPhoneNumber());
+
+            user.setPhoneNumber(number);
+
+            userRepository.save(user);
+        } else {
+            throw new PhoneNumberNotFoundException(number);
+        }
     }
 }

@@ -5,7 +5,7 @@ services:
     container_name: my-frontend
     image: wq1a/chess-union-frontend:latest
     environment:
-      - VITE_API_BASE_URL=http://83.166.247.15:8080
+      - VITE_API_BASE_URL=http://91.229.10.79:8080
     ports:
       - "5173:5173"
     depends_on:
@@ -70,3 +70,5 @@ volumes:
 networks:
   my-network:
     driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1500
