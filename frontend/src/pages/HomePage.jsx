@@ -4,22 +4,17 @@ const { Title, Paragraph } = Typography;
 
 const HomePage = () => {
     return (
-        <div style={{
-            textAlign: 'center',
-            padding: '40px 20px',
-            minHeight: '100vh',
-            background: 'var(--bg-color)'
-        }}>
+        <div className="home-hero">
             <Title
                 level={1}
                 style={{
                     color: 'var(--text-color)',
                     marginBottom: '16px',
                     fontWeight: 700,
-                    fontSize: '2.5rem'
+                    fontSize: 'clamp(1.6rem, 5vw, 2.5rem)'
                 }}
             >
-                Добро пожаловать в ChessUnion!
+                ChessUnion — шахматный клуб в Сочи
             </Title>
 
             <Paragraph
@@ -31,7 +26,7 @@ const HomePage = () => {
                     margin: '0 auto 40px'
                 }}
             >
-                Платформа для организации шахматных турниров и сообщество любителей шахмат
+                ChessUnion — клуб для любителей шахмат в Сочи. Мы объединяем взрослых и детей, проводим регулярные турниры, тренировки, дружеские встречи и поддерживаем сообщество, в котором каждый растёт и играет с удовольствием.
             </Paragraph>
 
             <Card
@@ -49,50 +44,40 @@ const HomePage = () => {
 
                 <div style={{ padding: '24px' }}>
                     <Title level={3} style={{ color: 'var(--text-color)', marginBottom: '16px' }}>
-                        Начните играть уже сегодня!
+                        Добро пожаловать в сообщество ChessUnion
                     </Title>
-                    <Paragraph style={{ color: 'var(--text-secondary)' }}>
-                        Присоединяйтесь к нашему сообществу, участвуйте в турнирах
-                        и улучшайте свои шахматные навыки вместе с нами.
+                    <Paragraph style={{ color: 'var(--text-secondary)', marginBottom: 24 }}>
+                        Приходите на наши встречи и участвуйте в турнирах. Мы рады новичкам и сильным игрокам — подберём соперников по уровню и поможем прогрессировать.
                     </Paragraph>
+
+                    {/* Галерея клуба. Положите изображения в frontend/src/images/ с именами ниже */}
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                        gap: 16,
+                        marginBottom: 24
+                    }}>
+                        <Image src="/src/images/chessunion_tournament.jpg" alt="Турнир ChessUnion" style={{ width: '100%', height: 200, objectFit: 'cover' }} />
+                        <Image src="/src/images/union_logo.jpg" alt="Логотип ChessUnion" style={{ width: '100%', height: 200, objectFit: 'cover', background: 'var(--bg-color)' }} />
+                        <Image src="/src/images/chessunion_club_bw.jpg" alt="Клуб ChessUnion" style={{ width: '100%', height: 200, objectFit: 'cover' }} />
+                    </div>
+
                     <Paragraph style={{ color: 'var(--text-secondary)' }}>
-                        Нажимайте на иконку телеграмма снизу, чтобы перейти в канал нашего клуба и следить за всеми новостями!
+                        Подписывайтесь на наш Telegram, чтобы не пропускать анонсы турниров, расписание занятий и фотоотчёты.
                     </Paragraph>
                     <a
+                        className="tg-button"
                         href="https://t.me/UnionSochy"
                         target="_blank"
                         rel="noopener noreferrer"
-                        style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '50px',
-                            height: '50px',
-                            borderRadius: '50%',
-                            backgroundColor: 'var(--hover-color)',
-                            textDecoration: 'none',
-                            transition: 'all 0.3s ease',
-                            margin: '10px',
-                            overflow: 'hidden'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.target.style.transform = 'scale(1.1)';
-                            e.target.style.backgroundColor = 'var(--primary-color)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.target.style.transform = 'scale(1)';
-                            e.target.style.backgroundColor = 'var(--hover-color)';
-                        }}
+                        aria-label="Мы в Telegram"
                     >
                         <img
+                            className="tg-icon"
                             src="/src/images/telegram_icon-icons.com_72055.png"
                             alt="Telegram"
-                            style={{
-                                width: '60px',
-                                height: '60px',
-                                objectFit: 'contain'
-                            }}
                         />
+                        <span>Мы в Telegram</span>
                     </a>
                 </div>
 
