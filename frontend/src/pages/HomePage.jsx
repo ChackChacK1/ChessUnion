@@ -2,89 +2,150 @@ import { Card, Image, Typography } from 'antd';
 
 const { Title, Paragraph } = Typography;
 
+const highlightCards = [
+    {
+        title: 'Турниры каждого формата',
+        description: 'Классика, рапид и блиц с профессиональным контролем времени и судейством.',
+        icon: '♔'
+    },
+    {
+        title: 'Детские и взрослые группы',
+        description: 'Гибкие группы по уровню: от первых шагов до подготовки к разрядам.',
+        icon: '♗'
+    },
+    {
+        title: 'Тренерский штаб',
+        description: 'Тренеры с опытом ФШР помогают расти стратегически и психологически.',
+        icon: '♘'
+    },
+    {
+        title: 'Живое комьюнити',
+        description: 'Открытые лекции, анализ партий и уютные встречи клуба в центре Сочи.',
+        icon: '♙'
+    }
+];
+
+const galleryImages = [
+    {
+        src: '/src/images/chessunion_tournament.jpg',
+        alt: 'Турнир ChessUnion',
+        caption: 'Спортивные выходные и рейтинговые встречи'
+    },
+    {
+        src: '/src/images/union_logo.jpg',
+        alt: 'Логотип ChessUnion',
+        caption: 'Фирменный стиль и атрибутика клуба'
+    },
+    {
+        src: '/src/images/chessunion_club_bw.jpg',
+        alt: 'Клуб ChessUnion',
+        caption: 'Уютный клубный зал в самом центре Сочи'
+    }
+];
+
 const HomePage = () => {
     return (
-        <div className="home-hero">
-            <Title
-                level={1}
-                style={{
-                    color: 'var(--text-color)',
-                    marginBottom: '16px',
-                    fontWeight: 700,
-                    fontSize: 'clamp(1.6rem, 5vw, 2.5rem)'
-                }}
-            >
-                ChessUnion — шахматный клуб в Сочи
-            </Title>
-
-            <Paragraph
-                style={{
-                    color: 'var(--text-secondary)',
-                    fontSize: '1.1rem',
-                    marginBottom: '40px',
-                    maxWidth: '600px',
-                    margin: '0 auto 40px'
-                }}
-            >
-                ChessUnion — клуб для любителей шахмат в Сочи. Мы объединяем взрослых и детей, проводим регулярные турниры, тренировки, дружеские встречи и поддерживаем сообщество, в котором каждый растёт и играет с удовольствием.
-            </Paragraph>
-
-            <Card
-                style={{
-                    maxWidth: 800,
-                    margin: '0 auto',
-                    backgroundColor: 'var(--card-bg)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: '16px',
-                    boxShadow: 'var(--shadow)',
-                    overflow: 'hidden'
-                }}
-                bodyStyle={{ padding: 0 }}
-            >
-
-                <div style={{ padding: '24px' }}>
-                    <Title level={3} style={{ color: 'var(--text-color)', marginBottom: '16px' }}>
-                        Добро пожаловать в сообщество ChessUnion
+        <main className="home-hero">
+            <section className="hero-grid">
+                <div className="hero-copy">
+                    <span className="eyebrow">Union • Сочи</span>
+                    <Title level={1} className="hero-title">
+                        Шахматный клуб для тех, кто живёт партиями
+                        <span className="title-accent" aria-label="Chess Union">
+                            Un
+                            <span className="pawn-letter" role="img" aria-label="шахматная пешка">♙</span>
+                            on
+                        </span>
                     </Title>
-                    <Paragraph style={{ color: 'var(--text-secondary)', marginBottom: 24 }}>
-                        Приходите на наши встречи и участвуйте в турнирах. Мы рады новичкам и сильным игрокам — подберём соперников по уровню и поможем прогрессировать.
+                    <Paragraph className="hero-lead">
+                        Мы соединяем шахматистов, тренеров и семьи в дружелюбное сообщество. Турниры, тренировки, лекции и камерные вечера — всё, чтобы вы чувствовали прогресс и азарт каждой партии.
                     </Paragraph>
 
-                    {/* Галерея клуба. Положите изображения в frontend/src/images/ с именами ниже */}
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                        gap: 16,
-                        marginBottom: 24
-                    }}>
-                        <Image src="/src/images/chessunion_tournament.jpg" alt="Турнир ChessUnion" style={{ width: '100%', height: 200, objectFit: 'cover' }} />
-                        <Image src="/src/images/union_logo.jpg" alt="Логотип ChessUnion" style={{ width: '100%', height: 200, objectFit: 'cover', background: 'var(--bg-color)' }} />
-                        <Image src="/src/images/chessunion_club_bw.jpg" alt="Клуб ChessUnion" style={{ width: '100%', height: 200, objectFit: 'cover' }} />
+                    <div className="hero-cta">
+                        <a
+                            className="tg-button"
+                            href="https://t.me/UnionSochy"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="Мы в Telegram"
+                        >
+                            <img
+                                className="tg-icon"
+                                src="/src/images/telegram_icon-icons.com_72055.png"
+                                alt="Telegram"
+                            />
+                            <span>Мы в Telegram</span>
+                        </a>
+                        <a className="outline-button" href="/tournaments">
+                            Расписание турниров
+                        </a>
                     </div>
 
-                    <Paragraph style={{ color: 'var(--text-secondary)' }}>
-                        Подписывайтесь на наш Telegram, чтобы не пропускать анонсы турниров, расписание занятий и фотоотчёты.
-                    </Paragraph>
-                    <a
-                        className="tg-button"
-                        href="https://t.me/UnionSochy"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label="Мы в Telegram"
-                    >
-                        <img
-                            className="tg-icon"
-                            src="/src/images/telegram_icon-icons.com_72055.png"
-                            alt="Telegram"
-                        />
-                        <span>Мы в Telegram</span>
-                    </a>
                 </div>
 
+                <div className="hero-visual">
+                    <div className="chessboard-frame">
+                        <span className="pivot-note">А ты записался на турнир?</span>
+                        <Image
+                            src="/src/images/ruslan.jpg"
+                            alt="Зал ChessUnion"
+                            preview={false}
+                            className="hero-image"
+                        />
+                        <div className="board-overlay">
+                            <div className="overlay-item">
+                                <span className="overlay-title">Live-аналитика</span>
+                                <span className="overlay-text">совместные разборы партий</span>
+                            </div>
+                            <div className="overlay-item">
+                                <span className="overlay-title">Кубки и рейтинги</span>
+                                <span className="overlay-text">Призовые турниры с обсчетом рейтинга</span>
+                            </div>
+                        </div>
+                    </div>
+                    <ul className="hero-pill-list">
+                        <li>Блиц-вечера с гостями</li>
+                        <li>Турниры каждые выходные</li>
+                        <li>Занятия с опытными тренерами</li>
+                    </ul>
+                </div>
+            </section>
 
+            <section className="hero-card-grid">
+                {highlightCards.map(({ title, description, icon }) => (
+                    <Card
+                        key={title}
+                        className="hero-card"
+                        bordered={false}
+                        bodyStyle={{ padding: '24px' }}
+                    >
+                        <span className="card-icon" aria-hidden="true">{icon}</span>
+                        <Title level={4} className="card-title">
+                            {title}
+                        </Title>
+                        <Paragraph className="card-text">{description}</Paragraph>
+                    </Card>
+                ))}
+            </section>
 
-            </Card>
-        </div>
+            <section className="gallery-section">
+                <div className="section-heading">
+                    <span className="eyebrow">Живая атмосфера</span>
+                    <Title level={3}>Так выглядит ChessUnion изнутри</Title>
+                    <Paragraph className="section-subtitle">
+                        Мы делимся каждым событием — от тренировок и мастер-классов до больших фестивалей. Присоединяйтесь и станьте частью хроники клуба.
+                    </Paragraph>
+                </div>
+                <div className="gallery-grid">
+                    {galleryImages.map(({ src, alt, caption }) => (
+                        <figure key={alt} className="gallery-figure">
+                            <Image src={src} alt={alt} preview={false} className="gallery-image" />
+                            <figcaption className="gallery-caption">{caption}</figcaption>
+                        </figure>
+                    ))}
+                </div>
+            </section>
+        </main>
     );
 };
 
