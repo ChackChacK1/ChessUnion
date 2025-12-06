@@ -433,6 +433,126 @@ body[data-theme="dark"] .pawn-letter {
   color: var(--text-secondary);
 }
 
+/* Секция с услугами и ценами */
+.pricing-section {
+  background: var(--card-bg);
+  border-radius: 32px;
+  padding: clamp(32px, 5vw, 56px);
+  box-shadow: var(--shadow-soft);
+  border: 1px solid rgba(31, 43, 56, 0.1);
+  margin-top: clamp(40px, 6vw, 72px);
+}
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  margin-top: 32px;
+}
+
+.pricing-card {
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 20px;
+  padding: 32px 24px;
+  text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-soft);
+}
+
+.pricing-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow);
+  border-color: var(--primary-color);
+}
+
+.pricing-card-featured {
+  border-color: var(--primary-color);
+  background: linear-gradient(135deg, rgba(212, 168, 87, 0.08), rgba(212, 168, 87, 0.03));
+}
+
+.pricing-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.pricing-title {
+  color: var(--text-color) !important;
+  margin-bottom: 16px !important;
+  font-size: 1.1rem !important;
+  line-height: 1.4 !important;
+}
+
+.pricing-price {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-top: 8px;
+}
+
+.pricing-unit {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* Футер */
+.site-footer {
+  background: linear-gradient(135deg, rgba(31, 43, 56, 0.95), rgba(15, 18, 23, 0.95));
+  border-top: 1px solid var(--border-color);
+  padding: clamp(32px, 5vw, 48px) clamp(20px, 7vw, 120px);
+  margin-top: clamp(40px, 6vw, 72px);
+  color: var(--text-color);
+}
+
+body[data-theme="dark"] .site-footer {
+  background: linear-gradient(135deg, rgba(15, 18, 23, 0.98), rgba(8, 11, 14, 0.98));
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.footer-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin: 0 0 8px 0 !important;
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.footer-text {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.6;
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.footer-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.footer-link:hover {
+  color: var(--hover-color);
+  text-decoration: underline;
+}
+
 /* Адаптивные правки под мобильные устройства */
 @media (max-width: 768px) {
   .home-hero {
@@ -451,6 +571,15 @@ body[data-theme="dark"] .pawn-letter {
 
   .board-overlay {
     grid-template-columns: 1fr;
+  }
+
+  .pricing-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: 24px;
   }
 }
 

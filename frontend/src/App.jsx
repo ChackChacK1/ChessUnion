@@ -56,6 +56,31 @@ function App() {
                 }
             />
         </Routes>
+        <footer className="site-footer">
+            <div className="footer-content">
+                <div className="footer-section">
+                    <h4 className="footer-title">ChessUnion</h4>
+                    <p className="footer-text">Шахматный клуб в Сочи</p>
+                </div>
+                <div className="footer-section">
+                    <h4 className="footer-title">Контактная информация</h4>
+                    <p className="footer-text">ИП Ковалёв Борис Геннадьевич</p>
+                    <p className="footer-text">ОРГНИП 325237500429920</p>
+                    <p className="footer-text">ИНН 671206955889</p>
+                </div>
+                <div className="footer-section">
+                    <h4 className="footer-title">Адрес</h4>
+                    <p className="footer-text">Краснодарский Край, Адлерский район</p>
+                    <p className="footer-text">г. Сочи, ул. Искры, 88к3, кВ 131</p>
+                </div>
+                <div className="footer-section">
+                    <h4 className="footer-title">Email</h4>
+                    <a href="mailto:boris.kovalyov.05.04@yandex.ru" className="footer-link">
+                        boris.kovalyov.05.04@yandex.ru
+                    </a>
+                </div>
+            </div>
+        </footer>
       </Router>
   );
 }

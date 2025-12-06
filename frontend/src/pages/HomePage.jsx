@@ -85,9 +85,9 @@ const HomePage = () => {
 
                 <div className="hero-visual">
                     <div className="chessboard-frame">
-                        <span className="pivot-note">А ты записался на турнир?</span>
+                        <span className="pivot-note">UNION</span>
                         <Image
-                            src="/src/images/ruslan.jpg"
+                            src="/src/images/chessunion_club_bw.jpg"
                             alt="Зал ChessUnion"
                             preview={false}
                             className="hero-image"
@@ -131,7 +131,10 @@ const HomePage = () => {
             <section className="gallery-section">
                 <div className="section-heading">
                     <span className="eyebrow">Живая атмосфера</span>
-                    <Title level={3}>Так выглядит ChessUnion изнутри</Title>
+                    <Title style={{
+                        color: 'var(--text-color)'
+                    }}
+                    level={3}>Так выглядит ChessUnion изнутри</Title>
                     <Paragraph className="section-subtitle">
                         Мы делимся каждым событием — от тренировок и мастер-классов до больших фестивалей. Присоединяйтесь и станьте частью хроники клуба.
                     </Paragraph>
@@ -143,6 +146,33 @@ const HomePage = () => {
                             <figcaption className="gallery-caption">{caption}</figcaption>
                         </figure>
                     ))}
+                </div>
+            </section>
+
+            <section className="pricing-section">
+                <div className="section-heading">
+                    <span className="eyebrow">Услуги и цены</span>
+                    <Title style={{
+                        color: 'var(--text-color)'
+                    }}
+                    level={3}>Наши тарифы</Title>
+                </div>
+                <div className="pricing-grid">
+                    <div className="pricing-card">
+                        <div className="pricing-icon">♔</div>
+                        <Title level={4} className="pricing-title">Шахматный турнир</Title>
+                        <div className="pricing-price">500₽</div>
+                    </div>
+                    <div className="pricing-card">
+                        <div className="pricing-icon">♗</div>
+                        <Title level={4} className="pricing-title">Групповое обучение</Title>
+                        <div className="pricing-price">500₽ <span className="pricing-unit">/ 1 занятие</span></div>
+                    </div>
+                    <div className="pricing-card pricing-card-featured">
+                        <div className="pricing-icon">♕</div>
+                        <Title level={4} className="pricing-title">Индивидуальное обучение с Международным Мастером</Title>
+                        <div className="pricing-price">2.000₽ <span className="pricing-unit">/ 1 час</span></div>
+                    </div>
                 </div>
             </section>
         </main>
