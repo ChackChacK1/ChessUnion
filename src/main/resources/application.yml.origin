@@ -1,14 +1,14 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/chess-union-db}
-    username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:104423315}
+    url:
+    username:
+    password:
   flyway:
     baseline-on-migrate: true
     enabled: true
-    user: ${SPRING_DATASOURCE_USERNAME:postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:104423315}
+    user:
+    password:
   data:
     redis:
       host: ${SPRING_DATA_REDIS_HOST:localhost}
@@ -17,18 +17,18 @@ spring:
     name: ChessUnion
 
 jwt:
-  secret: ${JWT_SECRET:90384fj304jf09j09fj3409fj3094fj9sjfP3dj8DDikSDJ39dJD39d3jdd}
+  secret:
   lifetime: ${JWT_LIFETIME:150d}
 server:
   port: ${SERVER_PORT:8080}
 
 sms:
   api:
-    key: ${SMS_API_KEY:someApiKey}
-    senderName: ${SMS_API_SENDER_NAME:ChessUnion}
+    key:
+    senderName:
 
 cors:
-  url: ${CORS_URL:http://83.166.247.15:5173}
+  url:
 
 
 management:

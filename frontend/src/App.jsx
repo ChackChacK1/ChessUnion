@@ -25,8 +25,11 @@ const AdminRoute = ({ children }) => {
 function App() {
   return (
       <Router>
-        <Navbar />
-        <Routes>
+          <div className="app-container">
+              <div className="content-wrapper"> {/* НОВЫЙ контейнер */}
+                  <Navbar />
+                  <div className="main-content">
+                      <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/tournaments" element={<Tournaments />} />
             <Route path="/login" element={<LoginPage />} />
@@ -55,8 +58,10 @@ function App() {
                     </AdminRoute>
                 }
             />
-        </Routes>
-        <footer className="site-footer">
+                      </Routes>
+                  </div>
+              </div>
+              <footer className="site-footer">
             <div className="footer-content">
                 <div className="footer-section">
                     <h4 className="footer-title">ChessUnion</h4>
@@ -80,7 +85,8 @@ function App() {
                     </a>
                 </div>
             </div>
-        </footer>
+              </footer>
+          </div>
       </Router>
   );
 }

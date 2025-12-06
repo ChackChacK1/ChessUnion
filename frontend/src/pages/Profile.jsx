@@ -114,7 +114,7 @@ const Profile = () => {
                         color: 'var(--text-secondary)'
                     }} />
                     <Title level={4} style={{ margin: 0, color: 'var(--text-color)' }}>
-                        {profile.firstName} {profile.lastName}
+                        {profile.firstName} {profile.lastName} {profile.surName}
                     </Title>
                 </div>
 

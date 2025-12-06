@@ -212,7 +212,7 @@ const Registration = () => {
                     <Form.Item
                         name="surName"
                         label={<span style={{ color: 'var(--text-color)' }}>Отчество</span>}
-                        rules={[{ required: true, message: 'Введите отчество' }]}
+                        rules={[{ required: false, message: 'Введите отчество' }]}
                     >
                         <Input
                             placeholder="Ваше отчество"

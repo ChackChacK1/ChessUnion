@@ -154,10 +154,11 @@ public class PhoneNumberService {
                 .baseUrl("https://ssl.bs00.ru")
                 .build();
 
-        System.out.println(restClient.post()
-                .uri(String.format("/?method=push_msg&key=%s&text=%s&phone=%s&sender_name=%s&format=json", smsApiKey, text, phoneNumber, senderName))
-                .retrieve()
-                .body(String.class));
+        System.out.println(text);
+//        System.out.println(restClient.post()
+//                .uri(String.format("/?method=push_msg&key=%s&text=%s&phone=%s&sender_name=%s&format=json", smsApiKey, text, phoneNumber, senderName))
+//                .retrieve()
+//                .body(String.class));
     }
 
     @Transactional

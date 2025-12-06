@@ -15,6 +15,7 @@ public class UpdateProfileDto {
 
     private String firstName;
     private String lastName;
+    private String surName;
 
     //todo НОМЕР ТЕЛЕФОНА
 

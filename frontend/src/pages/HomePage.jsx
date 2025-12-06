@@ -50,7 +50,7 @@ const HomePage = () => {
                 <div className="hero-copy">
                     <span className="eyebrow">Union • Сочи</span>
                     <Title level={1} className="hero-title">
-                        Шахматный клуб для тех, кто живёт партиями
+                        Шахматный клуб для тех, кто живёт партиями&nbsp;
                         <span className="title-accent" aria-label="Chess Union">
                             Un
                             <span className="pawn-letter" role="img" aria-label="шахматная пешка">♙</span>
@@ -76,7 +76,7 @@ const HomePage = () => {
                             />
                             <span>Мы в Telegram</span>
                         </a>
-                        <a className="outline-button" href="/tournaments">
+                        <a  className="outline-button" href="/tournaments">
                             Расписание турниров
                         </a>
                     </div>

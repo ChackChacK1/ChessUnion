@@ -158,6 +158,7 @@ public class UserService {
         user.setUsername(updateProfile.getUsername());
         user.setFirstName(updateProfile.getFirstName());
         user.setLastName(updateProfile.getLastName());
+        user.setSurName(updateProfile.getSurName());
         user.setEmail(updateProfile.getEmail());
 
         userRepository.save(user);

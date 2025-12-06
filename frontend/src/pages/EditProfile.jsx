@@ -21,6 +21,7 @@ const EditProfile = () => {
                     username: response.data.username,
                     firstName: response.data.firstName,
                     lastName: response.data.lastName,
+                    surName: response.data.surName,
                     email: response.data.email || ''
                 });
             } catch (error) {
@@ -123,6 +124,23 @@ const EditProfile = () => {
                     >
                         <Input
                             placeholder="Введите фамилию"
+                            style={{
+                                backgroundColor: 'var(--card-bg)',
+                                color: 'var(--text-color)',
+                                borderColor: 'var(--border-color)'
+                            }}
+                        />
+                    </Form.Item>
+
+                    <Form.Item
+                        label={<span style={{ color: 'var(--text-color)' }}>Отчество</span>}
+                        name="surName"
+                        rules={[
+                            { required: true, message: 'Пожалуйста, введите отчество' }
+                        ]}
+                    >
+                        <Input
+                            placeholder="Введите отчество"
                             style={{
                                 backgroundColor: 'var(--card-bg)',
                                 color: 'var(--text-color)',
