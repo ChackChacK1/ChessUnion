@@ -62,13 +62,13 @@ public class UserService {
 
     @Transactional
     public void registerUser(RegistrationRequest registrationRequest) {
-        registrationRequest.setPhoneNumber(phoneNumberService.formatPhoneNumber(registrationRequest.getPhoneNumber()));
+//        registrationRequest.setPhoneNumber(phoneNumberService.formatPhoneNumber(registrationRequest.getPhoneNumber()));
 
         User user = modelMapper.map(registrationRequest, User.class);
 
-        if (!phoneNumberService.finalCodeConfirmationCheck(registrationRequest.getPhoneNumber(), registrationRequest.getConfirmationCode())){
-            throw new WrongPhoneNumberConfirmationCodeException();
-        }
+//        if (!phoneNumberService.finalCodeConfirmationCheck(registrationRequest.getPhoneNumber(), registrationRequest.getConfirmationCode())){
+//            throw new WrongPhoneNumberConfirmationCodeException();
+//        }
 
         if (userRepository.existsByUsername(registrationRequest.getUsername().trim())){
             throw new UsernameAlreadyExistsException(registrationRequest.getUsername());

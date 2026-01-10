@@ -67,9 +67,9 @@ public class TournamentService {
 
         User user = userRepository.findByUsername(username).orElseThrow(()-> new UsernameNotFoundException(username));
 
-        if (user.getPhoneNumber() == null && checkPhoneNumber) {
-            throw new PhoneNumberNotFoundException("You need to register a phone number");
-        }
+//        if (user.getPhoneNumber() == null && checkPhoneNumber) {
+//            throw new PhoneNumberNotFoundException("You need to register a phone number");
+//        }
 
         boolean alreadyRegistered = playerRepository.existsByUserAndTournament(user, tournament);
         if (alreadyRegistered) {

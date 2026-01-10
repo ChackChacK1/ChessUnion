@@ -14,81 +14,81 @@ const Registration = () => {
     const [submitLoading, setSubmitLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
-    const sendConfirmationCode = async () => {
-        const phoneNumber = form.getFieldValue('phoneNumber');
+    // const sendConfirmationCode = async () => {
+    //     const phoneNumber = form.getFieldValue('phoneNumber');
+    //
+    //     if (!phoneNumber) {
+    //         message.error('Введите номер телефона');
+    //         return;
+    //     }
+    //
+    //     setSendingCode(true);
+    //     setErrorMessage('');
+    //     try {
+    //         await client.post('/api/phone/confirmation/send', { number: phoneNumber });
+    //         message.success('Код подтверждения отправлен');
+    //     } catch (error) {
+    //         const errorData = error.response?.data;
+    //         if (errorData?.error) {
+    //             const errorText = 'Неверный формат номера телефона. Формат: 89990000000 или +79990000000';
+    //             setErrorMessage(errorText);
+    //             message.error(`Ошибка: ${errorText}`);
+    //         } else {
+    //             const errorText = 'Ошибка при отправке кода: ' + (error.message || 'Неизвестная ошибка');
+    //             setErrorMessage(errorText);
+    //             message.error(errorText);
+    //         }
+    //     } finally {
+    //         setSendingCode(false);
+    //     }
+    // };
 
-        if (!phoneNumber) {
-            message.error('Введите номер телефона');
-            return;
-        }
-
-        setSendingCode(true);
-        setErrorMessage('');
-        try {
-            await client.post('/api/phone/confirmation/send', { number: phoneNumber });
-            message.success('Код подтверждения отправлен');
-        } catch (error) {
-            const errorData = error.response?.data;
-            if (errorData?.error) {
-                const errorText = 'Неверный формат номера телефона. Формат: 89990000000 или +79990000000';
-                setErrorMessage(errorText);
-                message.error(`Ошибка: ${errorText}`);
-            } else {
-                const errorText = 'Ошибка при отправке кода: ' + (error.message || 'Неизвестная ошибка');
-                setErrorMessage(errorText);
-                message.error(errorText);
-            }
-        } finally {
-            setSendingCode(false);
-        }
-    };
-
-    const verifyConfirmationCode = async () => {
-        const phoneNumber = form.getFieldValue('phoneNumber');
-        const confirmationCode = form.getFieldValue('confirmationCode');
-
-        if (!phoneNumber) {
-            message.error('Введите номер телефона');
-            return;
-        }
-
-        if (!confirmationCode) {
-            message.error('Введите код подтверждения');
-            return;
-        }
-
-        setVerifyingCode(true);
-        setErrorMessage('');
-        try {
-            await client.post('/api/phone/confirmation/confirm', {
-                number: phoneNumber,
-                code: confirmationCode
-            });
-            message.success('Номер телефона подтвержден');
-            setPhoneVerified(true);
-        } catch (error) {
-            const errorData = error.response?.data;
-            let errorText = 'Неверный код подтверждения';
-
-            if (errorData?.body) {
-                errorText = errorData.body;
-            } else if (errorData?.details && errorData.details.length > 0) {
-                errorText = errorData.details.join(', ');
-            }
-
-            setErrorMessage(errorText);
-            message.error(`Ошибка: ${errorText}`);
-            setPhoneVerified(false);
-        } finally {
-            setVerifyingCode(false);
-        }
-    };
+    // const verifyConfirmationCode = async () => {
+    //     const phoneNumber = form.getFieldValue('phoneNumber');
+    //     const confirmationCode = form.getFieldValue('confirmationCode');
+    //
+    //     if (!phoneNumber) {
+    //         message.error('Введите номер телефона');
+    //         return;
+    //     }
+    //
+    //     if (!confirmationCode) {
+    //         message.error('Введите код подтверждения');
+    //         return;
+    //     }
+    //
+    //     setVerifyingCode(true);
+    //     setErrorMessage('');
+    //     try {
+    //         await client.post('/api/phone/confirmation/confirm', {
+    //             number: phoneNumber,
+    //             code: confirmationCode
+    //         });
+    //         message.success('Номер телефона подтвержден');
+    //         setPhoneVerified(true);
+    //     } catch (error) {
+    //         const errorData = error.response?.data;
+    //         let errorText = 'Неверный код подтверждения';
+    //
+    //         if (errorData?.body) {
+    //             errorText = errorData.body;
+    //         } else if (errorData?.details && errorData.details.length > 0) {
+    //             errorText = errorData.details.join(', ');
+    //         }
+    //
+    //         setErrorMessage(errorText);
+    //         message.error(`Ошибка: ${errorText}`);
+    //         setPhoneVerified(false);
+    //     } finally {
+    //         setVerifyingCode(false);
+    //     }
+    // };
 
     const onFinish = async (values) => {
-        if (!phoneVerified) {
-            message.error('Подтвердите номер телефона перед регистрацией');
-            return;
-        }
+        // if (!phoneVerified) {
+        //     message.error('Подтвердите номер телефона перед регистрацией');
+        //     return;
+        // }
 
         setSubmitLoading(true);
         setErrorMessage('');
@@ -211,6 +211,7 @@ const Registration = () => {
 
                     <Form.Item
                         name="surName"
+                        initialValue={null}
                         label={<span style={{ color: 'var(--text-color)' }}>Отчество</span>}
                         rules={[{ required: false, message: 'Введите отчество' }]}
                     >
@@ -226,58 +227,63 @@ const Registration = () => {
 
                     <Form.Item
                         name="phoneNumber"
+                        hidden={true}
+                        initialValue={null}
                         label={<span style={{ color: 'var(--text-color)' }}>Номер телефона</span>}
-                        rules={[{ required: true, message: 'Введите номер телефона' }]}
+                        rules={[{ required: false, message: 'Введите номер телефона' }]}
                     >
-                        <Input
-                            placeholder="81231231212 или +71231231212"
-                            addonAfter={
-                                <Button
-                                    type="link"
-                                    onClick={sendConfirmationCode}
-                                    loading={sendingCode}
-                                    style={{
-                                        color: 'var(--primary-color)',
-                                        padding: 0
-                                    }}
-                                >
-                                    Отправить код
-                                </Button>
-                            }
-                            style={{
-                                backgroundColor: 'var(--card-bg)',
-                                color: 'var(--text-color)',
-                                borderColor: 'var(--border-color)'
-                            }}
+                        <Input hidden
+                            // placeholder="81231231212 или +71231231212"
+                            // addonAfter={
+                            //     <Button
+                            //         type="link"
+                            //         onClick={sendConfirmationCode}
+                            //         loading={sendingCode}
+                            //         style={{
+                            //             color: 'var(--primary-color)',
+                            //             padding: 0
+                            //         }}
+                            //     >
+                            //         Отправить код
+                            //     </Button>
+                            // }
+                            // style={{
+                            //     backgroundColor: 'var(--card-bg)',
+                            //     color: 'var(--text-color)',
+                            //     borderColor: 'var(--border-color)'
+                            // }}
                         />
                     </Form.Item>
 
                     <Form.Item
                         name="confirmationCode"
+                        hidden={true}
+                        initialValue={null}
                         label={<span style={{ color: 'var(--text-color)' }}>Код подтверждения</span>}
-                        rules={[{ required: true, message: 'Введите код подтверждения' }]}
+                        rules={[{ required: false, message: 'Введите код подтверждения' }]}
                     >
-                        <Input
-                            placeholder="Введите код из SMS"
-                            addonAfter={
-                                <Button
-                                    type="link"
-                                    onClick={verifyConfirmationCode}
-                                    loading={verifyingCode}
-                                    style={{
-                                        color: phoneVerified ? 'var(--success-color)' : 'var(--primary-color)',
-                                        padding: 0
-                                    }}
-                                >
-                                    {phoneVerified ? '✓ Проверено' : 'Проверить код'}
-                                </Button>
-                            }
-                            style={{
-                                backgroundColor: 'var(--card-bg)',
-                                color: 'var(--text-color)',
-                                borderColor: phoneVerified ? 'var(--success-color)' : 'var(--border-color)'
-                            }}
-                        />
+                        <Input hidden />
+                        {/*<Input*/}
+                        {/*    placeholder="Введите код из SMS"*/}
+                        {/*    addonAfter={*/}
+                        {/*        <Button*/}
+                        {/*            type="link"*/}
+                        {/*            onClick={verifyConfirmationCode}*/}
+                        {/*            loading={verifyingCode}*/}
+                        {/*            style={{*/}
+                        {/*                color: phoneVerified ? 'var(--success-color)' : 'var(--primary-color)',*/}
+                        {/*                padding: 0*/}
+                        {/*            }}*/}
+                        {/*        >*/}
+                        {/*            {phoneVerified ? '✓ Проверено' : 'Проверить код'}*/}
+                        {/*        </Button>*/}
+                        {/*    }*/}
+                        {/*    style={{*/}
+                        {/*        backgroundColor: 'var(--card-bg)',*/}
+                        {/*        color: 'var(--text-color)',*/}
+                        {/*        borderColor: phoneVerified ? 'var(--success-color)' : 'var(--border-color)'*/}
+                        {/*    }}*/}
+                        {/*/>*/}
                     </Form.Item>
 
                     <Form.Item
@@ -309,7 +315,7 @@ const Registration = () => {
                                 borderColor: 'var(--hover-color)',
                                 height: '40px'
                             }}
-                            disabled={!phoneVerified}
+                            // disabled={!phoneVerified}
                         >
                             Зарегистрироваться
                         </Button>

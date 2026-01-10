@@ -20,8 +20,8 @@ public class RegistrationRequest {
     private String lastName;
     private String surName;
 
-    @PhoneNumberFormatValidation
-    @PhoneNumberConfirmedValidation
+//    @PhoneNumberFormatValidation
+//    @PhoneNumberConfirmedValidation
     private String phoneNumber;
 
     private String confirmationCode;

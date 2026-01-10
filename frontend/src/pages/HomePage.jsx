@@ -1,4 +1,5 @@
 import { Card, Image, Typography } from 'antd';
+import {Link} from "react-router-dom";
 
 const { Title, Paragraph } = Typography;
 
@@ -76,9 +77,10 @@ const HomePage = () => {
                             />
                             <span>Мы в Telegram</span>
                         </a>
-                        <a  className="outline-button" href="/tournaments">
-                            Расписание турниров
-                        </a>
+                        <Link className="outline-button" to="/tournaments">Расписание турниров</Link>
+                        {/*<a  className="outline-button" href="/tournaments">*/}
+                        {/*    Расписание турниров*/}
+                        {/*</a>*/}
                     </div>
 
                 </div>
