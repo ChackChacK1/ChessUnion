@@ -227,7 +227,7 @@ const TournamentDetail = () => {
             width: 120,
             align: 'center',
             render: (secondScore) => (
-                <Tag color="orange" style={{
+                <Tag color="gold" style={{
                     color: 'var(--text-color)',
                     borderColor: 'var(--border-color)'
                 }}>
