@@ -8,6 +8,7 @@ import org.chessunion.dto.TournamentCreateRequest;
 import org.chessunion.dto.TournamentDto;
 import org.chessunion.dto.UpdateTournamentDto;
 import org.chessunion.service.TournamentService;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -46,6 +47,16 @@ public class TournamentAdminController {
                                               @RequestBody UpdateTournamentDto updateTournamentDto){
         tournamentService.updateTournament(id, updateTournamentDto);
         return ResponseEntity.ok("Tournament update successfully");
+    }
+
+    @DeleteMapping("{id}")
+    public ResponseEntity<?> deleteTournament(@PathVariable int id){
+        try {
+            tournamentService.deleteTournament(id);
+            return ResponseEntity.ok().build();
+        } catch (EmptyResultDataAccessException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping("/{id}/addUser")

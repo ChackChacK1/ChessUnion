@@ -18,4 +18,5 @@ public interface PlayerRepository extends JpaRepository<Player, Integer> {
     List<Player> findAllByTournament_Id(Integer tournamentId);
 
 
+    void deleteAllByTournamentId(Integer id);
 }

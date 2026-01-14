@@ -33,4 +33,6 @@ public interface MatchRepository extends JpaRepository<Match, Integer> {
     @Modifying
     @Query(value = "UPDATE matches SET result = null WHERE id IN (?1)", nativeQuery = true)
     void setResultNullToAllMatchesByIds(List<Integer> ids);
+
+    void deleteAllByTournamentId(Integer id);
 }

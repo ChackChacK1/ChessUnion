@@ -58,6 +58,18 @@ public class TournamentService {
     }
 
     @Transactional
+    public void deleteTournament(int id){
+        Tournament tournament = tournamentRepository.findById(id)
+                .orElseThrow(() -> new TournamentNotFoundException(id));
+
+        // при необходимости — сначала удалить связанные матчи и игроков
+        matchRepository.deleteAllByTournamentId(tournament.getId());
+        playerRepository.deleteAllByTournamentId(tournament.getId());
+
+        tournamentRepository.delete(tournament);
+    }
+
+    @Transactional
     public void registrationTournament(String username, int id, boolean checkPhoneNumber){
         Tournament tournament = tournamentRepository.findById(id).orElseThrow(()-> new TournamentNotFoundException(id));
 

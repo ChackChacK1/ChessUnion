@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     Card, Typography, Tag, Spin, message, Button,
-    Row, Col, Space, Alert, Grid, Divider, Table
+    Row, Col, Space, Alert, Grid, Divider, Table, Popconfirm
 } from 'antd';
 import {
     CalendarOutlined, TrophyOutlined, TeamOutlined,
     UserAddOutlined, CheckCircleOutlined, ArrowLeftOutlined,
     UserOutlined, CrownOutlined, ClockCircleOutlined,
-    InfoCircleOutlined, EnvironmentOutlined
+    InfoCircleOutlined, EnvironmentOutlined, DeleteOutlined
 } from '@ant-design/icons';
 import client from '../api/client';
 import dayjs from 'dayjs';
@@ -28,6 +28,8 @@ const TournamentDetail = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isRegistered, setIsRegistered] = useState(false);
     const [checkingRegistration, setCheckingRegistration] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [deleting, setDeleting] = useState(false);
 
     // Функции для получения цвета и перевода стадии
     const getStageColor = (stage) => {
@@ -66,6 +68,7 @@ const TournamentDetail = () => {
     const checkAuth = () => {
         const token = localStorage.getItem('token');
         setIsAuthenticated(!!token);
+        setIsAdmin(localStorage.getItem('role') === 'ADMIN');
     };
 
     const fetchTournament = async () => {
@@ -135,6 +138,19 @@ const TournamentDetail = () => {
         if (tournament.maxAmountOfPlayers && tournament.players?.length >= tournament.maxAmountOfPlayers) return false;
         if (isRegistered) return false;
         return true;
+    };
+
+    const handleDeleteTournament = async () => {
+        try {
+            setDeleting(true);
+            await client.delete(`/api/tournament/${id}`);
+            message.success('Турнир успешно удалён');
+            navigate('/tournaments');
+        } catch (error) {
+            message.error('Ошибка удаления турнира: ' + (error.response?.data?.message || error.message));
+        } finally {
+            setDeleting(false);
+        }
     };
 
     // Колонки для таблицы участников (стадия регистрации)
@@ -576,6 +592,41 @@ const TournamentDetail = () => {
                     </Card>
                 </Col>
             </Row>
+
+            {/* Кнопка удаления турнира (только для админа) */}
+            {isAdmin && (
+                <Card
+                    style={{
+                        marginTop: 20,
+                        backgroundColor: 'var(--card-bg)',
+                        borderColor: 'var(--border-color)'
+                    }}
+                    bodyStyle={{ padding: isMobile ? '16px' : '24px' }}
+                >
+                    <Space direction="vertical" style={{ width: '100%' }} size="middle">
+                        <Divider style={{ margin: '8px 0', borderColor: 'var(--border-color)' }} />
+                        <Popconfirm
+                            title="Удалить турнир?"
+                            description="Вы уверены, что хотите удалить этот турнир? Это действие нельзя отменить."
+                            okText="Да"
+                            cancelText="Нет"
+                            onConfirm={handleDeleteTournament}
+                            okButtonProps={{ danger: true }}
+                        >
+                            <Button
+                                type="primary"
+                                danger
+                                block
+                                icon={<DeleteOutlined />}
+                                loading={deleting}
+                                size={isMobile ? 'large' : 'middle'}
+                            >
+                                Удалить турнир
+                            </Button>
+                        </Popconfirm>
+                    </Space>
+                </Card>
+            )}
         </div>
     );
 };

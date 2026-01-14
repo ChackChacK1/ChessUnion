@@ -15,7 +15,8 @@ import {
     Tag,
     Spin,
     Space,
-    Grid
+    Grid,
+    Popconfirm
 } from 'antd';
 import {
     PlusOutlined,
@@ -24,7 +25,8 @@ import {
     EnvironmentOutlined,
     UserOutlined,
     TeamOutlined,
-    UserAddOutlined
+    UserAddOutlined,
+    DeleteOutlined
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import client from '../api/client';
@@ -137,6 +139,16 @@ const AdminPage = () => {
         navigate(`/admin/tournament/${tournament.id}/edit`);
     };
 
+    const handleDeleteTournament = async (tournamentId) => {
+        try {
+            await client.delete(`/api/admin/tournament/${tournamentId}`);
+            message.success('Турнир успешно удалён');
+            fetchRunningTournaments();
+        } catch (error) {
+            message.error('Ошибка удаления турнира: ' + (error.response?.data?.message || error.message));
+        }
+    };
+
     return (
         <div style={{ padding: isMobile ? '12px' : '20px', maxWidth: '1200px', margin: '0 auto' }}>
             <Title level={isMobile ? 3 : 2} style={{ color: 'var(--text-color)', marginBottom: 24 }}>
@@ -226,6 +238,33 @@ const AdminPage = () => {
                                             onClick={(e) => handleEditTournament(tournament, e)}
                                             onMouseEnter={(e) => e.stopPropagation()}
                                         />
+
+                                        {/* Кнопка удаления турнира */}
+                                        <Popconfirm
+                                            title="Удалить турнир?"
+                                            description="Вы уверены, что хотите удалить этот турнир? Это действие нельзя отменить."
+                                            okText="Да"
+                                            cancelText="Нет"
+                                            onConfirm={(e) => {
+                                                e?.stopPropagation();
+                                                handleDeleteTournament(tournament.id);
+                                            }}
+                                            onCancel={(e) => e?.stopPropagation()}
+                                        >
+                                            <Button
+                                                icon={<DeleteOutlined />}
+                                                type="text"
+                                                danger
+                                                size={isMobile ? "small" : "large"}
+                                                style={{
+                                                    position: 'absolute',
+                                                    top: isMobile ? '32px' : '40px',
+                                                    right: isMobile ? '8px' : '8px',
+                                                    zIndex: 30
+                                                }}
+                                                onClick={(e) => e.stopPropagation()}
+                                            />
+                                        </Popconfirm>
 
                                         <List.Item.Meta
                                             title={

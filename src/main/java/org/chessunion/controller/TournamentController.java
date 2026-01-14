@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.chessunion.dto.RegisterCustomUserRequest;
 import org.chessunion.dto.TournamentDto;
 import org.chessunion.service.TournamentService;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -47,7 +48,15 @@ public class TournamentController {
         return ResponseEntity.ok(tournamentService.checkTournamentRegistered(principal.getName(), id));
     }
 
-
-
-
+    @DeleteMapping("{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(name = "BearerAuth")
+    public ResponseEntity<?> deleteTournament(@PathVariable int id){
+        try {
+            tournamentService.deleteTournament(id);
+            return ResponseEntity.ok().build();
+        } catch (EmptyResultDataAccessException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
