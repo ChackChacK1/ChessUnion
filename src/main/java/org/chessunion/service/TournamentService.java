@@ -62,9 +62,18 @@ public class TournamentService {
         Tournament tournament = tournamentRepository.findById(id)
                 .orElseThrow(() -> new TournamentNotFoundException(id));
 
+        if (tournament.getStage() == Tournament.Stage.FINISHED) {
+            int currentRound = tournament.getCurrentRound();
+            while (currentRound > 0) {
+                playerHistoryService.rollbackOneRound(tournament.getId(), currentRound);
+                currentRound--;
+            }
+            userService.saveRatings(tournament.getId());
+        }
         // при необходимости — сначала удалить связанные матчи и игроков
         matchRepository.deleteAllByTournamentId(tournament.getId());
         playerRepository.deleteAllByTournamentId(tournament.getId());
+        playerHistoryRepository.deleteAllByTournamentId(tournament.getId());
 
         tournamentRepository.delete(tournament);
     }
@@ -229,6 +238,7 @@ public class TournamentService {
         Map<Boolean, List<MatchPair>> pairsMap = findPairsWithBacktracking(unpairedPlayers, opponentsMap, pairs, new HashSet<>());
 
         if (!pairsMap.keySet().iterator().next()) {
+            System.out.println("Ошибка расчета жеребьёвки");
             throw new NotEnoughPlayersException(unpairedPlayers.size(), unpairedPlayers.size());
         } else {
             for (MatchPair pair : pairsMap.get(true)) {

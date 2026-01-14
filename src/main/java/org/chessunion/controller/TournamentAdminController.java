@@ -49,14 +49,10 @@ public class TournamentAdminController {
         return ResponseEntity.ok("Tournament update successfully");
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTournament(@PathVariable int id){
-        try {
-            tournamentService.deleteTournament(id);
-            return ResponseEntity.ok().build();
-        } catch (EmptyResultDataAccessException e) {
-            return ResponseEntity.notFound().build();
-        }
+        tournamentService.deleteTournament(id);
+        return ResponseEntity.ok("Tournament deleted successfully");
     }
 
     @PostMapping("/{id}/addUser")

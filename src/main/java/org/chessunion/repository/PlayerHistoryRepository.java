@@ -19,5 +19,7 @@ public interface PlayerHistoryRepository extends JpaRepository<PlayerHistory, In
 
     void deleteByTournamentIdAndRoundOfChangesAndGeneratedWithRoundIsFalse(Integer tournamentId, int roundOfChanges);
 
+    void deleteAllByTournamentId(Integer tournamentId);
+
     Optional<List<PlayerHistory>> findAllByTournamentIdAndRoundOfChangesAndGeneratedWithRoundIsFalse(Integer tournamentId, int roundOfChanges);
 }

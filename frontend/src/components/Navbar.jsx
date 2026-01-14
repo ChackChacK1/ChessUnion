@@ -276,7 +276,6 @@ const Navbar = () => {
                     {!isAuthenticated && (
                         <Button
                             type="primary"
-                            icon={<LoginOutlined />}
                             onClick={showAuthModal}
                             size="middle"
                             style={{

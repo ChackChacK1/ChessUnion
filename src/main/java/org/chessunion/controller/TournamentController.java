@@ -48,15 +48,4 @@ public class TournamentController {
         return ResponseEntity.ok(tournamentService.checkTournamentRegistered(principal.getName(), id));
     }
 
-    @DeleteMapping("{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    @SecurityRequirement(name = "BearerAuth")
-    public ResponseEntity<?> deleteTournament(@PathVariable int id){
-        try {
-            tournamentService.deleteTournament(id);
-            return ResponseEntity.ok().build();
-        } catch (EmptyResultDataAccessException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
 }

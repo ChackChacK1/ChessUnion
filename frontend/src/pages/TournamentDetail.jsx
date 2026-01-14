@@ -143,7 +143,7 @@ const TournamentDetail = () => {
     const handleDeleteTournament = async () => {
         try {
             setDeleting(true);
-            await client.delete(`/api/tournament/${id}`);
+            await client.delete(`/api/admin/tournament/${id}`);
             message.success('Турнир успешно удалён');
             navigate('/tournaments');
         } catch (error) {
@@ -601,10 +601,10 @@ const TournamentDetail = () => {
                         backgroundColor: 'var(--card-bg)',
                         borderColor: 'var(--border-color)'
                     }}
-                    bodyStyle={{ padding: isMobile ? '16px' : '24px' }}
+                    bodyStyle={{ padding: isMobile ? '16px' : '14px' }}
                 >
                     <Space direction="vertical" style={{ width: '100%' }} size="middle">
-                        <Divider style={{ margin: '8px 0', borderColor: 'var(--border-color)' }} />
+
                         <Popconfirm
                             title="Удалить турнир?"
                             description="Вы уверены, что хотите удалить этот турнир? Это действие нельзя отменить."
