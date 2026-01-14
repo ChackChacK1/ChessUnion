@@ -185,6 +185,17 @@ const Navbar = () => {
         ),
     }];
 
+    // Пункт меню для входа (для мобильной версии)
+    const loginMenuItem = !isAuthenticated ? [{
+        key: 'login',
+        label: (
+            <span onClick={showAuthModal} style={{ color: 'var(--primary-color)', cursor: 'pointer', fontWeight: 'bold' }}>
+                Войти
+            </span>
+        ),
+        icon: <LoginOutlined style={{ color: 'var(--primary-color)', fontSize: '18px' }} />,
+    }] : [];
+
     // Пункт меню для выхода
     const logoutMenuItem = isAuthenticated ? [{
         key: 'logout',
@@ -197,7 +208,7 @@ const Navbar = () => {
     }] : [];
 
     // Полный список пунктов меню для мобильной версии
-    const mobileMenuItems = [...mainMenuItems, ...themeMenuItem, ...logoutMenuItem];
+    const mobileMenuItems = [...mainMenuItems, ...themeMenuItem, ...loginMenuItem, ...logoutMenuItem];
 
     // Десктопная версия навбара
     const desktopNavbar = (
@@ -264,23 +275,29 @@ const Navbar = () => {
 
                     {!isAuthenticated && (
                         <Button
-                            type="text"
+                            type="primary"
                             icon={<LoginOutlined />}
                             onClick={showAuthModal}
-                            size="small"
+                            size="middle"
                             style={{
-                                color: 'var(--text-color)',
-                                backgroundColor: 'transparent'
+                                backgroundColor: 'var(--primary-color)',
+                                borderColor: 'var(--primary-color)',
+                                fontWeight: 'bold',
+                                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
                             }}
                             onMouseEnter={(e) => {
                                 e.currentTarget.style.backgroundColor = 'var(--hover-color)';
-                                e.currentTarget.style.color = 'var(--primary-color)';
+                                e.currentTarget.style.borderColor = 'var(--hover-color)';
+                                e.currentTarget.style.transform = 'scale(1.05)';
                             }}
                             onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor = 'transparent';
-                                e.currentTarget.style.color = 'var(--text-color)';
+                                e.currentTarget.style.backgroundColor = 'var(--primary-color)';
+                                e.currentTarget.style.borderColor = 'var(--primary-color)';
+                                e.currentTarget.style.transform = 'scale(1)';
                             }}
-                        />
+                        >
+                            Войти
+                        </Button>
                     )}
                     <Button
                         type="text"
