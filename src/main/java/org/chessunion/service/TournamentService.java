@@ -87,6 +87,10 @@ public class TournamentService {
         }
 
         User user = userRepository.findByUsername(username).orElseThrow(()-> new UsernameNotFoundException(username));
+        if (user.isBanned()) {
+            throw new UserBannedException("You are not allowed to register to this tournament.");
+        }
+
 
 //        if (user.getPhoneNumber() == null && checkPhoneNumber) {
 //            throw new PhoneNumberNotFoundException("You need to register a phone number");

@@ -69,6 +69,15 @@ public class User {
     @OneToMany(mappedBy = "user")
     private Set<Player> players;
 
+    @Column(name = "is_banned", nullable = false)
+    private boolean isBanned = false;
+
+    @Column(name = "unban_date")
+    private LocalDateTime unbanDate;
+
+    @Column(name = "wrong_password_count")
+    private int wrongPasswordCount = 0;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 }

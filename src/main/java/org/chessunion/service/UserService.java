@@ -2,26 +2,19 @@ package org.chessunion.service;
 
 
 import lombok.RequiredArgsConstructor;
-import org.chessunion.dto.ProfileDto;
-import org.chessunion.dto.RegistrationRequest;
-import org.chessunion.dto.TopListElementDto;
-import org.chessunion.dto.UpdateProfileDto;
+import org.chessunion.dto.*;
 import org.chessunion.entity.Player;
 import org.chessunion.entity.Role;
 import org.chessunion.entity.User;
 import org.chessunion.exception.PhoneNumberNotFoundException;
 import org.chessunion.exception.UsernameAlreadyExistsException;
-import org.chessunion.exception.WrongPhoneNumberConfirmationCodeException;
 import org.chessunion.repository.PlayerRepository;
 import org.chessunion.repository.RoleRepository;
 import org.chessunion.repository.UserRepository;
-import org.hibernate.annotations.Cache;
 import org.modelmapper.ModelMapper;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -104,12 +96,22 @@ public class UserService {
 
         setAndSaveUser(user);
     }
+    private void deleteUser(User user) {
+        userRepository.delete(user);
+    }
 
     @Transactional
-    public void deleteUser(String username) {
+    public void deleteById(Integer id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException(id.toString()));
+        deleteUser(user);
+    }
+
+    @Transactional
+    public void deleteByUsername(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(username));
-        userRepository.delete(user);
+        deleteUser(user);
     }
 
     @Transactional
@@ -202,5 +204,75 @@ public class UserService {
         } else {
             throw new PhoneNumberNotFoundException(number);
         }
+    }
+
+    public Page<UserForAdminPanelDto> getAllUsersForAdminPanel(Pageable pageable) {
+        Page<User> userPage = userRepository.findAllByOrderByRatingDesc(pageable);
+
+        return userPage.map(user -> {
+            UserForAdminPanelDto userForAdminPanelDto = modelMapper.map(user, UserForAdminPanelDto.class);
+            userForAdminPanelDto.setFullName(user.getFirstName() + " " + user.getLastName() + " " + user.getSurName());
+            userForAdminPanelDto.setRating((int) Math.round(user.getRating()));
+            return userForAdminPanelDto;
+        });
+    }
+
+    @Transactional
+    public void banUser(Integer userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("User not found, id: " + userId));
+        user.setBanned(true);
+        user.setUnbanDate(null);
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void banUserUntil(Integer userId, LocalDateTime until) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("User not found, id: " + userId));
+        user.setBanned(true);
+        user.setUnbanDate(until);
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void unbanUser(Integer userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("User not found, id: " + userId));
+        user.setBanned(false);
+        user.setUnbanDate(null);
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public boolean wrongPasswordAttemptFunction(String username) {
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
+        if (user.getWrongPasswordCount() > 2) {
+            user.setBanned(true);
+            user.setUnbanDate(LocalDateTime.now().plusMinutes(30));
+            user.setWrongPasswordCount(0);
+            userRepository.save(user);
+            return true;
+        };
+        user.setWrongPasswordCount(user.getWrongPasswordCount() + 1);
+        userRepository.save(user);
+        return false;
+    }
+
+    private void tryToUnbanUser(User user) {
+        if (user.getUnbanDate() != null && user.getUnbanDate().isBefore(LocalDateTime.now())) {
+            user.setBanned(false);
+            user.setUnbanDate(null);
+            userRepository.save(user);
+        }
+    }
+
+    @Transactional
+    public void tryToUnbanUsername(String username) {
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found, name: " + username));
+        tryToUnbanUser(user);
+    }
+
+    @Transactional
+    public void tryToUnbanEmail(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found, email: " + email));
+        tryToUnbanUser(user);
     }
 }

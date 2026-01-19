@@ -31,6 +31,14 @@ import {
 import { useNavigate } from 'react-router-dom';
 import client from '../api/client';
 import dayjs from 'dayjs';
+import {
+    Modal,
+    // ... остальные существующие импорты ...
+} from 'antd';
+import {
+    ReloadOutlined,
+    // ... остальные существующие импорты ...
+} from '@ant-design/icons';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -48,7 +56,94 @@ const AdminPage = () => {
     const screens = useBreakpoint();
 
     const isMobile = !screens.md;
+    const [users, setUsers] = useState([]);
+    const [usersLoading, setUsersLoading] = useState(false);
+    const [pagination, setPagination] = useState({
+        current: 1,
+        pageSize: 10,
+        total: 0
+    });
+    const [banModalVisible, setBanModalVisible] = useState(false);
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [banDuration, setBanDuration] = useState(null);
 
+    // Функция загрузки пользователей
+    const fetchUsers = async (page = 1, pageSize = 10) => {
+        try {
+            setUsersLoading(true);
+            const response = await client.get('/api/admin/user/list', {
+                params: {
+                    page: page - 1,
+                    size: pageSize
+                }
+            });
+
+            setUsers(response.data.content || []);
+            setPagination({
+                current: response.data.number + 1,
+                pageSize: response.data.size,
+                total: response.data.totalElements
+            });
+        } catch (error) {
+            message.error('Ошибка загрузки пользователей: ' + (error.response?.data?.message || error.message));
+        } finally {
+            setUsersLoading(false);
+        }
+    };
+
+    // Функция удаления пользователя
+    const handleDeleteUser = async (userId) => {
+        try {
+            await client.delete(`/api/admin/user/${userId}`);
+            message.success('Пользователь успешно удалён');
+            fetchUsers(pagination.current, pagination.pageSize);
+        } catch (error) {
+            message.error('Ошибка удаления пользователя: ' + (error.response?.data?.message || error.message));
+        }
+    };
+
+    // Функция бана пользователя
+    const handleBanUser = async (userId, durationDays = null) => {
+        try {
+            await client.post(`/api/admin/user/ban/${userId}`,
+                durationDays ? { durationDays } : null,
+                {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+            message.success('Пользователь успешно забанен');
+            setBanModalVisible(false);
+            setSelectedUser(null);
+            setBanDuration(null);
+            fetchUsers(pagination.current, pagination.pageSize);
+        } catch (error) {
+            message.error('Ошибка бана пользователя: ' + (error.response?.data?.message || error.message));
+        }
+    };
+
+    // Функция разбана пользователя
+    const handleUnbanUser = async (userId) => {
+        try {
+            await client.post(`/api/admin/user/unban/${userId}`);
+            message.success('Пользователь успешно разбанен');
+            fetchUsers(pagination.current, pagination.pageSize);
+        } catch (error) {
+            message.error('Ошибка разбана пользователя: ' + (error.response?.data?.message || error.message));
+        }
+    };
+
+    // Функция открытия модалки бана
+    const openBanModal = (user) => {
+        setSelectedUser(user);
+        setBanModalVisible(true);
+    };
+
+    // Эффект для загрузки пользователей при переходе на вкладку
+    useEffect(() => {
+        // Можно добавить логику для загрузки при открытии вкладки
+    }, []);
     const fetchRunningTournaments = async () => {
         try {
             setTournamentsLoading(true);
@@ -607,7 +702,253 @@ const AdminPage = () => {
                         </div>
                     </Card>
                 </TabPane>
+
+                <TabPane
+                    tab={
+                        <span style={{ color: 'var(--text-color)' }}>
+            <TeamOutlined />
+                            {isMobile ? 'Пользователи' : 'Управление пользователями'}
+        </span>
+                    }
+                    key="users"
+                >
+                    <Card
+                        title={<span style={{ color: 'var(--text-color)', fontSize: isMobile ? '16px' : '18px' }}>Управление пользователями</span>}
+                        bordered={false}
+                        style={{
+                            backgroundColor: 'var(--card-bg)',
+                            borderColor: 'var(--border-color)'
+                        }}
+                        bodyStyle={{ padding: isMobile ? '12px' : '24px' }}
+                        extra={
+                            <Button
+                                icon={<ReloadOutlined />}
+                                onClick={() => fetchUsers(pagination.current, pagination.pageSize)}
+                                size={isMobile ? "small" : "middle"}
+                                style={{
+                                    color: 'var(--text-color)',
+                                    borderColor: 'var(--border-color)'
+                                }}
+                            >
+                                Обновить
+                            </Button>
+                        }
+                    >
+                        <List
+                            dataSource={users}
+                            loading={usersLoading}
+                            pagination={{
+                                ...pagination,
+                                onChange: (page, pageSize) => {
+                                    fetchUsers(page, pageSize);
+                                },
+                                showSizeChanger: true,
+                                pageSizeOptions: ['5', '10', '20', '50'],
+                                showTotal: (total, range) => `${range[0]}-${range[1]} из ${total} пользователей`,
+                                style: { marginBottom: 0 }
+                            }}
+                            renderItem={(user) => (
+                                <List.Item
+                                    style={{
+                                        padding: isMobile ? '8px 12px' : '12px 16px',
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: '6px',
+                                        marginBottom: '8px',
+                                        backgroundColor: 'var(--card-bg)'
+                                    }}
+                                    actions={[
+                                        <Popconfirm
+                                            title="Удалить пользователя?"
+                                            description="Вы уверены, что хотите удалить этого пользователя? Это действие нельзя отменить."
+                                            okText="Да"
+                                            cancelText="Нет"
+                                            onConfirm={() => handleDeleteUser(user.id)}
+                                        >
+                                            <Button
+                                                icon={<DeleteOutlined />}
+                                                type="text"
+                                                danger
+                                                size={isMobile ? "small" : "middle"}
+                                            />
+                                        </Popconfirm>,
+                                        user.banned ? (
+                                            <Popconfirm
+                                                title="Разбанить пользователя?"
+                                                description="Вы уверены, что хотите разбанить этого пользователя?"
+                                                okText="Да"
+                                                cancelText="Нет"
+                                                onConfirm={() => handleUnbanUser(user.id)}
+                                            >
+                                                <Button
+                                                    type="primary"
+                                                    size={isMobile ? "small" : "middle"}
+                                                    style={{
+                                                        backgroundColor: '#52c41a',
+                                                        borderColor: '#52c41a'
+                                                    }}
+                                                >
+                                                    Разбанить
+                                                </Button>
+                                            </Popconfirm>
+                                        ) : (
+                                            <Button
+                                                type="primary"
+                                                danger
+                                                size={isMobile ? "small" : "middle"}
+                                                onClick={() => openBanModal(user)}
+                                            >
+                                                Забанить
+                                            </Button>
+                                        )
+                                    ]}
+                                >
+                                    <List.Item.Meta
+                                        title={
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <Text strong style={{ color: 'var(--text-color)' }}>
+                                                    {user.username}
+                                                </Text>
+                                                {user.banned && (
+                                                    <Tag color="red">Забанен</Tag>
+                                                )}
+                                                {user.roles && user.roles.includes('ADMIN') && (
+                                                    <Tag color="gold">Админ</Tag>
+                                                )}
+                                            </div>
+                                        }
+                                        description={
+                                            <div>
+                                                <div>
+                                                    <Text style={{ color: 'var(--text-secondary)' }}>
+                                                        {user.fullName}
+                                                    </Text>
+                                                </div>
+                                                <div style={{ marginTop: '4px' }}>
+                                                    <Space size="small" wrap>
+                                                        <Tag
+                                                            color="blue"
+                                                            style={{
+                                                                borderColor: 'var(--border-color)',
+                                                                fontSize: isMobile ? '11px' : '12px'
+                                                            }}
+                                                        >
+                                                            Рейтинг: {user.rating}
+                                                        </Tag>
+                                                        <Tag
+                                                            color="green"
+                                                            style={{
+                                                                borderColor: 'var(--border-color)',
+                                                                fontSize: isMobile ? '11px' : '12px'
+                                                            }}
+                                                        >
+                                                            Матчей: {user.amountOfMatches}
+                                                        </Tag>
+                                                        {user.email && (
+                                                            <Tag
+                                                                style={{
+                                                                    borderColor: 'var(--border-color)',
+                                                                    fontSize: isMobile ? '11px' : '12px'
+                                                                }}
+                                                            >
+                                                                {user.email}
+                                                            </Tag>
+                                                        )}
+                                                        {user.phoneNumber && (
+                                                            <Tag
+                                                                style={{
+                                                                    borderColor: 'var(--border-color)',
+                                                                    fontSize: isMobile ? '11px' : '12px'
+                                                                }}
+                                                            >
+                                                                {user.phoneNumber}
+                                                            </Tag>
+                                                        )}
+                                                    </Space>
+                                                </div>
+                                                {user.banned && user.unbanDate && (
+                                                    <div style={{ marginTop: '8px' }}>
+                                                        <Text type="secondary" style={{ fontSize: isMobile ? '11px' : '12px' }}>
+                                                            Разбан: {dayjs(user.unbanDate).format('DD.MM.YYYY HH:mm')}
+                                                        </Text>
+                                                    </div>
+                                                )}
+                                                {user.banned && !user.unbanDate && (
+                                                    <div style={{ marginTop: '8px' }}>
+                                                        <Text type="secondary" style={{ fontSize: isMobile ? '11px' : '12px' }}>
+                                                            Перманентный бан
+                                                        </Text>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        }
+                                    />
+                                </List.Item>
+                            )}
+                        />
+                    </Card>
+                </TabPane>
             </Tabs>
+            <Modal
+                title="Бан пользователя"
+                open={banModalVisible}
+                onCancel={() => {
+                    setBanModalVisible(false);
+                    setSelectedUser(null);
+                    setBanDuration(null);
+                }}
+                footer={[
+                    <Button key="cancel" onClick={() => {
+                        setBanModalVisible(false);
+                        setSelectedUser(null);
+                        setBanDuration(null);
+                    }}>
+                        Отмена
+                    </Button>,
+                    <Button
+                        key="permanent"
+                        danger
+                        onClick={() => handleBanUser(selectedUser?.id)}
+                    >
+                        Перманентный бан
+                    </Button>,
+                    <Button
+                        key="temporary"
+                        type="primary"
+                        danger
+                        onClick={() => handleBanUser(selectedUser?.id, banDuration)}
+                        disabled={!banDuration || banDuration <= 0}
+                    >
+                        Временный бан ({banDuration} дней)
+                    </Button>
+                ]}
+            >
+                {selectedUser && (
+                    <div>
+                        <Text>
+                            Вы хотите забанить пользователя <Text strong>{selectedUser.username}</Text>?
+                        </Text>
+                        <div style={{ marginTop: '16px' }}>
+                            <Form layout="vertical">
+                                <Form.Item label="Количество дней (оставьте пустым для перманентного бана)">
+                                    <InputNumber
+                                        min={1}
+                                        max={365}
+                                        style={{ width: '100%' }}
+                                        value={banDuration}
+                                        onChange={setBanDuration}
+                                        placeholder="Введите количество дней"
+                                    />
+                                </Form.Item>
+                                {banDuration && (
+                                    <Text type="secondary">
+                                        Пользователь будет забанен до: {dayjs().add(banDuration, 'day').format('DD.MM.YYYY HH:mm')}
+                                    </Text>
+                                )}
+                            </Form>
+                        </div>
+                    </div>
+                )}
+            </Modal>
         </div>
     );
 };

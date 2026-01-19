@@ -2,6 +2,8 @@ package org.chessunion.exception;
 
 
 import io.jsonwebtoken.JwtException;
+import lombok.RequiredArgsConstructor;
+import org.chessunion.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -11,10 +13,14 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.Arrays;
 import java.util.List;
 
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class ApplicationErrorHandler {
+    private final UserService userService;
+
 
     @ExceptionHandler(PlayersTournamentConflictException.class)
     public ResponseEntity<AppErrorResponse> handlePlayersTournamentConflictException(PlayersTournamentConflictException e) {
@@ -172,10 +178,19 @@ public class ApplicationErrorHandler {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<AppErrorResponse> badCredentialsError(BadCredentialsException e) {
-        AppErrorResponse errorResponse = new AppErrorResponse(
-                "Bad credentials!",
-                e.getMessage()
-        );
+        AppErrorResponse errorResponse;
+        boolean result = userService.wrongPasswordAttemptFunction(e.getAuthenticationRequest().getName());
+        if (result){
+            errorResponse = new AppErrorResponse(
+                    "Аккаунт заблокирован на 30 минут(3 неудачных попытки ввода пароля).",
+                    e.getMessage()
+            );
+        } else {
+            errorResponse = new AppErrorResponse(
+                   "Bad credentials!",
+                    e.getMessage()
+            );
+        }
         return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
 
@@ -183,6 +198,15 @@ public class ApplicationErrorHandler {
     public ResponseEntity<AppErrorResponse> handleAuthError(AuthenticationException e) {
         AppErrorResponse errorResponse = new AppErrorResponse(
                 "Authentication error!",
+                e.getMessage()
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(UserBannedException.class)
+    public ResponseEntity<AppErrorResponse> handleUserBannedError(UserBannedException e) {
+        AppErrorResponse errorResponse = new AppErrorResponse(
+                "User is banned!",
                 e.getMessage()
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);

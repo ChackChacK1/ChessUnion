@@ -14,11 +14,13 @@ public class UserUserDetails implements UserDetails {
     private final String name;
     private final String password;
     private final List<SimpleGrantedAuthority> authorities;
+    private final boolean accountLocked;
 
     public UserUserDetails(User user) {
         name = user.getUsername();
         password = user.getPassword();
         authorities = user.getRoles().stream().map(Role::getName).map(SimpleGrantedAuthority::new).toList();
+        accountLocked = user.isBanned();
     }
 
     @Override
@@ -43,7 +45,7 @@ public class UserUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return UserDetails.super.isAccountNonLocked();
+        return !accountLocked;
     }
 
     @Override

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.chessunion.dto.AuthRequest;
 import org.chessunion.dto.AuthResponse;
 import org.chessunion.repository.UserRepository;
+import org.chessunion.service.UserService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,6 +21,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserUserDetailsService userUserDetailsService;
     private final UserRepository userRepository;
+    private final UserService userService;
 
     public AuthResponse createToken(AuthRequest authRequest) {
         String login;
@@ -28,8 +30,10 @@ public class AuthService {
         if (authRequest.getLogin().contains("@")){
             login = userRepository.findByEmail(authRequest.getLogin())
                     .orElseThrow(() -> new BadCredentialsException("Invalid email")).getUsername();
+            userService.tryToUnbanEmail(login);
         } else {
             login = authRequest.getLogin();
+            userService.tryToUnbanUsername(login);
         }
 
 

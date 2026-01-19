@@ -22,13 +22,6 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/delete")
-    public ResponseEntity<String> deleteUser(@RequestBody DeleteUserRequest deleteUserRequest) {
-        userService.deleteUser(deleteUserRequest.getUsername());
-        return ResponseEntity.ok("User deleted successfully");
-    }
-
     @PreAuthorize("isAuthenticated()")
     @PatchMapping("/changePassword")
     public ResponseEntity<String> changePassword(Principal principal, @RequestBody ChangePasswordRequest changePasswordRequest) {

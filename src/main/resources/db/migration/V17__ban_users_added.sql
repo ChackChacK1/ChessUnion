@@ -1,0 +1,11 @@
+ALTER TABLE users
+    ADD is_banned BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE users
+    ADD unban_date TIMESTAMP WITHOUT TIME ZONE;
+
+ALTER TABLE users
+    ADD wrong_password_count INTEGER DEFAULT 0;
+
+ALTER TABLE users
+    ALTER COLUMN is_banned SET NOT NULL;
