@@ -23,5 +23,6 @@ public class TournamentDto {
     private Integer minAmountOfPlayers;
     private Integer amountOfRounds;
     private Tournament.Stage stage;
+    private Tournament.SystemType systemType;
     private LocalDateTime createdAt;
 }

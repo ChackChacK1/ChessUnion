@@ -8,7 +8,6 @@ import org.chessunion.dto.TournamentCreateRequest;
 import org.chessunion.dto.TournamentDto;
 import org.chessunion.dto.UpdateTournamentDto;
 import org.chessunion.service.TournamentService;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;

@@ -141,8 +141,68 @@ public class TournamentService {
     }
 
     @Transactional
+    public void generateRoundsRoundRobin(Tournament tournament){
+        List<Player> rotation = new ArrayList<>(tournament.getPlayers());
+        rotation.sort(Comparator.comparingInt(Player::getId));
+        
+        if (rotation.size() % 2 != 0) {
+            rotation.add(null);
+        }
+
+        int playersCount = rotation.size();
+        if (playersCount < 2) {
+            throw new NotEnoughPlayersException(rotation.size(), 2);
+        }
+
+        int roundIndex = tournament.getCurrentRound() - 1;
+        int rotationsNeeded = playersCount - 1;
+        int effectiveShift = roundIndex % rotationsNeeded;
+
+        for (int r = 0; r < effectiveShift; r++) {
+            List<Player> next = new ArrayList<>(playersCount);
+            next.add(rotation.getFirst());                 // фиксированный игрок
+            next.add(rotation.getLast());                  // последний встаёт вторым
+            next.addAll(rotation.subList(1, playersCount - 1)); // остальные сдвигаются вправо
+            rotation = next;
+        }
+
+        int half = playersCount / 2;
+        for (int i = 0; i < half; i++) {
+            Player p1 = rotation.get(i);
+            Player p2 = rotation.get(playersCount - 1 - i);
+
+            if (p1 == null || p2 == null) {
+                Player byePlayer = p1 == null ? p2 : p1;
+                if (byePlayer != null && !byePlayer.isHadBye()) {
+                    byePlayer.setScore(byePlayer.getScore() + 1);
+                    byePlayer.setHadBye(true);
+                    PlayerHistory history = new PlayerHistory(
+                            tournament.getId(),
+                            byePlayer.getId(),
+                            LocalDateTime.now(),
+                            tournament.getCurrentRound()
+                    );
+                    history.setHadByeChanges(true);
+                    history.setScoreChanges(1.0);
+                    playerHistoryRepository.save(history);
+                    playerRepository.save(byePlayer);
+                }
+                continue;
+            }
+
+            boolean leftIsWhite = (roundIndex + i) % 2 == 0;
+            if (leftIsWhite) {
+                matchService.createMatch(p1, p2, tournament);
+            } else {
+                matchService.createMatch(p2, p1, tournament);
+            }
+        }
+    }
+
+    @Transactional
     public int generateNextRound(int id){
         Tournament tournament = tournamentRepository.findById(id).orElseThrow(()-> new TournamentNotFoundException(id));
+
         if (tournament.getCurrentRound() == tournament.getAmountOfRounds() ) {
             tournament.setStage(Tournament.Stage.FINISHED);
             userService.saveRatings(tournament.getId());
@@ -156,12 +216,19 @@ public class TournamentService {
             throw new TooManyPlayersException(tournament.getPlayers().size(), tournament.getMinAmountOfPlayers());
         }
 
-
-        if (tournament.getCurrentRound() == 0) {
+        if (tournament.getCurrentRound() == 0 && tournament.getSystemType() == Tournament.SystemType.ROUND_ROBIN) {
+            tournament.setCurrentRound(1);
+            tournament.setStage(Tournament.Stage.PLAYING);
+            generateRoundsRoundRobin(tournament);
+        } else if (tournament.getSystemType() == Tournament.SystemType.ROUND_ROBIN) {
+            tournament.setCurrentRound(tournament.getCurrentRound() + 1);
+            generateRoundsRoundRobin(tournament);
+        }
+        if (tournament.getCurrentRound() == 0 && tournament.getSystemType() == Tournament.SystemType.SWISS) {
             tournament.setCurrentRound(1);
             tournament.setStage(Tournament.Stage.PLAYING);
             generateFirstRound(tournament);
-        } else {
+        } else if (tournament.getSystemType() == Tournament.SystemType.SWISS){
             tournament.setCurrentRound(tournament.getCurrentRound() + 1);
             generateNonFirstRound(tournament);
         }

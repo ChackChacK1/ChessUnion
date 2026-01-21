@@ -12,7 +12,8 @@ import {
     Spin,
     Row,
     Col,
-    Tag
+    Tag,
+    Select
 } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -62,7 +63,8 @@ const EditTournament = () => {
                     startDateTime: dayjs(tournamentData.startDateTime),
                     maxAmountOfPlayers: tournamentData.maxAmountOfPlayers,
                     minAmountOfPlayers: tournamentData.minAmountOfPlayers,
-                    amountOfRounds: tournamentData.amountOfRounds
+                    amountOfRounds: tournamentData.amountOfRounds,
+                    systemType: tournamentData.systemType || 'SWISS'
                 });
             } catch (error) {
                 console.error('Error fetching tournament:', error);
@@ -86,7 +88,8 @@ const EditTournament = () => {
                 startDateTime: values.startDateTime.format('YYYY-MM-DDTHH:mm:ss'),
                 maxAmountOfPlayers: values.maxAmountOfPlayers,
                 minAmountOfPlayers: values.minAmountOfPlayers,
-                amountOfRounds: values.amountOfRounds
+                amountOfRounds: values.amountOfRounds,
+                systemType: values.systemType
             };
 
             await client.patch(`/api/admin/tournament/${tournamentId}/update`, tournamentData);
@@ -311,6 +314,21 @@ const EditTournament = () => {
                                         borderColor: 'var(--border-color)'
                                     }}
                                 />
+                            </Form.Item>
+                        </Col>
+                    </Row>
+
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item
+                                label={<span style={{ color: 'var(--text-color)' }}>Тип жеребьёвки</span>}
+                                name="systemType"
+                                rules={[{ required: true, message: 'Выберите тип жеребьёвки' }]}
+                            >
+                                <Select style={{ width: '100%' }}>
+                                    <Select.Option value="SWISS">Швейцарская система</Select.Option>
+                                    <Select.Option value="ROUND_ROBIN">Круговая (каждый с каждым)</Select.Option>
+                                </Select>
                             </Form.Item>
                         </Col>
                     </Row>

@@ -23,6 +23,10 @@ public class Tournament {
         REGISTRATION, PLAYING, FINISHED
     }
 
+    public enum SystemType {
+        SWISS, ROUND_ROBIN
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -53,6 +57,10 @@ public class Tournament {
 
     @Enumerated(EnumType.STRING)
     private Stage stage = Stage.REGISTRATION;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "system_type")
+    private SystemType systemType;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

@@ -4,6 +4,7 @@ package org.chessunion.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.chessunion.entity.Tournament;
 
 import java.time.LocalDateTime;
 
@@ -18,4 +19,5 @@ public class TournamentCreateRequest {
     private Integer maxAmountOfPlayers;
     private Integer minAmountOfPlayers;
     private Integer amountOfRounds;
+    private Tournament.SystemType systemType;
 }

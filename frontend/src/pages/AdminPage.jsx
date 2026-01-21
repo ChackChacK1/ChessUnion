@@ -16,7 +16,8 @@ import {
     Spin,
     Space,
     Grid,
-    Popconfirm
+    Popconfirm,
+    Select
 } from 'antd';
 import {
     PlusOutlined,
@@ -170,7 +171,8 @@ const AdminPage = () => {
                 startDateTime: values.startDateTime.format('YYYY-MM-DDTHH:mm:ss'),
                 maxAmountOfPlayers: values.maxAmountOfPlayers,
                 minAmountOfPlayers: values.minAmountOfPlayers,
-                amountOfRounds: values.amountOfRounds
+                amountOfRounds: values.amountOfRounds,
+                systemType: values.systemType
             };
 
             await client.post('/api/admin/tournament/create', tournamentData);
@@ -480,6 +482,9 @@ const AdminPage = () => {
                             layout="vertical"
                             onFinish={onFinish}
                             autoComplete="off"
+                            initialValues={{
+                                systemType: 'SWISS'
+                            }}
                         >
                             <Row gutter={isMobile ? 8 : 16}>
                                 <Col xs={24} md={12}>
@@ -602,6 +607,24 @@ const AdminPage = () => {
                                             size={isMobile ? "small" : "middle"}
                                             placeholder="Раунды"
                                         />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+
+                            <Row gutter={isMobile ? 8 : 16}>
+                                <Col xs={24} sm={12}>
+                                    <Form.Item
+                                        name="systemType"
+                                        label={<span style={{ color: 'var(--text-color)' }}>Тип жеребьёвки</span>}
+                                        rules={[{ required: true, message: 'Выберите тип жеребьёвки' }]}
+                                    >
+                                        <Select
+                                            size={isMobile ? "small" : "middle"}
+                                            style={{ width: '100%' }}
+                                        >
+                                            <Select.Option value="SWISS">Швейцарская система</Select.Option>
+                                            <Select.Option value="ROUND_ROBIN">Круговая (каждый с каждым)</Select.Option>
+                                        </Select>
                                     </Form.Item>
                                 </Col>
                             </Row>
