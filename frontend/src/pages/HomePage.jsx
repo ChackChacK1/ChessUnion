@@ -1,5 +1,5 @@
 import { Card, Image, Typography } from 'antd';
-import {Link} from "react-router-dom";
+import { Link } from 'react-router-dom';
 
 const { Title, Paragraph } = Typography;
 
@@ -51,7 +51,7 @@ const HomePage = () => {
                 <div className="hero-copy">
                     <span className="eyebrow">Union • Сочи</span>
                     <Title level={1} className="hero-title">
-                        Шахматный клуб для тех, кто живёт партиями&nbsp;
+                        Шахматный клуб в Сочи — турниры, обучение и рейтинги&nbsp;
                         <span className="title-accent" aria-label="Chess Union">
                             Un
                             <span className="pawn-letter" role="img" aria-label="шахматная пешка">♙</span>
@@ -59,7 +59,9 @@ const HomePage = () => {
                         </span>
                     </Title>
                     <Paragraph className="hero-lead">
-                        Мы соединяем шахматистов, тренеров и семьи в дружелюбное сообщество. Турниры, тренировки, лекции и камерные вечера — всё, чтобы вы чувствовали прогресс и азарт каждой партии.
+                        UNION — это шахматный клуб в Сочи для детей и взрослых.
+                        Мы проводим регулярные турниры, обучающие занятия с опытными тренерами,
+                        рейтинговые соревнования и разборы партий в живом формате
                     </Paragraph>
 
                     <div className="hero-cta">
@@ -74,13 +76,11 @@ const HomePage = () => {
                                 className="tg-icon"
                                 src="/src/images/telegram_icon-icons.com_72055.png"
                                 alt="Telegram"
+                                loading="lazy"
                             />
                             <span>Мы в Telegram</span>
                         </a>
                         <Link className="outline-button" to="/tournaments">Расписание турниров</Link>
-                        {/*<a  className="outline-button" href="/tournaments">*/}
-                        {/*    Расписание турниров*/}
-                        {/*</a>*/}
                     </div>
 
                 </div>
@@ -122,9 +122,7 @@ const HomePage = () => {
                         bodyStyle={{ padding: '24px' }}
                     >
                         <span className="card-icon" aria-hidden="true">{icon}</span>
-                        <Title level={4} className="card-title">
-                            {title}
-                        </Title>
+                        <Title level={4} className="card-title">{title}</Title>
                         <Paragraph className="card-text">{description}</Paragraph>
                     </Card>
                 ))}
@@ -133,10 +131,9 @@ const HomePage = () => {
             <section className="gallery-section">
                 <div className="section-heading">
                     <span className="eyebrow">Живая атмосфера</span>
-                    <Title style={{
-                        color: 'var(--text-color)'
-                    }}
-                    level={3}>Так выглядит ChessUnion изнутри</Title>
+                    <Title style={{ color: 'var(--text-color)' }} level={3}>
+                        Так выглядит Union изнутри
+                    </Title>
                     <Paragraph className="section-subtitle">
                         Мы делимся каждым событием — от тренировок и мастер-классов до больших фестивалей. Присоединяйтесь и станьте частью хроники клуба.
                     </Paragraph>
@@ -144,7 +141,12 @@ const HomePage = () => {
                 <div className="gallery-grid">
                     {galleryImages.map(({ src, alt, caption }) => (
                         <figure key={alt} className="gallery-figure">
-                            <Image src={src} alt={alt} preview={false} className="gallery-image" />
+                            <img 
+                                src={src} 
+                                alt={alt} 
+                                className="gallery-image"
+                                loading="lazy"
+                            />
                             <figcaption className="gallery-caption">{caption}</figcaption>
                         </figure>
                     ))}
@@ -154,10 +156,9 @@ const HomePage = () => {
             <section className="pricing-section">
                 <div className="section-heading">
                     <span className="eyebrow">Услуги и цены</span>
-                    <Title style={{
-                        color: 'var(--text-color)'
-                    }}
-                    level={3}>Наши тарифы</Title>
+                    <Title style={{ color: 'var(--text-color)' }} level={3}>
+                        Наши тарифы
+                    </Title>
                 </div>
                 <div className="pricing-grid">
                     <div className="pricing-card">

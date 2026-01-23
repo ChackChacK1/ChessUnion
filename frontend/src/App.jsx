@@ -64,7 +64,7 @@ function App() {
               <footer className="site-footer">
             <div className="footer-content">
                 <div className="footer-section">
-                    <h4 className="footer-title">ChessUnion</h4>
+                    <h4 className="footer-title">Union</h4>
                     <p className="footer-text">Шахматный клуб в Сочи</p>
                 </div>
                 <div className="footer-section">
