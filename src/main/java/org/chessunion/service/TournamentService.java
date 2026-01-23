@@ -190,10 +190,9 @@ public class TournamentService {
                 continue;
             }
 
-            boolean leftIsWhite = (roundIndex + i) % 2 == 0;
-            if (leftIsWhite) {
+            if (p1.getColorBalance() > p2.getColorBalance()) {
                 matchService.createMatch(p1, p2, tournament);
-            } else {
+            } else if (p1.getColorBalance() <= p2.getColorBalance()) {
                 matchService.createMatch(p2, p1, tournament);
             }
         }

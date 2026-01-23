@@ -60,8 +60,10 @@ public class SimpleRatingCalculator implements RatingCalculator {
         }
 
         playerWhite.setRating(ratingOfFirstPlayer + whiteK * (matchResult - expectedRatingDifferenceOfFirstPlayer));
+//        playerWhite.setRating(Math.max(1000, ratingOfFirstPlayer + whiteK * (matchResult - expectedRatingDifferenceOfFirstPlayer)));
         matchResult = Math.abs(matchResult-1);
         playerBlack.setRating(ratingOfSecondPlayer + blackK * (matchResult - expectedRatingDifferenceOfSecondPlayer));
+//        playerBlack.setRating(Math.max(1000, ratingOfSecondPlayer + blackK * (matchResult - expectedRatingDifferenceOfSecondPlayer)));
 
         match.setWhitePlayer(playerWhite);
         match.setBlackPlayer(playerBlack);
