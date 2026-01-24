@@ -270,6 +270,16 @@ const TournamentDetail = () => {
         }
     };
 
+    const playersForTable = (() => {
+        if (!tournament?.players) return [];
+        if (tournament.stage === 'REGISTRATION' || tournament.stage === 'ANNOUNCED') {
+            return [...tournament.players].sort(
+                (a, b) => (b?.rating ?? 0) - (a?.rating ?? 0)
+            );
+        }
+        return tournament.players;
+    })();
+
     if (loading) {
         return <Spin size="large" style={{ display: 'flex', justifyContent: 'center', marginTop: 50 }} />;
     }
@@ -481,9 +491,9 @@ const TournamentDetail = () => {
                         >
                             <Table
                                 columns={getTableColumns()}
-                                dataSource={tournament.players.map((player, index) => ({
+                                dataSource={playersForTable.map((player, index) => ({
                                     ...player,
-                                    key: index,
+                                    key: player?.id ?? index,
                                     // Добавляем place для турнирной таблицы
                                     place: (tournament.stage !== 'REGISTRATION' && tournament.stage !== 'ANNOUNCED')
                                         ? index + 1
