@@ -34,7 +34,7 @@ public class TournamentService {
 
     public List<TournamentDto> getAllTournaments(Pageable pageable) {
         return tournamentRepository.findAll().stream()
-                .sorted(Comparator.comparing(Tournament::getStartDateTime))
+                .sorted(Comparator.comparing(Tournament::getStartDateTime).reversed())
                 .map(this::tournamentToDto).toList();
     }
 
