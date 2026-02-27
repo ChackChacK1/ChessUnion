@@ -1,28 +1,20 @@
 package org.chessunion.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+
+import lombok.*;
 import org.springframework.data.domain.Page;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
-@Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class ProfileDto implements Serializable {
-
-    private Integer id;
-    private String username;
+@AllArgsConstructor
+@Data
+public class PublicProfileDto {
     private String firstName;
     private String lastName;
     private String surName;
     private String aboutSelf;
-    private String phoneNumber;
-    private String email;
     private Double rating;
     private Integer amountOfMatches;
     private Integer amountOfWins;

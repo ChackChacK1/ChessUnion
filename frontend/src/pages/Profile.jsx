@@ -1,31 +1,54 @@
 import { useEffect, useState } from 'react';
-import { Card, List, Typography, Divider, Tag, Spin, message, Button, Space, Row, Col, Statistic } from 'antd'; // Добавили Row, Col, Statistic
-import { UserOutlined, MailOutlined, TrophyOutlined, CalendarOutlined, EditOutlined, LockOutlined, CrownOutlined, FallOutlined, MinusOutlined, BarChartOutlined } from '@ant-design/icons'; // Добавили иконки для статистики
+import { Card, List, Typography, Divider, Tag, Spin, message, Button, Space, Row, Col, Statistic, Pagination, Input, Progress } from 'antd'; // Добавили Progress
+import { UserOutlined, MailOutlined, TrophyOutlined, CalendarOutlined, EditOutlined, LockOutlined, CrownOutlined, FallOutlined, MinusOutlined, BarChartOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import client from '../api/client';
 import dayjs from 'dayjs';
 
 const { Title, Text } = Typography;
+const { TextArea } = Input;
 
 const Profile = () => {
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [matchesPage, setMatchesPage] = useState({ content: [], totalPages: 1, totalElements: 0 });
+    const [currentPage, setCurrentPage] = useState(0);
+    const [pageSize] = useState(10);
+    const [editingAbout, setEditingAbout] = useState(false);
+    const [aboutText, setAboutText] = useState('');
+    const [updatingAbout, setUpdatingAbout] = useState(false);
+
+    // Константа для максимальной длины
+    const MAX_ABOUT_LENGTH = 1500;
+
     const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                const response = await client.get('/api/user/profile');
-                setProfile(response.data);
-            } catch (error) {
-                message.error('Ошибка загрузки профиля: ' + error.response?.data?.message || error.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchProfile();
-    }, []);
+    }, [currentPage]);
+
+    const fetchProfile = async () => {
+        setLoading(true);
+        try {
+            const response = await client.get('/api/user/profile', {
+                params: {
+                    page: currentPage,
+                    size: pageSize,
+                    sort: 'createdAt,desc'
+                }
+            });
+            const profileData = response.data;
+            setProfile(profileData);
+            setAboutText(profileData.aboutSelf || '');
+            if (profileData.matches) {
+                setMatchesPage(profileData.matches);
+            }
+        } catch (error) {
+            message.error('Ошибка загрузки профиля: ' + (error.response?.data?.message || error.message));
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleEdit = () => {
         navigate('/profile/edit');
@@ -33,6 +56,55 @@ const Profile = () => {
 
     const handleChangePassword = () => {
         navigate('/change-password');
+    };
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page - 1);
+    };
+
+    const handleUpdateAboutSelf = async () => {
+        if (aboutText.length > MAX_ABOUT_LENGTH) {
+            message.error(`Текст не может превышать ${MAX_ABOUT_LENGTH} символов`);
+            return;
+        }
+
+        setUpdatingAbout(true);
+        try {
+            await client.patch('/api/user/updateAboutSelf', aboutText, {
+                headers: {
+                    'Content-Type': 'text/plain'
+                }
+            });
+            message.success('Информация о себе обновлена');
+            setEditingAbout(false);
+            setProfile(prev => ({ ...prev, aboutSelf: aboutText }));
+        } catch (error) {
+            message.error('Ошибка обновления: ' + (error.response?.data?.message || error.message));
+        } finally {
+            setUpdatingAbout(false);
+        }
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleUpdateAboutSelf();
+        } else if (e.key === 'Escape') {
+            setEditingAbout(false);
+            setAboutText(profile?.aboutSelf || '');
+        }
+    };
+
+    // Функция для определения цвета счетчика
+    const getCounterColor = (length) => {
+        if (length >= MAX_ABOUT_LENGTH) return '#ff4d4f'; // Красный
+        if (length >= MAX_ABOUT_LENGTH * 0.9) return '#faad14'; // Желтый
+        return 'var(--text-color)'; // Обычный цвет
+    };
+
+    // Функция для определения процента заполнения
+    const getProgressPercent = (length) => {
+        return Math.min((length / MAX_ABOUT_LENGTH) * 100, 100);
     };
 
     const getResultText = (result) => {
@@ -53,7 +125,6 @@ const Profile = () => {
         }
     };
 
-    // Функция для расчета процента побед
     const calculateWinPercentage = () => {
         if (!profile?.amountOfMatches || profile.amountOfMatches === 0) return 0;
         return ((profile.amountOfWins / profile.amountOfMatches) * 100).toFixed(1);
@@ -132,13 +203,139 @@ const Profile = () => {
                     <p style={{ color: 'var(--text-color)' }}>
                         <Text strong style={{ color: 'var(--text-color)' }}>Email:</Text> {profile.email || 'Не указан'}
                     </p>
+
+                    {/* Блок "О себе" с редактированием и счетчиком */}
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '10px',
+                        marginBottom: '10px'
+                    }}>
+                        <Text strong style={{ color: 'var(--text-color)', minWidth: '20px' }}>
+                            О себе:
+                        </Text>
+                        <div style={{ flex: 1 }}>
+                            {editingAbout ? (
+                                <Space direction="vertical" style={{ width: '100%' }} size="small">
+                                    <div style={{ position: 'relative' }}>
+                                        <TextArea
+                                            value={aboutText}
+                                            onChange={(e) => setAboutText(e.target.value.slice(0, MAX_ABOUT_LENGTH))} // Обрезаем до максимума
+                                            onKeyDown={handleKeyDown}
+                                            autoSize={{ minRows: 3, maxRows: 8 }}
+                                            placeholder="Расскажите о себе..."
+                                            disabled={updatingAbout}
+                                            maxLength={MAX_ABOUT_LENGTH} // Добавляем атрибут maxLength
+                                            style={{
+                                                backgroundColor: 'var(--input-bg)',
+                                                color: 'var(--text-color)',
+                                                borderColor: aboutText.length >= MAX_ABOUT_LENGTH ? '#ff4d4f' : 'var(--border-color)',
+                                                paddingBottom: '30px' // Оставляем место для счетчика
+                                            }}
+                                        />
+                                        {/* Счетчик символов */}
+                                        <div style={{
+                                            position: 'absolute',
+                                            bottom: '8px',
+                                            right: '12px',
+                                            fontSize: '12px',
+                                            color: getCounterColor(aboutText.length),
+                                            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                                            padding: '2px 8px',
+                                            borderRadius: '12px',
+                                            backdropFilter: 'blur(4px)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '6px'
+                                        }}>
+                                            <span>{aboutText.length}</span>
+                                            <span style={{ color: 'var(--text-secondary)' }}>/</span>
+                                            <span>{MAX_ABOUT_LENGTH}</span>
+                                            {/* Прогресс бар в виде точки */}
+                                            <div style={{
+                                                width: '4px',
+                                                height: '4px',
+                                                borderRadius: '2px',
+                                                backgroundColor: getCounterColor(aboutText.length),
+                                                marginLeft: '4px',
+                                                transition: 'all 0.3s',
+                                                transform: `scaleX(${aboutText.length / MAX_ABOUT_LENGTH})`,
+                                                transformOrigin: 'left'
+                                            }} />
+                                        </div>
+                                    </div>
+
+                                    {/* Дополнительный прогресс бар (опционально) */}
+                                    <Progress
+                                        percent={getProgressPercent(aboutText.length)}
+                                        size="small"
+                                        status={aboutText.length >= MAX_ABOUT_LENGTH ? 'exception' : 'active'}
+                                        showInfo={false}
+                                        strokeColor={getCounterColor(aboutText.length)}
+                                    />
+
+                                    <Space>
+                                        <Button
+                                            type="primary"
+                                            size="small"
+                                            onClick={handleUpdateAboutSelf}
+                                            loading={updatingAbout}
+                                            disabled={aboutText.length > MAX_ABOUT_LENGTH}
+                                        >
+                                            Сохранить (Enter)
+                                        </Button>
+                                        <Button
+                                            size="small"
+                                            onClick={() => {
+                                                setEditingAbout(false);
+                                                setAboutText(profile.aboutSelf || '');
+                                            }}
+                                            disabled={updatingAbout}
+                                        >
+                                            Отмена (Esc)
+                                        </Button>
+                                    </Space>
+                                </Space>
+                            ) : (
+                                <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+                                    <span style={{
+                                        color: profile.aboutSelf ? 'var(--text-color)' : 'var(--text-secondary)',
+                                        fontStyle: profile.aboutSelf ? 'normal' : 'italic'
+                                    }}>
+                                        {profile.aboutSelf || 'расскажите о себе'}
+                                    </span>
+                                    <Button
+                                        type="text"
+                                        icon={<EditOutlined />}
+                                        onClick={() => setEditingAbout(true)}
+                                        size="small"
+                                        style={{ color: 'var(--text-secondary)' }}
+                                    />
+                                </Space>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Индикатор длины для нередактируемого режима (опционально) */}
+                    {!editingAbout && profile.aboutSelf && (
+                        <div style={{
+                            marginLeft: '57px',
+                            fontSize: '12px',
+                            color: 'var(--text-secondary)',
+                            marginTop: '-5px',
+                            marginBottom: '5px'
+                        }}>
+                            {profile.aboutSelf.length} / {MAX_ABOUT_LENGTH} символов
+                        </div>
+                    )}
+
                     <p style={{ color: 'var(--text-color)' }}>
                         <Text strong style={{ color: 'var(--text-color)' }}>Рейтинг:</Text>
                         <Tag color="gold" style={{
                             color: 'var(--text-color)',
                             borderColor: 'var(--border-color)'
                         }}>
-                            {profile.rating || 'Нет данных'}
+                            {profile.rating?.toFixed(2) || 'Нет данных'}
                         </Tag>
                     </p>
                     <p style={{ color: 'var(--text-color)' }}>
@@ -153,7 +350,7 @@ const Profile = () => {
                     </p>
                 </div>
 
-                {/* Новая секция со статистикой */}
+                {/* Остальная часть компонента без изменений */}
                 <Divider orientation="left" style={{
                     color: 'var(--text-color)',
                     borderColor: 'var(--border-color)'
@@ -161,6 +358,7 @@ const Profile = () => {
                     Статистика игр
                 </Divider>
 
+                {/* ... статистика игр ... */}
                 <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
                     <Col xs={12} sm={6}>
                         <Card
@@ -228,7 +426,6 @@ const Profile = () => {
                     </Col>
                 </Row>
 
-                {/* Дополнительная статистика */}
                 {profile.amountOfMatches > 0 && (
                     <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
                         <Col xs={12} sm={6}>
@@ -259,7 +456,6 @@ const Profile = () => {
                                     title="Очков набрано"
                                     value={(profile.amountOfWins * 1 + profile.amountOfDraws * 0.5).toFixed(1)}
                                     valueStyle={{ color: 'var(--text-color)' }}
-                                    titleStyle={{ color: 'var(--text-secondary)' }}
                                 />
                             </Card>
                         </Col>
@@ -270,62 +466,93 @@ const Profile = () => {
                     color: 'var(--text-color)',
                     borderColor: 'var(--border-color)'
                 }}>
-                    История матчей
+                    История матчей {matchesPage.totalElements > 0 && `(${matchesPage.totalElements})`}
                 </Divider>
 
-                {profile.matches && profile.matches.length > 0 ? (
-                    <List
-                        dataSource={profile.matches}
-                        style={{ color: 'var(--text-color)' }}
-                        renderItem={(match) => (
-                            <List.Item style={{
-                                borderBottom: '1px solid var(--border-color)',
-                                padding: '12px 0'
+                {matchesPage.content && matchesPage.content.length > 0 ? (
+                    <>
+                        <List
+                            dataSource={matchesPage.content}
+                            style={{ color: 'var(--text-color)' }}
+                            renderItem={(match) => (
+                                <List.Item style={{
+                                    borderBottom: '1px solid var(--border-color)',
+                                    padding: '12px 0'
+                                }}>
+                                    <div style={{ width: '100%' }}>
+                                        <div style={{
+                                            display: 'grid',
+                                            gridTemplateColumns: '1fr auto 1fr',
+                                            textAlign: 'center',
+                                            marginBottom: 8,
+                                            fontWeight: 'bold',
+                                            color: 'var(--text-color)'
+                                        }}>
+                                            <span>Белые</span>
+                                            <span>Результат</span>
+                                            <span>Чёрные</span>
+                                        </div>
+
+                                        <div style={{
+                                            display: 'grid',
+                                            gridTemplateColumns: '1fr auto 1fr',
+                                            alignItems: 'center',
+                                            textAlign: 'center',
+                                            color: 'var(--text-color)'
+                                        }}>
+                                            <Text strong style={{ color: 'var(--text-color)' }}>
+                                                {match.whitePlayer?.fullName || 'Неизвестный игрок'}
+                                            </Text>
+
+                                            <Tag
+                                                color={getResultColor(match.result)}
+                                                style={{
+                                                    margin: '0 10px',
+                                                    color: 'var(--text-color)',
+                                                    borderColor: 'var(--border-color)'
+                                                }}
+                                            >
+                                                {getResultText(match.result)}
+                                            </Tag>
+
+                                            <Text strong style={{ color: 'var(--text-color)' }}>
+                                                {match.blackPlayer?.fullName || 'Неизвестный игрок'}
+                                            </Text>
+                                        </div>
+
+                                        {match.createdAt && (
+                                            <div style={{
+                                                textAlign: 'center',
+                                                marginTop: 8,
+                                                fontSize: '12px',
+                                                color: 'var(--text-secondary)'
+                                            }}>
+                                                <CalendarOutlined style={{ marginRight: 4 }} />
+                                                {dayjs(match.createdAt).format('DD.MM.YYYY HH:mm')}
+                                            </div>
+                                        )}
+                                    </div>
+                                </List.Item>
+                            )}
+                        />
+
+                        {matchesPage.totalPages > 1 && (
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                marginTop: 20
                             }}>
-                                <div style={{ width: '100%' }}>
-                                    <div style={{
-                                        display: 'grid',
-                                        gridTemplateColumns: '1fr auto 1fr',
-                                        textAlign: 'center',
-                                        marginBottom: 8,
-                                        fontWeight: 'bold',
-                                        color: 'var(--text-color)'
-                                    }}>
-                                        <span>Белые</span>
-                                        <span>Результат</span>
-                                        <span>Чёрные</span>
-                                    </div>
-
-                                    <div style={{
-                                        display: 'grid',
-                                        gridTemplateColumns: '1fr auto 1fr',
-                                        alignItems: 'center',
-                                        textAlign: 'center',
-                                        color: 'var(--text-color)'
-                                    }}>
-                                        <Text strong style={{ color: 'var(--text-color)' }}>
-                                            {match.whitePlayer?.fullName || 'Неизвестный игрок'}
-                                        </Text>
-
-                                        <Tag
-                                            color={getResultColor(match.result)}
-                                            style={{
-                                                margin: '0 10px',
-                                                color: 'var(--text-color)',
-                                                borderColor: 'var(--border-color)'
-                                            }}
-                                        >
-                                            {getResultText(match.result)}
-                                        </Tag>
-
-                                        <Text strong style={{ color: 'var(--text-color)' }}>
-                                            {match.blackPlayer?.fullName || 'Неизвестный игрок'}
-                                        </Text>
-                                    </div>
-                                </div>
-                            </List.Item>
+                                <Pagination
+                                    current={currentPage + 1}
+                                    total={matchesPage.totalElements}
+                                    pageSize={pageSize}
+                                    onChange={handlePageChange}
+                                    showSizeChanger={false}
+                                    showTotal={(total) => `Всего ${total} матчей`}
+                                />
+                            </div>
                         )}
-                    />
+                    </>
                 ) : (
                     <Text style={{ color: 'var(--text-color)' }}>Матчей пока нет</Text>
                 )}

@@ -11,6 +11,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TopListElementDto implements Serializable {
+    private Integer id;
     private String fullName;
     private Integer rating;
 }

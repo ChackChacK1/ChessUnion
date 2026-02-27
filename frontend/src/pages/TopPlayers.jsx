@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Table, Card, Typography, Spin, message, Tag, Pagination } from 'antd';
-import { CrownOutlined, TrophyOutlined, StarFilled } from '@ant-design/icons';
+import { Table, Card, Typography, Spin, message, Tag, Pagination, Avatar } from 'antd';
+import { CrownOutlined, TrophyOutlined, StarFilled, UserOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom'; // Добавляем useNavigate
 import client from '../api/client';
 
 const { Title, Text } = Typography;
@@ -12,6 +13,9 @@ const TopPlayers = () => {
     const [totalPages, setTotalPages] = useState(0);
     const [totalElements, setTotalElements] = useState(0);
     const [pageSize, setPageSize] = useState(10);
+    const [hoveredPlayer, setHoveredPlayer] = useState(null);
+
+    const navigate = useNavigate(); // Хук для навигации
 
     useEffect(() => {
         fetchTopPlayers(currentPage, pageSize);
@@ -20,7 +24,6 @@ const TopPlayers = () => {
     const fetchTopPlayers = async (page = 1, size = 10) => {
         try {
             setLoading(true);
-            // Вычитаем 1 из page, так как бэкенд использует zero-based пагинацию
             const response = await client.get(`/api/user/top?page=${page - 1}&size=${size}`);
             const pageData = response.data;
 
@@ -39,13 +42,17 @@ const TopPlayers = () => {
         setPageSize(size);
     };
 
+    // Обработчик клика по игроку
+    const handlePlayerClick = (playerId) => {
+        navigate(`/profile/${playerId}`);
+    };
+
     const columns = [
         {
             title: <span style={{ color: 'var(--text-color)' }}>Место</span>,
             key: 'place',
             width: 100,
             render: (_, __, index) => {
-                // Рассчитываем глобальное место с учетом пагинации
                 const globalPlace = (currentPage - 1) * pageSize + index + 1;
 
                 return (
@@ -56,6 +63,7 @@ const TopPlayers = () => {
                         borderRadius: '6px',
                         transition: 'background-color 0.2s'
                     }}
+
                          onMouseEnter={(e) => {
                              e.currentTarget.style.backgroundColor = 'var(--menu-target-color)';
                          }}
@@ -139,15 +147,48 @@ const TopPlayers = () => {
             render: (name, record, index) => {
                 const globalPlace = (currentPage - 1) * pageSize + index + 1;
                 return (
-                    <Text
-                        strong
+                    <div
+                        onClick={() => handlePlayerClick(record.id)}
                         style={{
-                            color: 'var(--text-color)',
-                            fontSize: globalPlace < 4 ? '16px' : '14px'
+                            display: 'flex',
+                            alignItems: 'center',
+                            cursor: 'pointer',
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            transition: 'all 0.3s',
+                            backgroundColor: 'transparent'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = 'var(--menu-target-color)';
+                            e.currentTarget.style.transform = 'translateX(4px)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.transform = 'translateX(0)';
                         }}
                     >
-                        {name || 'Неизвестный игрок'}
-                    </Text>
+                        <Avatar
+                            size="small"
+                            icon={<UserOutlined />}
+                            style={{
+                                marginRight: 12,
+                                backgroundColor: globalPlace < 4 ? '#1890ff' : 'var(--primary-color)',
+                                flexShrink: 0
+                            }}
+                        />
+                        <Text
+                            strong
+                            style={{
+                                color: 'var(--text-color)',
+                                fontSize: globalPlace < 4 ? '16px' : '14px',
+                                borderBottom: '1px dashed transparent',
+                                transition: 'border-color 0.3s'
+                            }}
+                            className="player-name"
+                        >
+                            {name || 'Неизвестный игрок'}
+                        </Text>
+                    </div>
                 );
             }
         },
@@ -168,15 +209,45 @@ const TopPlayers = () => {
                             borderColor: 'var(--border-color)',
                             fontWeight: 'bold',
                             fontSize: globalPlace < 4 ? '16px' : '14px',
-                            backgroundColor: globalPlace < 4 ? '#1890ff' : 'transparent'
+                            padding: '4px 12px',
+                            borderRadius: '20px',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s'
+                        }}
+                        onClick={() => handlePlayerClick(record.id)}
+                        onMouseEnter={(e) => {
+                            if (globalPlace >= 4) {
+                                e.currentTarget.style.backgroundColor = 'var(--menu-target-color)';
+                                e.currentTarget.style.transform = 'scale(1.05)';
+                            }
+                        }}
+                        onMouseLeave={(e) => {
+                            if (globalPlace >= 4) {
+                                e.currentTarget.style.backgroundColor = 'transparent';
+                                e.currentTarget.style.transform = 'scale(1)';
+                            }
                         }}
                     >
-                        {rating || 0}
+                        {rating?.toFixed(2) || 0}
                     </Tag>
                 );
             }
         }
     ];
+
+    // Добавляем стили для компонента
+    const styles = `
+        .player-row {
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .player-row:hover {
+            background-color: var(--menu-target-color);
+        }
+        .player-name:hover {
+            border-bottom-color: var(--primary-color);
+        }
+    `;
 
     if (loading) {
         return (
@@ -188,7 +259,10 @@ const TopPlayers = () => {
     }
 
     return (
-        <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
+        <div style={{ padding: '20px', maxWidth: '900px', margin: '0 auto' }}>
+            {/* Добавляем стили */}
+            <style>{styles}</style>
+
             <Title level={2} style={{ color: 'var(--text-color)', textAlign: 'center', marginBottom: 30 }}>
                 <TrophyOutlined style={{ marginRight: 12, color: '#faad14' }} />
                 Рейтинг игроков
@@ -198,7 +272,8 @@ const TopPlayers = () => {
                 style={{
                     backgroundColor: 'var(--card-bg)',
                     borderColor: 'var(--border-color)',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                    borderRadius: '12px'
                 }}
             >
                 <Table
@@ -213,6 +288,11 @@ const TopPlayers = () => {
                         emptyText: 'Нет данных о игроках'
                     }}
                     size="middle"
+                    onRow={(record) => ({
+                        onClick: () => handlePlayerClick(record.id),
+                        style: { cursor: 'pointer' },
+                        className: 'player-row'
+                    })}
                 />
 
                 {players.length === 0 && !loading && (

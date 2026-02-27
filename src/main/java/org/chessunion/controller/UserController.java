@@ -45,8 +45,21 @@ public class UserController {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/profile")
-    public ResponseEntity<ProfileDto> getUserProfile(Principal principal) {
-        return ResponseEntity.ok(userService.getProfile(principal));
+    public ResponseEntity<ProfileDto> getUserProfile(Principal principal, @PageableDefault Pageable pageable) {
+        return ResponseEntity.ok(userService.getProfile(principal, pageable));
+    }
+
+    @PreAuthorize("permitAll()")
+    @GetMapping("/profile/{id}")
+    public ResponseEntity<PublicProfileDto> getPublicUserProfile(@PathVariable(name = "id") int userId,
+                                                                       @PageableDefault Pageable pageable) {
+        return ResponseEntity.ok(userService.getPublicUserProfile(userId, pageable));
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PatchMapping("/updateAboutSelf")
+    public ResponseEntity<String> updateAboutSelf(Principal principal, @RequestBody(required = false) String aboutSelf) {
+        return ResponseEntity.ok(userService.updateAboutSelf(principal, aboutSelf));
     }
 
     @PreAuthorize("isAuthenticated()")

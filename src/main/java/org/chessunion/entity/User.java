@@ -46,6 +46,9 @@ public class User {
     @Column(nullable = false)
     private Double rating;
 
+    @Column(name = "about_self", length = 1500)
+    private String aboutSelf;
+
     @Column(name = "amount_of_matches", nullable = false)
     private Integer amountOfMatches;
 

@@ -40,14 +40,13 @@ public class UserService {
     private final PhoneNumberService phoneNumberService;
 
     @Cacheable(cacheNames = "profiles", key = "#principal.getName()", unless = "#result == null")
-    public ProfileDto getProfile(Principal principal) {
+    public ProfileDto getProfile(Principal principal, Pageable pageable) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow(() -> new UsernameNotFoundException(principal.getName()));
 
         ProfileDto profileDto = modelMapper.map(user, ProfileDto.class);
         profileDto.setRating(Math.round(profileDto.getRating() * 100) / 100.00);
 
-
-        profileDto.setMatches(matchService.findAllMatchesByUserId(user.getId()));
+        profileDto.setMatches(matchService.findAllMatchesByUserId(user.getId(), pageable));
 
         return profileDto;
     }
@@ -185,6 +184,7 @@ public class UserService {
 
         return userPage.map(player -> {
             TopListElementDto topListElementDto = new TopListElementDto();
+            topListElementDto.setId(player.getId());
             topListElementDto.setFullName(player.getFirstName() + " " + player.getLastName());
             topListElementDto.setRating((int) Math.round(player.getRating()));
             return topListElementDto;
@@ -274,5 +274,23 @@ public class UserService {
     public void tryToUnbanEmail(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found, email: " + email));
         tryToUnbanUser(user);
+    }
+
+    public PublicProfileDto getPublicUserProfile(int userId, Pageable pageable) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("User not found, id: " + userId));
+        PublicProfileDto publicProfileDto = modelMapper.map(user, PublicProfileDto.class);
+
+        publicProfileDto.setRating(Math.round(publicProfileDto.getRating() * 100) / 100.00);
+
+        publicProfileDto.setMatches(matchService.findAllMatchesByUserId(user.getId(), pageable));
+        return publicProfileDto;
+    }
+
+    @Transactional
+    public String updateAboutSelf(Principal principal, String aboutSelf) {
+        User user = userRepository.findByUsername(principal.getName()).orElseThrow(() -> new UsernameNotFoundException("User not found, username: " + principal.getName()));
+        user.setAboutSelf(aboutSelf);
+        userRepository.save(user);
+        return aboutSelf;
     }
 }

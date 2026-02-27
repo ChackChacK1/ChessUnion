@@ -16,6 +16,8 @@ import EditTournament from "./pages/EditTournament.jsx";
 import TournamentPlayersManagement from "./pages/TournamentPlayersManagement.jsx";
 import TopPlayers from "./pages/TopPlayers.jsx";
 import ChangePassword from "./pages/ChangePassword.jsx";
+import PublicProfile from './pages/PublicProfile';
+
 
 const AdminRoute = ({ children }) => {
     const role = localStorage.getItem('role');
@@ -41,6 +43,7 @@ function App() {
             <Route path="/admin/players/:tournamentId" element={<TournamentPlayersManagement />} />
             <Route path="/top" element={<TopPlayers />} />
             <Route path="/change-password" element={<ChangePassword />} />
+            <Route path="/profile/:id" element={<PublicProfile />} />
             <Route
                 path="/profile"
                 element={

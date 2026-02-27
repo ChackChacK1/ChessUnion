@@ -1,0 +1,2 @@
+ALTER TABLE users
+    ALTER COLUMN about_self TYPE VARCHAR(1500) USING (about_self::VARCHAR(1500));

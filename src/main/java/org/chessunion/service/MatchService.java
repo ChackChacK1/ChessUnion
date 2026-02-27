@@ -17,6 +17,7 @@ import org.chessunion.repository.PlayerHistoryRepository;
 import org.chessunion.repository.PlayerRepository;
 import org.chessunion.util.rating.SimpleRatingCalculator;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -112,10 +113,8 @@ public class MatchService {
     }
 
 
-    public List<MatchDto> findAllMatchesByUserId(Integer userId) {
-        return matchRepository.findAllMatchesByUserId(userId).stream()
-                .map(this::matchToMatchDto)
-                .toList();
+    public Page<MatchDto> findAllMatchesByUserId(Integer userId, Pageable pageable) {
+        return matchRepository.findAllMatchesByUserId(userId, pageable).map(this::matchToMatchDto);
     }
 
 
