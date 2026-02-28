@@ -7,6 +7,7 @@ import org.chessunion.entity.*;
 import org.chessunion.exception.*;
 import org.chessunion.repository.*;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -32,10 +33,9 @@ public class TournamentService {
     private final PlayerHistoryRepository playerHistoryRepository;
     private final MatchRepository matchRepository;
 
-    public List<TournamentDto> getAllTournaments(Pageable pageable) {
-        return tournamentRepository.findAll().stream()
-                .sorted(Comparator.comparing(Tournament::getStartDateTime).reversed())
-                .map(this::tournamentToDto).toList();
+    public Page<TournamentListElementDto> getAllTournaments(Pageable pageable) {
+        return tournamentRepository.findAllByOrderByCreatedAtDesc(pageable).map(this::tournamentToListElementDto);
+
     }
 
     @Transactional
@@ -491,12 +491,13 @@ public class TournamentService {
 
 
 
-    public TournamentDto tournamentToDto(Tournament tournament) {
+    private TournamentDto tournamentToDto(Tournament tournament) {
         TournamentDto dto = modelMapper.map(tournament, TournamentDto.class);
 
         List<PlayerDto> playerDtoList = tournament.getPlayers().stream()
                 .map(player -> {
                     PlayerDto playerDto = modelMapper.map(player, PlayerDto.class);
+                    playerDto.setUserId(player.getUser().getId());
                     playerDto.setSecondScore(playerService.calculateSecondScore(player));
                     playerDto.setFullName(playerService.getFullName(player));
                     return playerDto;
@@ -508,6 +509,12 @@ public class TournamentService {
 
         dto.setPlayers(playerDtoList);
         return dto;
+    }
+
+    private TournamentListElementDto tournamentToListElementDto(Tournament tournament) {
+        TournamentListElementDto tournamentListElementDto = modelMapper.map(tournament, TournamentListElementDto.class);
+        tournamentListElementDto.setPlayersRegistered(tournament.getPlayers().size());
+        return tournamentListElementDto;
     }
 
     @Transactional

@@ -5,8 +5,10 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.chessunion.dto.RegisterCustomUserRequest;
 import org.chessunion.dto.TournamentDto;
+import org.chessunion.dto.TournamentListElementDto;
 import org.chessunion.service.TournamentService;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +27,7 @@ public class TournamentController {
 
     @GetMapping("/all")
     @PreAuthorize("permitAll()")
-    public ResponseEntity<List<TournamentDto>> getAllTournaments(@PageableDefault Pageable pageable) {
+    public ResponseEntity<Page<TournamentListElementDto>> getAllTournaments(@PageableDefault Pageable pageable) {
         return ResponseEntity.ok(tournamentService.getAllTournaments(pageable));
     }
 

@@ -16,4 +16,5 @@ public class PlayerDto implements Serializable {
     private Double score;
     private String place;
     private Double secondScore;
+    private Integer userId;
 }

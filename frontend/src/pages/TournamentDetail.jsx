@@ -34,22 +34,18 @@ const TournamentDetail = () => {
     // Функции для получения цвета и перевода стадии
     const getStageColor = (stage) => {
         const colors = {
-            'ANNOUNCED': 'blue',
             'REGISTRATION': 'green',
-            'IN_PROGRESS': 'orange',
-            'FINISHED': 'red',
-            'CANCELLED': 'gray'
+            'PLAYING': 'blue',
+            'FINISHED': 'red'
         };
         return colors[stage] || 'default';
     };
 
     const translateStage = (stage) => {
         const translations = {
-            'ANNOUNCED': 'Анонсирован',
             'REGISTRATION': 'Регистрация',
-            'IN_PROGRESS': 'В процессе',
-            'FINISHED': 'Завершен',
-            'CANCELLED': 'Отменен'
+            'PLAYING': 'В процессе',
+            'FINISHED': 'Завершен'
         };
         return translations[stage] || stage;
     };
@@ -153,14 +149,36 @@ const TournamentDetail = () => {
         }
     };
 
+    // Обработчик клика по игроку - используем userId
+    const handlePlayerClick = (userId) => {
+        if (userId) {
+            navigate(`/profile/${userId}`);
+        }
+    };
+
     // Колонки для таблицы участников (стадия регистрации)
     const registrationColumns = [
         {
             title: <span style={{ color: 'var(--text-color)' }}>Игрок</span>,
             dataIndex: 'fullName',
             key: 'fullName',
-            render: (name) => (
-                <Text style={{ color: 'var(--text-color)' }}>{name || 'Неизвестный игрок'}</Text>
+            render: (name, record) => (
+                <Button
+                    type="link"
+                    style={{ padding: 0, height: 'auto' }}
+                    onClick={() => handlePlayerClick(record.userId)}
+                >
+                    <Text style={{
+                        color: 'var(--primary-color)',
+                        textDecoration: 'none',
+                        transition: 'text-decoration 0.3s'
+                    }}
+                          onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
+                          onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
+                    >
+                        {name || 'Неизвестный игрок'}
+                    </Text>
+                </Button>
             )
         },
         {
@@ -180,7 +198,7 @@ const TournamentDetail = () => {
         }
     ];
 
-// Колонки для турнирной таблицы (стадия IN_PROGRESS или FINISHED)
+    // Колонки для турнирной таблицы (стадия PLAYING или FINISHED)
     const tournamentTableColumns = [
         {
             title: <span style={{ color: 'var(--text-color)' }}>Место</span>,
@@ -201,8 +219,23 @@ const TournamentDetail = () => {
             title: <span style={{ color: 'var(--text-color)' }}>Игрок</span>,
             dataIndex: 'fullName',
             key: 'fullName',
-            render: (name) => (
-                <Text style={{ color: 'var(--text-color)' }}>{name || 'Неизвестный игрок'}</Text>
+            render: (name, record) => (
+                <Button
+                    type="link"
+                    style={{ padding: 0, height: 'auto' }}
+                    onClick={() => handlePlayerClick(record.userId)}
+                >
+                    <Text style={{
+                        color: 'var(--primary-color)',
+                        textDecoration: 'none',
+                        transition: 'text-decoration 0.3s'
+                    }}
+                          onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
+                          onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
+                    >
+                        {name || 'Неизвестный игрок'}
+                    </Text>
+                </Button>
             )
         },
         {
@@ -216,7 +249,7 @@ const TournamentDetail = () => {
                     color: 'var(--text-color)',
                     borderColor: 'var(--border-color)'
                 }}>
-                    {score || '0'}
+                    {score?.toFixed(1) || '0.0'}
                 </Tag>
             )
         },
@@ -231,7 +264,7 @@ const TournamentDetail = () => {
                     color: 'var(--text-color)',
                     borderColor: 'var(--border-color)'
                 }}>
-                    {secondScore || '0'}
+                    {secondScore?.toFixed(1) || '0.0'}
                 </Tag>
             )
         },
@@ -254,7 +287,7 @@ const TournamentDetail = () => {
 
     // Выбираем какие колонки использовать в зависимости от стадии турнира
     const getTableColumns = () => {
-        if (tournament.stage === 'REGISTRATION' || tournament.stage === 'ANNOUNCED') {
+        if (tournament.stage === 'REGISTRATION') {
             return registrationColumns;
         } else {
             return tournamentTableColumns;
@@ -263,8 +296,8 @@ const TournamentDetail = () => {
 
     // Выбираем заголовок в зависимости от стадии турнира
     const getTableTitle = () => {
-        if (tournament.stage === 'REGISTRATION' || tournament.stage === 'ANNOUNCED') {
-            return `Участники (${tournament.players?.length || 0})`;
+        if (tournament.stage === 'REGISTRATION') {
+            return `Зарегистрированные участники (${tournament.players?.length || 0})`;
         } else {
             return `Турнирная таблица (${tournament.players?.length || 0})`;
         }
@@ -272,7 +305,7 @@ const TournamentDetail = () => {
 
     const playersForTable = (() => {
         if (!tournament?.players) return [];
-        if (tournament.stage === 'REGISTRATION' || tournament.stage === 'ANNOUNCED') {
+        if (tournament.stage === 'REGISTRATION') {
             return [...tournament.players].sort(
                 (a, b) => (b?.rating ?? 0) - (a?.rating ?? 0)
             );
@@ -334,13 +367,13 @@ const TournamentDetail = () => {
                                 </Tag>
                             </div>
 
-                            {/* Описание */}
+                            {/* Описание - показываем только если есть */}
                             {tournament.description && (
                                 <div>
                                     <Text strong style={{ color: 'var(--text-color)' }}>Описание: </Text>
                                     <Paragraph style={{
                                         marginBottom: 0,
-                                        marginTop: 8,
+                                        marginTop: 4,
                                         color: 'var(--text-color)'
                                     }}>
                                         {tournament.description}
@@ -348,9 +381,7 @@ const TournamentDetail = () => {
                                 </div>
                             )}
 
-                            <Divider style={{ margin: '16px 0', borderColor: 'var(--border-color)' }} />
-
-                            {/* Адрес проведения */}
+                            {/* Адрес проведения - показываем только если есть */}
                             {tournament.address && (
                                 <div style={{ display: 'flex', alignItems: 'flex-start' }}>
                                     <EnvironmentOutlined style={{
@@ -365,11 +396,9 @@ const TournamentDetail = () => {
                                 </div>
                             )}
 
-                            <Divider style={{ margin: '16px 0', borderColor: 'var(--border-color)' }} />
-
                             {/* Даты */}
-                            <Space direction="vertical" style={{ width: '100%' }} size="small">
-                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <div style={{ marginTop: tournament.address || tournament.description ? 16 : 0 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
                                     <CalendarOutlined style={{ marginRight: 8, color: 'var(--primary-color)' }} />
                                     <Text strong style={{ color: 'var(--text-color)' }}>Дата начала: </Text>
                                     <Text style={{ marginLeft: 8, color: 'var(--text-color)' }}>
@@ -388,12 +417,12 @@ const TournamentDetail = () => {
                                             'Не указано'}
                                     </Text>
                                 </div>
-                            </Space>
-
-                            <Divider style={{ margin: '16px 0', borderColor: 'var(--border-color)' }} />
+                            </div>
 
                             {/* Статистика турнира */}
-                            <Title level={5} style={{ color: 'var(--text-color)' }}>Информация о турнире</Title>
+                            <Title level={5} style={{ color: 'var(--text-color)', marginTop: 16 }}>
+                                Информация о турнире
+                            </Title>
 
                             <Row gutter={16}>
                                 <Col xs={12} sm={8}>
@@ -459,7 +488,7 @@ const TournamentDetail = () => {
                                     </div>
                                 )}
 
-                                {tournament.maxAmountOfPlayers && tournament.players?.length && (
+                                {(
                                     <div style={{ display: 'flex', alignItems: 'center' }}>
                                         <TeamOutlined style={{ marginRight: 8, color: 'var(--accent-color)' }} />
                                         <Text strong style={{ color: 'var(--text-color)' }}>Свободных мест: </Text>
@@ -472,41 +501,38 @@ const TournamentDetail = () => {
                         </Space>
                     </Card>
 
-                    {/* Список зарегистрированных игроков */}
-                    {tournament.players && tournament.players.length > 0 && (
-                        <Card
-                            title={
-                                <Space>
-                                    <TeamOutlined style={{ color: 'var(--text-color)' }} />
-                                    <span style={{ color: 'var(--text-color)' }}>
-                                        {getTableTitle()}
-                                    </span>
-                                </Space>
-                            }
-                            style={{
-                                backgroundColor: 'var(--card-bg)',
-                                borderColor: 'var(--border-color)'
+                    {/* Список зарегистрированных игроков - всегда показываем */}
+                    <Card
+                        title={
+                            <Space>
+                                <TeamOutlined style={{ color: 'var(--text-color)' }} />
+                                <span style={{ color: 'var(--text-color)' }}>
+                                    {getTableTitle()}
+                                </span>
+                            </Space>
+                        }
+                        style={{
+                            backgroundColor: 'var(--card-bg)',
+                            borderColor: 'var(--border-color)'
+                        }}
+                        bodyStyle={{ padding: isMobile ? '12px' : '16px' }}
+                    >
+                        <Table
+                            columns={getTableColumns()}
+                            dataSource={playersForTable.map((player, index) => ({
+                                ...player,
+                                key: player?.id ?? index,
+                                place: (tournament.stage !== 'REGISTRATION')
+                                    ? index + 1
+                                    : undefined
+                            }))}
+                            pagination={false}
+                            size="small"
+                            locale={{
+                                emptyText: 'Нет зарегистрированных участников'
                             }}
-                            bodyStyle={{ padding: isMobile ? '12px' : '16px' }}
-                        >
-                            <Table
-                                columns={getTableColumns()}
-                                dataSource={playersForTable.map((player, index) => ({
-                                    ...player,
-                                    key: player?.id ?? index,
-                                    // Добавляем place для турнирной таблицы
-                                    place: (tournament.stage !== 'REGISTRATION' && tournament.stage !== 'ANNOUNCED')
-                                        ? index + 1
-                                        : undefined
-                                }))}
-                                pagination={false}
-                                size="small"
-                                locale={{
-                                    emptyText: 'Нет данных'
-                                }}
-                            />
-                        </Card>
-                    )}
+                        />
+                    </Card>
                 </Col>
 
                 {/* Блок действий */}
@@ -614,7 +640,6 @@ const TournamentDetail = () => {
                     bodyStyle={{ padding: isMobile ? '16px' : '14px' }}
                 >
                     <Space direction="vertical" style={{ width: '100%' }} size="middle">
-
                         <Popconfirm
                             title="Удалить турнир?"
                             description="Вы уверены, что хотите удалить этот турнир? Это действие нельзя отменить."
