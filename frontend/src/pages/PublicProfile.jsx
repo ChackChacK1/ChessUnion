@@ -17,7 +17,7 @@ const { Title, Text } = Typography;
 const PublicProfile = () => {
     const { id } = useParams(); // Получаем ID из URL
     const navigate = useNavigate();
-
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '');
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [matchesPage, setMatchesPage] = useState({
@@ -31,6 +31,69 @@ const PublicProfile = () => {
     useEffect(() => {
         fetchPublicProfile();
     }, [id, currentPage]);
+
+    const goBack = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (window.history.length > 1) navigate('/top');
+        else navigate('/', { replace: true });
+    };
+
+    const getProfileImageUrl = () => {
+        if (!id) return undefined;
+        return `${API_BASE_URL}/api/profile_image/${id}`;
+    };
+
+    const FancyAvatar = ({ src, size = 80, ring = false, onClick, hint }) => {
+        const outer = ring ? size + 8 : size;    // внешний размер (кольцо)
+        const pad = ring ? 2 : 0;                // толщина кольца
+        const inner = outer - pad * 2;
+
+        return (
+            <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center' }}>
+      <span
+          onClick={onClick}
+          style={{
+              display: 'inline-flex',
+              width: outer,
+              height: outer,
+              borderRadius: '50%',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: pad,
+              boxSizing: 'border-box',
+              background: ring ? 'linear-gradient(135deg, #ffd700, #ffed4e)' : 'transparent',
+              border: ring ? '1px solid rgba(255,255,255,0.25)' : '1px solid var(--border-color)',
+              boxShadow: ring ? '0 0 0 2px rgba(0,0,0,0.25), 0 10px 26px rgba(0,0,0,0.35)' : 'none',
+              cursor: onClick ? 'pointer' : 'default',
+          }}
+      >
+        <Avatar
+            size={inner}
+            src={src}
+            icon={<UserOutlined />}
+            onError={() => true}
+            style={{
+                width: inner,
+                height: inner,
+                minWidth: inner,
+                minHeight: inner,
+                borderRadius: '50%',
+                backgroundColor: 'var(--card-bg)',
+                border: '1px solid rgba(255,255,255,0.18)',
+            }}
+        />
+      </span>
+
+                {hint && (
+                    <Text style={{ marginTop: 6, fontSize: 12, color: 'var(--text-secondary)' }}>
+                        {hint}
+                    </Text>
+                )}
+            </div>
+        );
+    };
 
     const fetchPublicProfile = async () => {
         setLoading(true);
@@ -117,6 +180,7 @@ const PublicProfile = () => {
             }}>
                 <Title style = {{color : '#ffffff'}} level={3}>Пользователь не найден</Title>
                 <Button
+                    htmlType="button"
                     type="primary"
                     icon={<ArrowLeftOutlined />}
                     onClick={() => navigate(-1)}
@@ -131,9 +195,11 @@ const PublicProfile = () => {
     return (
         <div style={{ padding: '20px', maxWidth: '1000px', margin: '0 auto' }}>
             {/* Кнопка назад */}
+
+
             <Button
                 icon={<ArrowLeftOutlined />}
-                onClick={() => navigate(-1)}
+                onClickCapture={goBack}
                 style={{ marginBottom: 16 }}
             >
                 Назад
@@ -156,13 +222,10 @@ const PublicProfile = () => {
                     marginBottom: 24,
                     flexWrap: 'wrap'
                 }}>
-                    <Avatar
-                        size={80}
-                        icon={<UserOutlined />}
-                        style={{
-                            backgroundColor: 'var(--primary-color)',
-                            color: 'white'
-                        }}
+                    <FancyAvatar
+                        size={110}
+                        ring={true}
+                        src={getProfileImageUrl()}
                     />
                     <div style={{ flex: 1 }}>
                         <Title level={3} style={{

@@ -187,6 +187,7 @@ public class UserService {
             topListElementDto.setId(player.getId());
             topListElementDto.setFullName(player.getFirstName() + " " + player.getLastName());
             topListElementDto.setRating((int) Math.round(player.getRating()));
+            topListElementDto.setThumbUrl("/profile-images/thumb/" + player.getId() + ".png");
             return topListElementDto;
         });
     }
@@ -211,7 +212,10 @@ public class UserService {
 
         return userPage.map(user -> {
             UserForAdminPanelDto userForAdminPanelDto = modelMapper.map(user, UserForAdminPanelDto.class);
-            userForAdminPanelDto.setFullName(user.getFirstName() + " " + user.getLastName() + " " + user.getSurName());
+            String fullName = user.getSurName() == null ?
+                    user.getFirstName() + " " + user.getLastName() :
+                    user.getFirstName() + " " + user.getLastName() + " " + user.getSurName();
+            userForAdminPanelDto.setFullName(fullName);
             userForAdminPanelDto.setRating((int) Math.round(user.getRating()));
             return userForAdminPanelDto;
         });

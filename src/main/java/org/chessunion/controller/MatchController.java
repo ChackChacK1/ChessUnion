@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.chessunion.dto.MatchDto;
 import org.chessunion.entity.Match;
 import org.chessunion.service.MatchService;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +31,7 @@ public class MatchController {
     }
 
     @GetMapping("/byTournament/{tournamentId}")
-    public ResponseEntity<List<MatchDto>> getTournamentMatches(@PathVariable int tournamentId, @PageableDefault Pageable pageable) {
+    public ResponseEntity<Page<MatchDto>> getTournamentMatches(@PathVariable int tournamentId, @PageableDefault Pageable pageable) {
         return ResponseEntity.ok(matchService.findMatchesByTournament(tournamentId, pageable));
     }
 

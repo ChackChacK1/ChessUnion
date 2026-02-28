@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
     Form,
     Input,
@@ -13,7 +13,8 @@ import {
     Row,
     Col,
     Tag,
-    Select
+    Select,
+    Divider,
 } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -28,27 +29,44 @@ const EditTournament = () => {
     const [loading, setLoading] = useState(false);
     const [tournament, setTournament] = useState(null);
     const [fetching, setFetching] = useState(true);
+
     const navigate = useNavigate();
     const { tournamentId } = useParams();
 
+    const stageColor = useMemo(() => {
+        return (stage) => {
+            const colors = {
+                ANNOUNCED: 'blue',
+                REGISTRATION: 'green',
+                IN_PROGRESS: 'orange',
+                FINISHED: 'red',
+                CANCELLED: 'gray',
+            };
+            return colors[stage] || 'default';
+        };
+    }, []);
+
+    const stageLabel = useMemo(() => {
+        return (stage) => {
+            const translations = {
+                ANNOUNCED: 'Анонсирован',
+                REGISTRATION: 'Регистрация',
+                IN_PROGRESS: 'В процессе',
+                FINISHED: 'Завершен',
+                CANCELLED: 'Отменен',
+            };
+            return translations[stage] || stage;
+        };
+    }, []);
+
     useEffect(() => {
         const fetchTournament = async () => {
+            setFetching(true);
             try {
                 const response = await client.get(`/api/tournament/${tournamentId}`);
 
-                // Исправление: проверяем разные форматы ответа
-                let tournamentData = response.data;
-
-                // Если данные в поле body
-                if (response.data && response.data.body) {
-                    tournamentData = response.data.body;
-                }
-                // Если это прямой объект
-                else if (response.data && response.data.id) {
-                    tournamentData = response.data;
-                }
-
-                console.log('Tournament data:', tournamentData); // Для отладки
+                // Бэкенд может отдавать либо объект турнира, либо { body: tournament }
+                const tournamentData = response?.data?.body?.id ? response.data.body : response.data;
 
                 if (!tournamentData || !tournamentData.id) {
                     throw new Error('Турнир не найден');
@@ -56,43 +74,51 @@ const EditTournament = () => {
 
                 setTournament(tournamentData);
 
-                // Заполняем форму данными турнира
                 form.setFieldsValue({
-                    name: tournamentData.name,
-                    description: tournamentData.description || '',
-                    startDateTime: dayjs(tournamentData.startDateTime),
-                    maxAmountOfPlayers: tournamentData.maxAmountOfPlayers,
-                    minAmountOfPlayers: tournamentData.minAmountOfPlayers,
-                    amountOfRounds: tournamentData.amountOfRounds,
-                    systemType: tournamentData.systemType || 'SWISS'
+                    name: tournamentData.name ?? '',
+                    address: tournamentData.address ?? '',
+                    description: tournamentData.description ?? '',
+                    startDateTime: tournamentData.startDateTime ? dayjs(tournamentData.startDateTime) : null,
+                    maxAmountOfPlayers: tournamentData.maxAmountOfPlayers ?? null,
+                    minAmountOfPlayers: tournamentData.minAmountOfPlayers ?? null,
+                    amountOfRounds: tournamentData.amountOfRounds ?? null,
+                    systemType: tournamentData.systemType ?? 'SWISS',
                 });
             } catch (error) {
                 console.error('Error fetching tournament:', error);
                 message.error('Ошибка загрузки турнира: ' + (error.response?.data?.message || error.message));
+                setTournament(null);
             } finally {
                 setFetching(false);
             }
         };
 
-        if (tournamentId) {
-            fetchTournament();
-        }
+        if (tournamentId) fetchTournament();
     }, [tournamentId, form]);
 
     const handleSubmit = async (values) => {
         setLoading(true);
         try {
-            const tournamentData = {
-                name: values.name,
-                description: values.description,
-                startDateTime: values.startDateTime.format('YYYY-MM-DDTHH:mm:ss'),
+            const minPlayers = values.minAmountOfPlayers;
+            const maxPlayers = values.maxAmountOfPlayers;
+
+            if (minPlayers && maxPlayers && minPlayers > maxPlayers) {
+                message.error('Минимальное количество игроков не может быть больше максимального');
+                return;
+            }
+
+            const payload = {
+                name: values.name?.trim(),
+                address: values.address?.trim(),
+                description: values.description ?? '',
+                startDateTime: values.startDateTime?.format('YYYY-MM-DDTHH:mm:ss'),
                 maxAmountOfPlayers: values.maxAmountOfPlayers,
                 minAmountOfPlayers: values.minAmountOfPlayers,
                 amountOfRounds: values.amountOfRounds,
-                systemType: values.systemType
+                systemType: values.systemType,
             };
 
-            await client.patch(`/api/admin/tournament/${tournamentId}/update`, tournamentData);
+            await client.patch(`/api/admin/tournament/${tournamentId}/update`, payload);
             message.success('Турнир успешно обновлен');
             navigate('/admin');
         } catch (error) {
@@ -106,28 +132,6 @@ const EditTournament = () => {
 
     const handleCancel = () => {
         navigate('/admin');
-    };
-
-    const getStageColor = (stage) => {
-        const colors = {
-            'ANNOUNCED': 'blue',
-            'REGISTRATION': 'green',
-            'IN_PROGRESS': 'orange',
-            'FINISHED': 'red',
-            'CANCELLED': 'gray'
-        };
-        return colors[stage] || 'default';
-    };
-
-    const translateStage = (stage) => {
-        const translations = {
-            'ANNOUNCED': 'Анонсирован',
-            'REGISTRATION': 'Регистрация',
-            'IN_PROGRESS': 'В процессе',
-            'FINISHED': 'Завершен',
-            'CANCELLED': 'Отменен'
-        };
-        return translations[stage] || stage;
     };
 
     if (fetching) {
@@ -144,10 +148,7 @@ const EditTournament = () => {
             <div style={{ padding: '20px', textAlign: 'center' }}>
                 <Text style={{ color: 'var(--text-color)' }}>Турнир не найден</Text>
                 <br />
-                <Button
-                    onClick={handleCancel}
-                    style={{ marginTop: 10 }}
-                >
+                <Button onClick={handleCancel} style={{ marginTop: 10 }}>
                     Вернуться назад
                 </Button>
             </div>
@@ -155,14 +156,14 @@ const EditTournament = () => {
     }
 
     return (
-        <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
+        <div style={{ padding: '20px', maxWidth: '850px', margin: '0 auto' }}>
             <Card
                 style={{
                     backgroundColor: 'var(--card-bg)',
-                    borderColor: 'var(--border-color)'
+                    borderColor: 'var(--border-color)',
                 }}
             >
-                <Space style={{ marginBottom: 20, alignItems: 'center' }}>
+                <Space style={{ marginBottom: 12, alignItems: 'center' }}>
                     <Button
                         icon={<ArrowLeftOutlined />}
                         onClick={handleCancel}
@@ -174,46 +175,95 @@ const EditTournament = () => {
                     </Title>
                 </Space>
 
-                {/* Информация о текущем состоянии */}
-                <div style={{
-                    marginBottom: 20,
-                    padding: '15px',
-                    backgroundColor: 'var(--bg-color)',
-                    borderRadius: '6px',
-                    border: '1px solid var(--border-color)'
-                }}>
-                    <Text strong style={{ color: 'var(--text-color)' }}>Текущая информация:</Text>
-                    <br />
-                    <Text style={{ color: 'var(--text-color)' }}>ID: {tournament.id}</Text>
-                    <br />
-                    <Text style={{ color: 'var(--text-color)' }}>
-                        Статус: <Tag color={getStageColor(tournament.stage)}>
-                        {translateStage(tournament.stage)}
-                    </Tag>
-                    </Text>
-                    <br />
-                    <Text style={{ color: 'var(--text-color)' }}>Текущий раунд: {tournament.currentRound + 1}</Text>
-                    <br />
-                    <Text style={{ color: 'var(--text-color)' }}>Зарегистрировано игроков: {tournament.players?.length || 0}</Text>
+                {/* Текущая информация */}
+                <div
+                    style={{
+                        marginBottom: 18,
+                        padding: 14,
+                        backgroundColor: 'var(--bg-color)',
+                        borderRadius: 10,
+                        border: '1px solid var(--border-color)',
+                    }}
+                >
+                    <Row gutter={[12, 10]}>
+                        <Col xs={24} sm={12}>
+                            <Text strong style={{ color: 'var(--text-color)' }}>
+                                Текущая информация
+                            </Text>
+                            <Divider style={{ margin: '8px 0', borderColor: 'var(--border-color)' }} />
+                            <div style={{ lineHeight: 1.7 }}>
+                                <Text style={{ color: 'var(--text-color)' }}>ID: {tournament.id}</Text>
+                                <br />
+                                <Text style={{ color: 'var(--text-color)' }}>
+                                    Статус:{' '}
+                                    <Tag color={stageColor(tournament.stage)} style={{ marginLeft: 6 }}>
+                                        {stageLabel(tournament.stage)}
+                                    </Tag>
+                                </Text>
+                                <br />
+                                <Text style={{ color: 'var(--text-color)' }}>
+                                    Адрес: {tournament.address || '—'}
+                                </Text>
+                                <br />
+                                <Text style={{ color: 'var(--text-color)' }}>
+                                    Текущий раунд:{' '}
+                                    {typeof tournament.currentRound === 'number' ? tournament.currentRound + 1 : '—'}
+                                </Text>
+                                <br />
+                                <Text style={{ color: 'var(--text-color)' }}>
+                                    Зарегистрировано игроков: {tournament.players?.length || 0}
+                                </Text>
+                            </div>
+                        </Col>
+
+                        <Col xs={24} sm={12}>
+                            <Text strong style={{ color: 'var(--text-color)' }}>
+                                Подсказка
+                            </Text>
+                            <Divider style={{ margin: '8px 0', borderColor: 'var(--border-color)' }} />
+                            <Text style={{ color: 'var(--text-secondary)' }}>
+                                Изменения вступят в силу после сохранения. Если турнир уже начался, некоторые поля могут быть
+                                ограничены правилами бэкенда.
+                            </Text>
+                        </Col>
+                    </Row>
                 </div>
 
-                <Form
-                    form={form}
-                    layout="vertical"
-                    onFinish={handleSubmit}
-                    autoComplete="off"
-                >
+                <Form form={form} layout="vertical" onFinish={handleSubmit} autoComplete="off" disabled={loading}>
                     <Form.Item
                         label={<span style={{ color: 'var(--text-color)' }}>Название турнира</span>}
                         name="name"
-                        rules={[{ required: true, message: 'Введите название турнира' }]}
+                        rules={[
+                            { required: true, message: 'Введите название турнира' },
+                            { whitespace: true, message: 'Название не может состоять только из пробелов' },
+                            { min: 3, message: 'Минимум 3 символа' },
+                        ]}
                     >
                         <Input
                             placeholder="Введите название турнира"
                             style={{
                                 backgroundColor: 'var(--card-bg)',
                                 color: 'var(--text-color)',
-                                borderColor: 'var(--border-color)'
+                                borderColor: 'var(--border-color)',
+                            }}
+                        />
+                    </Form.Item>
+
+                    <Form.Item
+                        label={<span style={{ color: 'var(--text-color)' }}>Адрес</span>}
+                        name="address"
+                        rules={[
+                            { required: true, message: 'Введите адрес турнира' },
+                            { whitespace: true, message: 'Адрес не может состоять только из пробелов' },
+                            { min: 3, message: 'Минимум 3 символа' },
+                        ]}
+                    >
+                        <Input
+                            placeholder="Город, клуб, улица..."
+                            style={{
+                                backgroundColor: 'var(--card-bg)',
+                                color: 'var(--text-color)',
+                                borderColor: 'var(--border-color)',
                             }}
                         />
                     </Form.Item>
@@ -221,14 +271,15 @@ const EditTournament = () => {
                     <Form.Item
                         label={<span style={{ color: 'var(--text-color)' }}>Описание турнира</span>}
                         name="description"
+                        rules={[{ max: 2000, message: 'Описание не может быть длиннее 2000 символов' }]}
                     >
                         <TextArea
-                            rows={3}
+                            rows={4}
                             placeholder="Введите описание турнира"
                             style={{
                                 backgroundColor: 'var(--card-bg)',
                                 color: 'var(--text-color)',
-                                borderColor: 'var(--border-color)'
+                                borderColor: 'var(--border-color)',
                             }}
                         />
                     </Form.Item>
@@ -248,78 +299,49 @@ const EditTournament = () => {
                     </Form.Item>
 
                     <Row gutter={16}>
-                        <Col span={8}>
+                        <Col xs={24} md={8}>
                             <Form.Item
                                 label={<span style={{ color: 'var(--text-color)' }}>Минимальное количество игроков</span>}
                                 name="minAmountOfPlayers"
                                 rules={[
                                     { required: true, message: 'Введите минимальное количество' },
-                                    { type: 'number', min: 2, message: 'Минимум 2 игрока' }
+                                    { type: 'number', min: 2, message: 'Минимум 2 игрока' },
                                 ]}
                             >
-                                <InputNumber
-                                    min={2}
-                                    max={100}
-                                    style={{ width: '100%' }}
-                                    placeholder="Минимум игроков"
-                                    controlsStyle={{
-                                        backgroundColor: 'var(--card-bg)',
-                                        color: 'var(--text-color)',
-                                        borderColor: 'var(--border-color)'
-                                    }}
-                                />
+                                <InputNumber min={2} max={100} style={{ width: '100%' }} placeholder="Минимум" />
                             </Form.Item>
                         </Col>
 
-                        <Col span={8}>
+                        <Col xs={24} md={8}>
                             <Form.Item
                                 label={<span style={{ color: 'var(--text-color)' }}>Максимальное количество игроков</span>}
                                 name="maxAmountOfPlayers"
                                 rules={[
                                     { required: true, message: 'Введите максимальное количество' },
-                                    { type: 'number', min: 2, message: 'Минимум 2 игрока' }
+                                    { type: 'number', min: 2, message: 'Минимум 2 игрока' },
                                 ]}
                             >
-                                <InputNumber
-                                    min={2}
-                                    max={100}
-                                    style={{ width: '100%' }}
-                                    placeholder="Максимум игроков"
-                                    controlsStyle={{
-                                        backgroundColor: 'var(--card-bg)',
-                                        color: 'var(--text-color)',
-                                        borderColor: 'var(--border-color)'
-                                    }}
-                                />
+                                <InputNumber min={2} max={100} style={{ width: '100%' }} placeholder="Максимум" />
                             </Form.Item>
                         </Col>
 
-                        <Col span={8}>
+                        <Col xs={24} md={8}>
                             <Form.Item
                                 label={<span style={{ color: 'var(--text-color)' }}>Количество раундов</span>}
                                 name="amountOfRounds"
                                 rules={[
                                     { required: true, message: 'Введите количество раундов' },
-                                    { type: 'number', min: 1, message: 'Минимум 1 раунд' }
+                                    { type: 'number', min: 1, message: 'Минимум 1 раунд' },
+                                    { type: 'number', max: 50, message: 'Слишком много раундов' },
                                 ]}
                             >
-                                <InputNumber
-                                    min={1}
-                                    max={20}
-                                    style={{ width: '100%' }}
-                                    placeholder="Количество раундов"
-                                    controlsStyle={{
-                                        backgroundColor: 'var(--card-bg)',
-                                        color: 'var(--text-color)',
-                                        borderColor: 'var(--border-color)'
-                                    }}
-                                />
+                                <InputNumber min={1} max={50} style={{ width: '100%' }} placeholder="Раунды" />
                             </Form.Item>
                         </Col>
                     </Row>
 
                     <Row gutter={16}>
-                        <Col span={12}>
+                        <Col xs={24} md={12}>
                             <Form.Item
                                 label={<span style={{ color: 'var(--text-color)' }}>Тип жеребьёвки</span>}
                                 name="systemType"
@@ -333,7 +355,7 @@ const EditTournament = () => {
                         </Col>
                     </Row>
 
-                    <Form.Item>
+                    <Form.Item style={{ marginTop: 8 }}>
                         <Space>
                             <Button
                                 type="primary"
@@ -341,16 +363,17 @@ const EditTournament = () => {
                                 loading={loading}
                                 style={{
                                     backgroundColor: 'var(--hover-color)',
-                                    borderColor: 'var(--hover-color)'
+                                    borderColor: 'var(--hover-color)',
                                 }}
                             >
                                 Сохранить изменения
                             </Button>
                             <Button
+                                htmlType="button"
                                 onClick={handleCancel}
                                 style={{
                                     color: 'var(--text-color)',
-                                    borderColor: 'var(--border-color)'
+                                    borderColor: 'var(--border-color)',
                                 }}
                             >
                                 Отмена

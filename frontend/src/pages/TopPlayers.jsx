@@ -14,12 +14,81 @@ const TopPlayers = () => {
     const [totalElements, setTotalElements] = useState(0);
     const [pageSize, setPageSize] = useState(10);
     const [hoveredPlayer, setHoveredPlayer] = useState(null);
-
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '');
     const navigate = useNavigate(); // Хук для навигации
 
     useEffect(() => {
         fetchTopPlayers(currentPage, pageSize);
     }, [currentPage, pageSize]);
+
+    const toApiUrl = (path) => {
+        if (!path) return undefined;
+        if (path.startsWith('http://') || path.startsWith('https://')) return path;
+        return `${API_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
+    };
+
+    const renderPlayerAvatar = (record, globalPlace) => {
+        const isTop1 = globalPlace === 1;
+        const isTop2 = globalPlace === 2;
+        const isTop3 = globalPlace === 3;
+        const isTop = isTop1 || isTop2 || isTop3;
+
+        const ring = isTop1
+            ? 'linear-gradient(135deg, #ffd700, #ffed4e)'
+            : isTop2
+                ? 'linear-gradient(135deg, #c0c0c0, #f0f0f0)'
+                : isTop3
+                    ? 'linear-gradient(135deg, #cd7f32, #f1b36b)'
+                    : null;
+
+        const src = toApiUrl(record.thumbUrl);
+
+        // размеры можно подстроить
+        const outerSize = 34;          // общий размер блока (с кольцом)
+        const ringPadding = isTop ? 1 : 0; // толщина кольца
+        const avatarSize = isTop ? outerSize - ringPadding * 2 : 28;
+
+        return (
+            <span
+                style={{
+                    display: 'inline-flex',
+                    width: isTop ? outerSize : 28,
+                    height: isTop ? outerSize : 28,
+                    borderRadius: '50%',
+                    padding: ringPadding,
+                    background: ring || 'transparent',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxSizing: 'border-box',
+
+                    // заметный контур + тень (видно и на тёмном фоне)
+                    border: isTop ? '1px solid rgba(255,255,255,0.25)' : '1px solid var(--border-color)',
+                    boxShadow: isTop ? '0 0 0 2px rgba(0,0,0,0.25), 0 6px 18px rgba(0,0,0,0.35)' : 'none',
+
+                    // чтобы тень не обрезалась, немного “выталкиваем” наружу
+                    marginRight: 12,
+                    flexShrink: 0,
+                }}
+            >
+      <Avatar
+          size={avatarSize}
+          src={src}
+          icon={<UserOutlined />}
+          style={{
+              width: avatarSize,
+              height: avatarSize,
+              minWidth: avatarSize,
+              minHeight: avatarSize,
+              borderRadius: '50%',
+              objectFit: 'cover',
+              backgroundColor: 'var(--card-bg)',
+              border: '1px solid rgba(255,255,255,0.18)',
+          }}
+          onError={() => true}
+      />
+    </span>
+        );
+    };
 
     const fetchTopPlayers = async (page = 1, size = 10) => {
         try {
@@ -146,6 +215,7 @@ const TopPlayers = () => {
             key: 'fullName',
             render: (name, record, index) => {
                 const globalPlace = (currentPage - 1) * pageSize + index + 1;
+
                 return (
                     <div
                         onClick={() => handlePlayerClick(record.id)}
@@ -167,18 +237,12 @@ const TopPlayers = () => {
                             e.currentTarget.style.transform = 'translateX(0)';
                         }}
                     >
-                        <Avatar
-                            size="small"
-                            icon={<UserOutlined />}
-                            style={{
-                                marginRight: 12,
-                                backgroundColor: globalPlace < 4 ? '#1890ff' : 'var(--primary-color)',
-                                flexShrink: 0
-                            }}
-                        />
+                        {renderPlayerAvatar(record, globalPlace)}
+
                         <Text
                             strong
                             style={{
+                                marginLeft: 10,
                                 color: 'var(--text-color)',
                                 fontSize: globalPlace < 4 ? '16px' : '14px',
                                 borderBottom: '1px dashed transparent',
@@ -302,7 +366,7 @@ const TopPlayers = () => {
                     </div>
                 )}
 
-                {totalPages > 1 && (
+                {(
                     <div style={{
                         marginTop: 24,
                         display: 'flex',

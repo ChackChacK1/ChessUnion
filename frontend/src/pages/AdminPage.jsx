@@ -380,7 +380,7 @@ const AdminPage = () => {
                                                     </Text>
                                                     {getStageTag(tournament.stage)}
                                                     <Tag
-                                                        color='var(--hover-color)'
+                                                        color='red'
                                                         style={{
                                                             color: 'var(--text-color)',
                                                             borderColor: 'var(--border-color)',
@@ -391,10 +391,10 @@ const AdminPage = () => {
                                                         {tournament.players?.length || 0} игроков
                                                     </Tag>
                                                     <Tag
-                                                        color="orange"
+                                                        color="green"
                                                         style={{
-                                                            color: 'var(--text-color)',
-                                                            borderColor: 'var(--border-color)',
+                                                            color: 'blue',
+                                                            borderColor: 'blue',
                                                             fontSize: isMobile ? '11px' : '12px'
                                                         }}
                                                     >

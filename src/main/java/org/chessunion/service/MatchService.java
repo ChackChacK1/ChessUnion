@@ -143,11 +143,9 @@ public class MatchService {
 
 
 
-    public List<MatchDto> findMatchesByTournament(int tournamentId, Pageable pageable) {
+    public Page<MatchDto> findMatchesByTournament(int tournamentId, Pageable pageable) {
         return matchRepository.findMatchesByTournamentId(tournamentId, pageable)
-                .orElseThrow(() -> new TournamentNotFoundException(tournamentId)).stream()
-                .map(this::matchToMatchDto)
-                .toList();
+                .orElseThrow(() -> new TournamentNotFoundException(tournamentId)).map(this::matchToMatchDto);
     }
 
     public List<MatchDto> findMatchesByTournamentRound(int tournamentId, int roundNumber) {

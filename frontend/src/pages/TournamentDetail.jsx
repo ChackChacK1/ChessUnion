@@ -30,7 +30,6 @@ const TournamentDetail = () => {
     const [checkingRegistration, setCheckingRegistration] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
     const [deleting, setDeleting] = useState(false);
-
     // Функции для получения цвета и перевода стадии
     const getStageColor = (stage) => {
         const colors = {
@@ -320,7 +319,8 @@ const TournamentDetail = () => {
     if (!tournament) {
         return <Text style={{ color: 'var(--text-color)' }}>Турнир не найден</Text>;
     }
-
+    const isPlaying = tournament.stage === 'PLAYING';
+    const colSpan = isPlaying ? 8 : 12;
     return (
         <div style={{ padding: isMobile ? '12px' : '20px', maxWidth: '1200px', margin: '0 auto' }}>
             {/* Кнопка назад для мобильных */}
@@ -335,7 +335,7 @@ const TournamentDetail = () => {
                 </Button>
             )}
 
-            <Title level={isMobile ? 3 : 2} style={{ marginBottom: 24, color: 'var(--text-color)' }}>
+            <Title level={isMobile ? 3 : 2} style={{ marginBottom: 24, color: '#ffffff' }}>
                 {tournament.name || 'Без названия'}
             </Title>
 
@@ -425,21 +425,22 @@ const TournamentDetail = () => {
                             </Title>
 
                             <Row gutter={16}>
-                                <Col xs={12} sm={8}>
-                                    <div style={{ textAlign: isMobile ? 'left' : 'center' }}>
-                                        <Title level={4} style={{ margin: 0, color: 'var(--primary-color)' }}>
-                                            {tournament.currentRound || 0}
-                                        </Title>
-                                        <Text style={{
-                                            fontSize: '12px',
-                                            color: 'var(--text-secondary)'
-                                        }}>
-                                            Текущий раунд
-                                        </Text>
-                                    </div>
-                                </Col>
-
-                                <Col xs={12} sm={8}>
+                                {isPlaying && (
+                                    <Col xs={12} sm={colSpan}>
+                                        <div style={{ textAlign: isMobile ? 'left' : 'center' }}>
+                                            <Title level={4} style={{ margin: 0, color: 'var(--primary-color)' }}>
+                                                {tournament.currentRound || 0}
+                                            </Title>
+                                            <Text style={{
+                                                fontSize: '12px',
+                                                color: 'var(--text-secondary)'
+                                            }}>
+                                                Текущий раунд
+                                            </Text>
+                                        </div>
+                                    </Col>
+                                )}
+                                <Col xs={12} sm={colSpan}>
                                     <div style={{ textAlign: isMobile ? 'left' : 'center' }}>
                                         <Title level={4} style={{ margin: 0, color: 'var(--primary-color)' }}>
                                             {tournament.players?.length || 0}
@@ -454,7 +455,7 @@ const TournamentDetail = () => {
                                 </Col>
 
                                 {tournament.maxAmountOfPlayers && (
-                                    <Col xs={12} sm={8}>
+                                    <Col xs={12} sm={colSpan}>
                                         <div style={{ textAlign: isMobile ? 'left' : 'center' }}>
                                             <Title level={4} style={{ margin: 0, color: 'var(--primary-color)' }}>
                                                 {tournament.maxAmountOfPlayers}
@@ -540,6 +541,7 @@ const TournamentDetail = () => {
                     <Card
                         title={<span style={{ color: 'var(--text-color)' }}>Действия</span>}
                         style={{
+                            marginTop: 20,
                             marginBottom: isMobile ? 20 : 0,
                             backgroundColor: 'var(--card-bg)',
                             borderColor: 'var(--border-color)'

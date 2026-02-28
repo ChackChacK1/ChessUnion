@@ -14,4 +14,5 @@ public class TopListElementDto implements Serializable {
     private Integer id;
     private String fullName;
     private Integer rating;
+    private String thumbUrl;
 }

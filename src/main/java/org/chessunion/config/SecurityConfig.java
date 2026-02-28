@@ -64,6 +64,8 @@ public class SecurityConfig {
                                 "/api/match/**",
                                 "/api/user/top",
                                 "/api/user/profile/*",
+                                "/api/profile_image/*",
+                                "/profile-images/thumb/**",
                                 "/swagger-ui/**",
                                 "/api/phone/confirmation/**").permitAll()
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
@@ -82,7 +84,7 @@ public class SecurityConfig {
         configuration.setAllowedOriginPatterns(List.of(
                 "http://localhost:5173",
                 "http://127.0.0.1:5173",
-                "http://192.168.0.103:5173",
+                "http://192.168.0.203:5173",
                 "https://chess-union.ru",
                 "https://www.chess-union.ru",
                 "http://192.168.48.1:5173",

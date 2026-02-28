@@ -217,6 +217,7 @@ public class TournamentService {
 
         if (tournament.getCurrentRound() == 0 && tournament.getSystemType() == Tournament.SystemType.ROUND_ROBIN) {
             tournament.setCurrentRound(1);
+            tournament.setAmountOfRounds(tournament.getPlayers().size() - 1);
             tournament.setStage(Tournament.Stage.PLAYING);
             generateRoundsRoundRobin(tournament);
         } else if (tournament.getSystemType() == Tournament.SystemType.ROUND_ROBIN) {
