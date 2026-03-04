@@ -11,6 +11,6 @@ public class StaticResourceConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/profile-images/thumb/**")
                 .addResourceLocations("file:/data/profile_images/thumb/")
-                .setCachePeriod(60 * 60 * 24 * 30);
+                .setCachePeriod(0);
     }
 }
