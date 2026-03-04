@@ -62,14 +62,14 @@ public class TournamentService {
         Tournament tournament = tournamentRepository.findById(id)
                 .orElseThrow(() -> new TournamentNotFoundException(id));
 
-        if (tournament.getStage() == Tournament.Stage.FINISHED) {
-            int currentRound = tournament.getCurrentRound();
-            while (currentRound > 0) {
-                playerHistoryService.rollbackOneRound(tournament.getId(), currentRound);
-                currentRound--;
-            }
-            userService.saveRatings(tournament.getId());
-        }
+//        if (tournament.getStage() == Tournament.Stage.FINISHED) {
+//            int currentRound = tournament.getCurrentRound();
+//            while (currentRound > 0) {
+//                playerHistoryService.rollbackOneRound(tournament.getId(), currentRound);
+//                currentRound--;
+//            }
+//            userService.saveRatings(tournament.getId());
+//        }
         // при необходимости — сначала удалить связанные матчи и игроков
         matchRepository.deleteAllByTournamentId(tournament.getId());
         playerRepository.deleteAllByTournamentId(tournament.getId());
