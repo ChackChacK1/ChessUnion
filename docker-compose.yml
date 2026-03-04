@@ -1,37 +1,43 @@
 services:
-  frontend:
+  web:
     build:
       context: ./frontend
-    container_name: my-frontend
-    image: wq1a/chess-union-frontend:latest
-    environment:
-      - VITE_API_BASE_URL=http://localhost:8080
+      args:
+        VITE_API_BASE_URL: ""
+    image: wq1a/chess-union-web:latest
+    container_name: my-web
     ports:
-      - "5173:5173"
+      - "80:80"
+      - "443:443"
     depends_on:
       - backend
     restart: unless-stopped
     networks:
       - my-network
-    command: ["npm", "run", "dev", "--", "--host"]
+    volumes:
+      # монтируем твои уже существующие сертификаты с хоста внутрь контейнера
+      - /etc/ssl/nginx/chess-union.ru.chained.crt:/etc/ssl/nginx/chess-union.ru.chained.crt:ro
+      - /etc/ssl/nginx/certificate.key:/etc/ssl/nginx/certificate.key:ro
 
   backend:
     build:
       context: .
     image: wq1a/chess-union-backend:latest
     container_name: my-backend
-    ports:
-      - "8080:8080"
     env_file:
       - .env
     depends_on:
       - db
       - redis
+    restart: unless-stopped
     volumes:
       - profile_images:/data/profile_images
-    restart: unless-stopped
     networks:
       - my-network
+    # ports наружу можно убрать (безопаснее)
+    # если хочешь оставить для отладки - раскомментируй:
+    # ports:
+    #   - "8080:8080"
 
   db:
     image: postgres:15
@@ -42,16 +48,14 @@ services:
       - POSTGRES_PASSWORD=23111
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+    restart: unless-stopped
     networks:
       - my-network
 
   redis:
     image: redis:7
     container_name: my-redis
-    ports:
-      - "6379:6379"
+    restart: unless-stopped
     networks:
       - my-network
 
@@ -62,12 +66,12 @@ services:
       - "5540:5540"
     depends_on:
       - redis
+    restart: unless-stopped
     networks:
       - my-network
 
 volumes:
   postgres_data:
-  redis_insight:
   profile_images:
 
 networks:

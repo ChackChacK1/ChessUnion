@@ -1,5 +1,12 @@
 import { Card, Image, Typography } from 'antd';
 import { Link } from 'react-router-dom';
+import tournamentImg from '../images/chessunion_tournament.jpg';
+import logoImg from '../images/union_logo.jpg';
+import clubImg from '../images/chessunion_club_bw.jpg';
+
+import tgIcon from '../images/telegram_icon-icons.com_72055.png';
+import vkIcon from '../images/icons8-vk-48.png';
+import maxIcon from '../images/Max_logo_2025.png';
 
 const { Title, Paragraph } = Typography;
 
@@ -28,17 +35,17 @@ const highlightCards = [
 
 const galleryImages = [
     {
-        src: '/src/images/chessunion_tournament.jpg',
+        src: tournamentImg,
         alt: 'Турнир ChessUnion',
         caption: 'Спортивные выходные и рейтинговые встречи'
     },
     {
-        src: '/src/images/union_logo.jpg',
+        src: logoImg,
         alt: 'Логотип ChessUnion',
         caption: 'Фирменный стиль и атрибутика клуба'
     },
     {
-        src: '/src/images/chessunion_club_bw.jpg',
+        src: clubImg,
         alt: 'Клуб ChessUnion',
         caption: 'Уютный клубный зал в самом центре Сочи'
     }
@@ -74,7 +81,7 @@ const HomePage = () => {
                         >
                             <img
                                 className="tg-icon"
-                                src="/src/images/telegram_icon-icons.com_72055.png"
+                                src={tgIcon}
                                 alt="Telegram"
                                 loading="lazy"
                             />
@@ -83,13 +90,45 @@ const HomePage = () => {
                         <Link className="outline-button" to="/tournaments">Расписание турниров</Link>
                     </div>
 
+                    <div className="hero-cta">
+                        <a
+                            className="tg-button"
+                            href="https://vk.ru/club236316961"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="Мы в VK"
+                        >
+                            <img
+                                className="tg-icon"
+                                src={vkIcon}
+                                alt="vk"
+                                loading="lazy"
+                            />
+                            <span>Мы в VK</span>
+                        </a>
+                        <a
+                            className="tg-button"
+                            href="https://max.ru/join/705DRT_rLBowaFns6ebFlPvY0xqCKAjVAIE0gsmUpvk"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="Мы в Max"
+                        >
+                            <img
+                                className="tg-icon"
+                                src={maxIcon}
+                                alt="max"
+                                loading="lazy"
+                            />
+                            <span>Мы в Max</span>
+                        </a>
+                    </div>
                 </div>
 
                 <div className="hero-visual">
                     <div className="chessboard-frame">
                         <span className="pivot-note">UNION</span>
                         <Image
-                            src="/src/images/chessunion_club_bw.jpg"
+                            src={clubImg}
                             alt="Зал ChessUnion"
                             preview={false}
                             className="hero-image"
