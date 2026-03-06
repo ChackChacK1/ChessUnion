@@ -106,21 +106,21 @@ const HomePage = () => {
                             />
                             <span>Мы в VK</span>
                         </a>
-                        <a
-                            className="tg-button"
-                            href="https://max.ru/join/705DRT_rLBowaFns6ebFlPvY0xqCKAjVAIE0gsmUpvk"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            aria-label="Мы в Max"
-                        >
-                            <img
-                                className="tg-icon"
-                                src={maxIcon}
-                                alt="max"
-                                loading="lazy"
-                            />
-                            <span>Мы в Max</span>
-                        </a>
+                        {/*<a*/}
+                        {/*    className="tg-button"*/}
+                        {/*    href="https://max.ru/join/705DRT_rLBowaFns6ebFlPvY0xqCKAjVAIE0gsmUpvk"*/}
+                        {/*    target="_blank"*/}
+                        {/*    rel="noopener noreferrer"*/}
+                        {/*    aria-label="Мы в Max"*/}
+                        {/*>*/}
+                        {/*    <img*/}
+                        {/*        className="tg-icon"*/}
+                        {/*        src={maxIcon}*/}
+                        {/*        alt="max"*/}
+                        {/*        loading="lazy"*/}
+                        {/*    />*/}
+                        {/*    <span>Мы в Max</span>*/}
+                        {/*</a>*/}
                     </div>
                 </div>
 
