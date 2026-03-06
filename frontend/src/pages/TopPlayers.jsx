@@ -435,7 +435,6 @@ const TopPlayers = () => {
                         }}
                     />
                 ) : (
-                    <div className="top-players-table">
                         <Table
                             columns={columns}
                             dataSource={players.map((player, index) => ({
@@ -455,7 +454,6 @@ const TopPlayers = () => {
                                 className: 'player-row'
                             })}
                         />
-                    </div>
                 )}
 
                 {players.length === 0 && !loading && (
@@ -480,7 +478,7 @@ const TopPlayers = () => {
                             total={totalElements}
                             onChange={handlePageChange}
                             onShowSizeChange={handlePageChange}
-                            simple={isMobile}
+                            // simple={isMobile}
                             showSizeChanger={!isMobile}
                             pageSizeOptions={isMobile ? ['10'] : ['10', '20', '50']}
                             showTotal={isMobile ? undefined : (total, range) =>
