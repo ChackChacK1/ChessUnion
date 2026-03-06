@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import {
     Menu, Button, Space, Modal, Form, Input, message,
-    Drawer, Grid, Switch, Alert
+    Drawer, Grid, Alert
 } from 'antd';
 import {
     HomeOutlined, TrophyOutlined, UserOutlined,
     LockOutlined, MenuOutlined, LoginOutlined,
     LogoutOutlined, ExclamationCircleOutlined,
-    MoonOutlined, SunOutlined, StarOutlined
+    StarOutlined
 } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import client from '../api/client';
@@ -20,28 +20,15 @@ const Navbar = () => {
     const [loginLoading, setLoginLoading] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
-    const [isDarkTheme, setIsDarkTheme] = useState(false);
     const [loginError, setLoginError] = useState(''); // Новое состояние для ошибки
     const navigate = useNavigate();
     const screens = useBreakpoint();
 
-    // Инициализация темы при загрузке
+    // Всегда используем только тёмную тему
     useEffect(() => {
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-        const theme = savedTheme || (prefersDark ? 'dark' : 'light');
-        setIsDarkTheme(theme === 'dark');
-        document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
     }, []);
-
-    // Переключение темы
-    const toggleTheme = (checked) => {
-        setIsDarkTheme(checked);
-        const theme = checked ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('theme', theme);
-    };
 
     // Определяем, является ли устройство мобильным
     const isMobile = !screens.md;
@@ -168,23 +155,6 @@ const Navbar = () => {
         }] : [])
     ];
 
-    // Пункт меню для переключателя темы (для мобильной версии)
-    const themeMenuItem = [{
-        key: 'theme',
-        label: (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: 'var(--text-color)'}}>
-                <span>Тёмная тема </span>
-                <Switch
-                    checked={isDarkTheme}
-                    onChange={toggleTheme}
-                    size="small"
-                    checkedChildren={<MoonOutlined />}
-                    unCheckedChildren={<SunOutlined />}
-                />
-            </div>
-        ),
-    }];
-
     // Пункт меню для входа (для мобильной версии)
     const loginMenuItem = !isAuthenticated ? [{
         key: 'login',
@@ -208,7 +178,7 @@ const Navbar = () => {
     }] : [];
 
     // Полный список пунктов меню для мобильной версии
-    const mobileMenuItems = [...mainMenuItems, ...themeMenuItem, ...loginMenuItem, ...logoutMenuItem];
+    const mobileMenuItems = [...mainMenuItems, ...loginMenuItem, ...logoutMenuItem];
 
     // Десктопная версия навбара
     const desktopNavbar = (
@@ -219,14 +189,6 @@ const Navbar = () => {
                 style={{ justifyContent: 'center', flex: 1 }}
             />
             <Space style={{ position: 'absolute', right: 20, top: 10 }}>
-                {/* Переключатель темы */}
-                <Switch
-                    checked={isDarkTheme}
-                    onChange={toggleTheme}
-                    checkedChildren={<MoonOutlined />}
-                    unCheckedChildren={<SunOutlined />}
-                />
-
                 {isAuthenticated ? (
                     <Button
                         type="text"
@@ -264,15 +226,6 @@ const Navbar = () => {
                 </Link>
 
                 <Space>
-                    {/* Переключатель темы в мобильной версии */}
-                    <Switch
-                        checked={isDarkTheme}
-                        onChange={toggleTheme}
-                        size="small"
-                        checkedChildren={<MoonOutlined />}
-                        unCheckedChildren={<SunOutlined />}
-                    />
-
                     {!isAuthenticated && (
                         <Button
                             type="primary"

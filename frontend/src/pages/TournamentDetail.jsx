@@ -161,6 +161,8 @@ const TournamentDetail = () => {
             title: <span style={{ color: 'var(--text-color)' }}>Игрок</span>,
             dataIndex: 'fullName',
             key: 'fullName',
+            width: isMobile ? 180 : undefined,
+            ellipsis: true,
             render: (name, record) => (
                 <Button
                     type="link"
@@ -184,7 +186,7 @@ const TournamentDetail = () => {
             title: <span style={{ color: 'var(--text-color)' }}>Рейтинг</span>,
             dataIndex: 'rating',
             key: 'rating',
-            width: 100,
+            width: isMobile ? 78 : 100,
             align: 'center',
             render: (rating) => (
                 <Tag color="blue" style={{
@@ -203,7 +205,7 @@ const TournamentDetail = () => {
             title: <span style={{ color: 'var(--text-color)' }}>Место</span>,
             dataIndex: 'place',
             key: 'place',
-            width: 80,
+            width: isMobile ? 64 : 80,
             align: 'center',
             render: (place) => (
                 <Tag color="blue" style={{
@@ -218,6 +220,8 @@ const TournamentDetail = () => {
             title: <span style={{ color: 'var(--text-color)' }}>Игрок</span>,
             dataIndex: 'fullName',
             key: 'fullName',
+            width: isMobile ? 180 : undefined,
+            ellipsis: true,
             render: (name, record) => (
                 <Button
                     type="link"
@@ -241,7 +245,7 @@ const TournamentDetail = () => {
             title: <span style={{ color: 'var(--text-color)' }}>Очки</span>,
             dataIndex: 'score',
             key: 'score',
-            width: 100,
+            width: isMobile ? 72 : 100,
             align: 'center',
             render: (score) => (
                 <Tag color="green" style={{
@@ -256,7 +260,7 @@ const TournamentDetail = () => {
             title: <span style={{ color: 'var(--text-color)' }}>Доп. очки</span>,
             dataIndex: 'secondScore',
             key: 'secondScore',
-            width: 120,
+            width: isMobile ? 84 : 120,
             align: 'center',
             render: (secondScore) => (
                 <Tag color="gold" style={{
@@ -271,7 +275,7 @@ const TournamentDetail = () => {
             title: <span style={{ color: 'var(--text-color)' }}>Рейтинг</span>,
             dataIndex: 'rating',
             key: 'rating',
-            width: 100,
+            width: isMobile ? 78 : 100,
             align: 'center',
             render: (rating) => (
                 <Tag color="blue" style={{
@@ -312,6 +316,33 @@ const TournamentDetail = () => {
         return tournament.players;
     })();
 
+    const styles = `
+        .tournament-detail-page .tournament-players-table .ant-table-content {
+            overflow-x: auto;
+        }
+        @media (max-width: 576px) {
+            .tournament-detail-page .tournament-players-table .ant-table {
+                font-size: 12px;
+            }
+            .tournament-detail-page .tournament-players-table .ant-table-thead > tr > th {
+                padding: 6px 8px !important;
+                white-space: nowrap;
+            }
+            .tournament-detail-page .tournament-players-table .ant-table-tbody > tr > td {
+                padding: 6px 8px !important;
+                vertical-align: middle;
+            }
+            .tournament-detail-page .tournament-players-table .ant-tag {
+                font-size: 11px;
+                padding: 0 6px;
+                line-height: 18px;
+            }
+            .tournament-detail-page .tournament-players-table .ant-btn-link {
+                font-size: 12px;
+            }
+        }
+    `;
+
     if (loading) {
         return <Spin size="large" style={{ display: 'flex', justifyContent: 'center', marginTop: 50 }} />;
     }
@@ -322,7 +353,8 @@ const TournamentDetail = () => {
     const isPlaying = tournament.stage === 'PLAYING';
     const colSpan = isPlaying ? 8 : 12;
     return (
-        <div style={{ padding: isMobile ? '12px' : '20px', maxWidth: '1200px', margin: '0 auto' }}>
+        <div className="tournament-detail-page" style={{ padding: isMobile ? '12px' : '20px', maxWidth: '1200px', margin: '0 auto' }}>
+            <style>{styles}</style>
             {/* Кнопка назад для мобильных */}
             {isMobile && (
                 <Button
@@ -519,6 +551,7 @@ const TournamentDetail = () => {
                         bodyStyle={{ padding: isMobile ? '12px' : '16px' }}
                     >
                         <Table
+                            className="tournament-players-table"
                             columns={getTableColumns()}
                             dataSource={playersForTable.map((player, index) => ({
                                 ...player,
@@ -529,6 +562,8 @@ const TournamentDetail = () => {
                             }))}
                             pagination={false}
                             size="small"
+                            tableLayout="fixed"
+                            scroll={isMobile ? { x: 520 } : undefined}
                             locale={{
                                 emptyText: 'Нет зарегистрированных участников'
                             }}

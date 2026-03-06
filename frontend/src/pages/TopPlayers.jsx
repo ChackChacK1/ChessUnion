@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Table, Card, Typography, Spin, message, Tag, Pagination, Avatar } from 'antd';
+import { Table, Card, Typography, Spin, message, Tag, Pagination, Avatar, Grid, List } from 'antd';
 import { CrownOutlined, TrophyOutlined, StarFilled, UserOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom'; // Добавляем useNavigate
 import client from '../api/client';
@@ -10,12 +10,12 @@ const TopPlayers = () => {
     const [players, setPlayers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(0);
     const [totalElements, setTotalElements] = useState(0);
     const [pageSize, setPageSize] = useState(10);
-    const [hoveredPlayer, setHoveredPlayer] = useState(null);
     const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '');
     const navigate = useNavigate(); // Хук для навигации
+    const screens = Grid.useBreakpoint();
+    const isMobile = !screens.sm;
 
     useEffect(() => {
         fetchTopPlayers(currentPage, pageSize);
@@ -27,7 +27,7 @@ const TopPlayers = () => {
         return `${API_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
     };
 
-    const renderPlayerAvatar = (record, globalPlace) => {
+    const renderPlayerAvatar = (record, globalPlace, compact = false) => {
         const isTop1 = globalPlace === 1;
         const isTop2 = globalPlace === 2;
         const isTop3 = globalPlace === 3;
@@ -44,9 +44,9 @@ const TopPlayers = () => {
         const src = toApiUrl(record.thumbUrl);
 
         // размеры можно подстроить
-        const outerSize = 34;          // общий размер блока (с кольцом)
+        const outerSize = compact ? 30 : 34; // общий размер блока (с кольцом)
         const ringPadding = isTop ? 1 : 0; // толщина кольца
-        const avatarSize = isTop ? outerSize - ringPadding * 2 : 28;
+        const avatarSize = isTop ? outerSize - ringPadding * 2 : (compact ? 26 : 28);
 
         return (
             <span
@@ -66,7 +66,7 @@ const TopPlayers = () => {
                     boxShadow: isTop ? '0 0 0 2px rgba(0,0,0,0.25), 0 6px 18px rgba(0,0,0,0.35)' : 'none',
 
                     // чтобы тень не обрезалась, немного “выталкиваем” наружу
-                    marginRight: 12,
+                    marginRight: compact ? 10 : 12,
                     flexShrink: 0,
                 }}
             >
@@ -97,7 +97,6 @@ const TopPlayers = () => {
             const pageData = response.data;
 
             setPlayers(Array.isArray(pageData.content) ? pageData.content : []);
-            setTotalPages(pageData.totalPages || 0);
             setTotalElements(pageData.totalElements || 0);
         } catch (error) {
             message.error('Ошибка загрузки рейтинга: ' + (error.response?.data?.message || error.message));
@@ -114,6 +113,67 @@ const TopPlayers = () => {
     // Обработчик клика по игроку
     const handlePlayerClick = (playerId) => {
         navigate(`/profile/${playerId}`);
+    };
+
+    const renderPlaceBadge = (globalPlace, compact = false) => {
+        const isTop1 = globalPlace === 1;
+        const isTop2 = globalPlace === 2;
+        const isTop3 = globalPlace === 3;
+
+        const size = compact ? 28 : 32;
+        const radius = compact ? 6 : 6;
+        const fontSize = compact ? 13 : 14;
+        const iconSize = compact ? 14 : 16;
+        const marginRight = compact ? 10 : 12;
+
+        const baseBox = {
+            width: `${size}px`,
+            height: `${size}px`,
+            borderRadius: `${radius}px`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginRight,
+            fontWeight: 'bold',
+            color: '#000',
+            flexShrink: 0,
+        };
+
+        if (isTop1) {
+            return (
+                <div style={{ ...baseBox, background: 'linear-gradient(135deg, #ffd700, #ffed4e)' }}>
+                    <CrownOutlined style={{ fontSize: iconSize }} />
+                </div>
+            );
+        }
+
+        if (isTop2) {
+            return (
+                <div style={{ ...baseBox, background: 'linear-gradient(135deg, #c0c0c0, #e0e0e0)' }}>
+                    <StarFilled style={{ fontSize: iconSize }} />
+                </div>
+            );
+        }
+
+        if (isTop3) {
+            return (
+                <div style={{ ...baseBox, background: 'linear-gradient(135deg, #cd7f32, #e39e54)' }}>
+                    <StarFilled style={{ fontSize: iconSize }} />
+                </div>
+            );
+        }
+
+        return (
+            <div style={{
+                ...baseBox,
+                backgroundColor: 'var(--card-bg)',
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-color)',
+                fontSize,
+            }}>
+                {globalPlace}
+            </div>
+        );
     };
 
     const columns = [
@@ -140,71 +200,7 @@ const TopPlayers = () => {
                              e.currentTarget.style.backgroundColor = 'transparent';
                          }}
                     >
-                        {globalPlace === 1 && (
-                            <div style={{
-                                width: '32px',
-                                height: '32px',
-                                borderRadius: '6px',
-                                background: 'linear-gradient(135deg, #ffd700, #ffed4e)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                marginRight: '12px',
-                                fontWeight: 'bold',
-                                color: '#000'
-                            }}>
-                                <CrownOutlined />
-                            </div>
-                        )}
-                        {globalPlace === 2 && (
-                            <div style={{
-                                width: '32px',
-                                height: '32px',
-                                borderRadius: '6px',
-                                background: 'linear-gradient(135deg, #c0c0c0, #e0e0e0)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                marginRight: '12px',
-                                fontWeight: 'bold',
-                                color: '#000'
-                            }}>
-                                <StarFilled />
-                            </div>
-                        )}
-                        {globalPlace === 3 && (
-                            <div style={{
-                                width: '32px',
-                                height: '32px',
-                                borderRadius: '6px',
-                                background: 'linear-gradient(135deg, #cd7f32, #e39e54)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                marginRight: '12px',
-                                fontWeight: 'bold',
-                                color: '#000'
-                            }}>
-                                <StarFilled />
-                            </div>
-                        )}
-                        {globalPlace > 3 && (
-                            <div style={{
-                                width: '32px',
-                                height: '32px',
-                                borderRadius: '6px',
-                                backgroundColor: 'var(--card-bg)',
-                                border: '1px solid var(--border-color)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                marginRight: '12px',
-                                fontWeight: 'bold',
-                                color: 'var(--text-color)'
-                            }}>
-                                {globalPlace}
-                            </div>
-                        )}
+                        {renderPlaceBadge(globalPlace)}
                     </div>
                 );
             }
@@ -301,6 +297,11 @@ const TopPlayers = () => {
 
     // Добавляем стили для компонента
     const styles = `
+        .top-players-page {
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
         .player-row {
             cursor: pointer;
             transition: background-color 0.3s;
@@ -310,6 +311,38 @@ const TopPlayers = () => {
         }
         .player-name:hover {
             border-bottom-color: var(--primary-color);
+        }
+        .top-players-table {
+            width: 100%;
+            overflow-x: auto;
+        }
+        .top-players-list .ant-list-item {
+            border-color: var(--border-color);
+        }
+        .top-players-list-item {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .top-players-list-item:hover {
+            background-color: var(--menu-target-color);
+        }
+        @media (max-width: 576px) {
+            .top-players-page {
+                padding: 12px;
+            }
+            .top-players-title {
+                margin-bottom: 16px !important;
+            }
+            .top-players-title .anticon {
+                margin-right: 8px !important;
+            }
+            .top-players-card {
+                border-radius: 10px !important;
+            }
+            .top-players-pagination {
+                margin-top: 16px !important;
+                padding: 8px 0 !important;
+            }
         }
     `;
 
@@ -323,16 +356,21 @@ const TopPlayers = () => {
     }
 
     return (
-        <div style={{ padding: '20px', maxWidth: '900px', margin: '0 auto' }}>
+        <div className="top-players-page">
             {/* Добавляем стили */}
             <style>{styles}</style>
 
-            <Title level={2} style={{ color: 'var(--text-color)', textAlign: 'center', marginBottom: 30 }}>
+            <Title
+                level={isMobile ? 3 : 2}
+                className="top-players-title"
+                style={{ color: 'var(--text-color)', textAlign: 'center', marginBottom: isMobile ? 16 : 30 }}
+            >
                 <TrophyOutlined style={{ marginRight: 12, color: '#faad14' }} />
                 Рейтинг игроков
             </Title>
 
             <Card
+                className="top-players-card"
                 style={{
                     backgroundColor: 'var(--card-bg)',
                     borderColor: 'var(--border-color)',
@@ -340,24 +378,85 @@ const TopPlayers = () => {
                     borderRadius: '12px'
                 }}
             >
-                <Table
-                    columns={columns}
-                    dataSource={players.map((player, index) => ({
-                        ...player,
-                        key: (currentPage - 1) * pageSize + index
-                    }))}
-                    loading={loading}
-                    pagination={false}
-                    locale={{
-                        emptyText: 'Нет данных о игроках'
-                    }}
-                    size="middle"
-                    onRow={(record) => ({
-                        onClick: () => handlePlayerClick(record.id),
-                        style: { cursor: 'pointer' },
-                        className: 'player-row'
-                    })}
-                />
+                {isMobile ? (
+                    <List
+                        className="top-players-list"
+                        dataSource={players}
+                        locale={{ emptyText: 'Нет данных о игроках' }}
+                        renderItem={(player, index) => {
+                            const globalPlace = (currentPage - 1) * pageSize + index + 1;
+                            return (
+                                <List.Item
+                                    className="top-players-list-item"
+                                    onClick={() => handlePlayerClick(player.id)}
+                                    style={{
+                                        padding: '10px 12px',
+                                        borderRadius: 10,
+                                        marginBottom: 8,
+                                        background: 'transparent',
+                                    }}
+                                >
+                                    <div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: 10 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0 }}>
+                                            {renderPlaceBadge(globalPlace, true)}
+                                            {renderPlayerAvatar(player, globalPlace, true)}
+                                            <Text
+                                                strong
+                                                style={{
+                                                    color: 'var(--text-color)',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    whiteSpace: 'nowrap',
+                                                    display: 'block',
+                                                }}
+                                            >
+                                                {player.fullName || 'Неизвестный игрок'}
+                                            </Text>
+                                        </div>
+
+                                        <Tag
+                                            color={globalPlace < 4 ? "blue" : "default"}
+                                            style={{
+                                                margin: 0,
+                                                color: globalPlace < 4 ? '#fff' : 'var(--text-color)',
+                                                borderColor: 'var(--border-color)',
+                                                fontWeight: 'bold',
+                                                fontSize: '13px',
+                                                padding: '3px 10px',
+                                                borderRadius: '20px',
+                                                flexShrink: 0,
+                                            }}
+                                        >
+                                            {player.rating?.toFixed(2) || 0}
+                                        </Tag>
+                                    </div>
+                                </List.Item>
+                            );
+                        }}
+                    />
+                ) : (
+                    <div className="top-players-table">
+                        <Table
+                            columns={columns}
+                            dataSource={players.map((player, index) => ({
+                                ...player,
+                                key: (currentPage - 1) * pageSize + index
+                            }))}
+                            loading={loading}
+                            pagination={false}
+                            locale={{
+                                emptyText: 'Нет данных о игроках'
+                            }}
+                            size="middle"
+                            scroll={{ x: 520 }}
+                            onRow={(record) => ({
+                                onClick: () => handlePlayerClick(record.id),
+                                style: { cursor: 'pointer' },
+                                className: 'player-row'
+                            })}
+                        />
+                    </div>
+                )}
 
                 {players.length === 0 && !loading && (
                     <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
@@ -367,7 +466,9 @@ const TopPlayers = () => {
                 )}
 
                 {(
-                    <div style={{
+                    <div
+                        className="top-players-pagination"
+                        style={{
                         marginTop: 24,
                         display: 'flex',
                         justifyContent: 'center',
@@ -379,9 +480,10 @@ const TopPlayers = () => {
                             total={totalElements}
                             onChange={handlePageChange}
                             onShowSizeChange={handlePageChange}
-                            showSizeChanger={true}
-                            pageSizeOptions={['10', '20', '50']}
-                            showTotal={(total, range) =>
+                            simple={isMobile}
+                            showSizeChanger={!isMobile}
+                            pageSizeOptions={isMobile ? ['10'] : ['10', '20', '50']}
+                            showTotal={isMobile ? undefined : (total, range) =>
                                 `Показано ${range[0]}-${range[1]} из ${total} игроков`
                             }
                             style={{ color: 'var(--text-color)' }}

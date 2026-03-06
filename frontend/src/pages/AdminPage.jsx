@@ -304,37 +304,40 @@ const AdminPage = () => {
                                             e.currentTarget.style.borderColor = 'var(--border-color)';
                                         }}
                                     >
-                                        {/* Кнопка управления игроками */}
-                                        <Button
-                                            icon={<TeamOutlined />}
-                                            type="text"
-                                            size={isMobile ? "small" : "large"}
-                                            style={{
-                                                position: 'absolute',
-                                                top: isMobile ? '4px' : '8px',
-                                                right: isMobile ? '36px' : '48px',
-                                                zIndex: 30,
-                                                color: 'var(--text-color)'
-                                            }}
-                                            onClick={(e) => handleManagePlayers(tournament, e)}
-                                            onMouseEnter={(e) => e.stopPropagation()}
-                                        />
+                                        {/* Кнопки управления турниром (десктоп) */}
+                                        {!isMobile && (
+                                            <>
+                                                <Button
+                                                    icon={<TeamOutlined />}
+                                                    type="text"
+                                                    size="large"
+                                                    style={{
+                                                        position: 'absolute',
+                                                        top: '8px',
+                                                        right: '48px',
+                                                        zIndex: 30,
+                                                        color: 'var(--text-color)'
+                                                    }}
+                                                    onClick={(e) => handleManagePlayers(tournament, e)}
+                                                    onMouseEnter={(e) => e.stopPropagation()}
+                                                />
 
-                                        {/* Кнопка редактирования */}
-                                        <Button
-                                            icon={<EditOutlined />}
-                                            type="text"
-                                            size={isMobile ? "small" : "large"}
-                                            style={{
-                                                position: 'absolute',
-                                                top: isMobile ? '4px' : '8px',
-                                                right: isMobile ? '8px' : '8px',
-                                                zIndex: 30,
-                                                color: 'var(--text-color)'
-                                            }}
-                                            onClick={(e) => handleEditTournament(tournament, e)}
-                                            onMouseEnter={(e) => e.stopPropagation()}
-                                        />
+                                                <Button
+                                                    icon={<EditOutlined />}
+                                                    type="text"
+                                                    size="large"
+                                                    style={{
+                                                        position: 'absolute',
+                                                        top: '8px',
+                                                        right: '8px',
+                                                        zIndex: 30,
+                                                        color: 'var(--text-color)'
+                                                    }}
+                                                    onClick={(e) => handleEditTournament(tournament, e)}
+                                                    onMouseEnter={(e) => e.stopPropagation()}
+                                                />
+                                            </>
+                                        )}
 
                                         {/* Кнопка удаления турнира */}
                                         <Popconfirm
@@ -447,6 +450,34 @@ const AdminPage = () => {
                                                             ID: {tournament.id}
                                                         </Text>
                                                     </div>
+                                                    {isMobile && (
+                                                        <div
+                                                            style={{
+                                                                marginTop: '10px',
+                                                                display: 'flex',
+                                                                flexDirection: 'column',
+                                                                gap: '8px'
+                                                            }}
+                                                        >
+                                                            <Button
+                                                                icon={<TeamOutlined />}
+                                                                type="primary"
+                                                                size="middle"
+                                                                block
+                                                                onClick={(e) => handleManagePlayers(tournament, e)}
+                                                            >
+                                                                Управление игроками
+                                                            </Button>
+                                                            <Button
+                                                                icon={<EditOutlined />}
+                                                                size="middle"
+                                                                block
+                                                                onClick={(e) => handleEditTournament(tournament, e)}
+                                                            >
+                                                                Изменить турнир
+                                                            </Button>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             }
                                         />
